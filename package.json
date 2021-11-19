@@ -1,0 +1,6 @@
+{
+  "name": "@lancejpollard/js2link.js",
+  "dependencies": {
+    "@lancejpollard/normalize-ast.js": "*"
+  }
+}
