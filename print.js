@@ -13,10 +13,15 @@ const printers = {
   rest: printRest,
   save: printSave,
   size: printSize,
+  text: printText,
 }
 
 function printSize(node) {
   return [`size ${node.size}`]
+}
+
+function printText(node) {
+  return [`text <${node.text}>`]
 }
 
 function printTerm(node) {
@@ -86,7 +91,7 @@ function printLink(node) {
 }
 
 function printTask(node) {
-  const text = []
+  const text = [``]
   text.push(`task ${printName(node.name)}`)
   node.base.forEach(b => {
     printBase(b).forEach(line => {

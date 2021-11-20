@@ -32,8 +32,6 @@
  */
 
 /*jslint white: true, onevar: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, regexp: true, newcap: true, immed: true, strict: true */
-"use strict";
-var keccak32 = (function () {
 	var permute, RC, r, circ, hex, output_fn;
 	permute = [0, 10, 20, 5, 15, 16, 1, 11, 21, 6, 7, 17, 2, 12, 22, 23, 8, 18, 3, 13, 14, 24, 9, 19, 4];
 	RC = "1,8082,808a,80008000,808b,80000001,80008081,8009,8a,88,80008009,8000000a,8000808b,8b,8089,8003,8002,80,800a,8000000a,80008081,8080"
@@ -44,13 +42,14 @@ var keccak32 = (function () {
 	circ = function (s, n) {
 		return (s << n) | (s >>> (32 - n));
 	};
-	hex = function (n) {
+	hex = function(n) {
 		return ("00" + n.toString(16)).slice(-2);
 	};
 	output_fn = function (n) {
 		return hex(n & 255) + hex(n >>> 8) + hex(n >>> 16) + hex(n >>> 24);
 	};
-	return function (m) {
+
+  function keccak32(m) {
 		var i, b, k, x, y, C, D, round, next, state;
 		state = [];
 		for (i = 0; i < 25; i += 1) {
@@ -92,4 +91,3 @@ var keccak32 = (function () {
 		}
 		return state.slice(0, 8).map(output_fn).join("");
 	};
-}());

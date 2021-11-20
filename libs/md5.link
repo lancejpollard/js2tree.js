@@ -1,171 +1,74 @@
-save a, size 10
-save x
-  call add
-    bind a, link a
-    bind b, size 20
-save y
-  call multiply
-    bind a, link a
-    bind b, link b
-save x2
-  task tmp0
-    base y
-    call console/log
-      bind text <foo>
-save a1, link a/0
-save b1, link a/1
-save y2
-  task tmp1
-    base undefined
-    save tmp0
-      call multiply
-        bind a, link a
-        bind b, size 2
-    turn seed, link tmp0
-save y3
-  task tmp2
-    base x
-    base y
-    call check
-      bind test, link x
-      hook match
-        call y
-      hook fault
-        call check
-          bind test, link z
-          hook match
-            call z
-save y4
-  task tmp3
-    call loop
-      hook test
-        save tmp1, call a
-        save tmp2, call tmp1/b
-        call check
-          bind test, link tmp2/x
-      hook match
-        call console/log
-          bind text <foo>
-      hook fault
-        turn seed, link false
-call check
-  bind test, link x
-  hook match
-    call y
-save y5
-  call or
-    bind a, a
-    bind b, b
-save tmp3, call a[z]
-save tmp4, call b/y
-save y6
-  call and
-    bind a, tmp3
-    bind b, tmp4
-save y7, make object
-save y8
-  make object
-    bind foo, text <bar>
-save tmp5, call x
-save y9
-  make object
-    bind foo, link tmp5/y
-save y10, make list
-save y11
-  make list
-    bind size 1
-    bind size 2
-    bind size 3
-save y12
-  make list
-    bind
-      make object
-        bind a, link a
-    bind
-      make object
-        bind b, link b
-    bind
-      make object
-        bind c, link c
-save y13
-  make list
-    bind rest a
-save y14
-  make object
-    bind 
-save y15
-  make object
-    bind a
-      make object
-        bind b, link b
+
 task safe-add
   base x
   base y
-  save tmp6
+  save tmp0
     call bitwise-and
       bind a, link x
       bind b, size 65535
-  save tmp7
+  save tmp1
     call bitwise-and
       bind a, link y
       bind b, size 65535
   save lsw
     call add
-      bind a, link tmp6
-      bind b, link tmp7
-  save tmp8
+      bind a, link tmp0
+      bind b, link tmp1
+  save tmp2
     call shift-right
       bind a, link x
       bind b, size 16
-  save tmp9
+  save tmp3
     call shift-right
       bind a, link y
       bind b, size 16
-  save tmp10
+  save tmp4
     call add
-      bind a, link tmp8
-      bind b, link tmp9
-  save tmp11
+      bind a, link tmp2
+      bind b, link tmp3
+  save tmp5
     call shift-right
       bind a, link lsw
       bind b, size 16
   save msw
     call add
-      bind a, link tmp10
-      bind b, link tmp11
-  save tmp12
+      bind a, link tmp4
+      bind b, link tmp5
+  save tmp6
     call shift-left
       bind a, link msw
       bind b, size 16
-  save tmp13
+  save tmp7
     call bitwise-and
       bind a, link lsw
       bind b, size 65535
-  save tmp14
+  save tmp8
     call bitwise-or
-      bind a, link tmp12
-      bind b, link tmp13
-  turn seed, link tmp14
+      bind a, link tmp6
+      bind b, link tmp7
+  turn seed, link tmp8
+
 task bit-rotate-left
   base num
   base cnt
-  save tmp15
+  save tmp9
     call shift-left
       bind a, link num
       bind b, link cnt
-  save tmp16
+  save tmp10
     call negative
       bind a, size 32
       bind b, link cnt
-  save tmp17
+  save tmp11
     call unsigned-shift-right
       bind a, link num
-      bind b, link tmp16
-  save tmp18
+      bind b, link tmp10
+  save tmp12
     call bitwise-or
-      bind a, link tmp15
-      bind b, link tmp17
-  turn seed, link tmp18
+      bind a, link tmp9
+      bind b, link tmp11
+  turn seed, link tmp12
+
 task md5cmn
   base q
   base a
@@ -173,27 +76,28 @@ task md5cmn
   base x
   base s
   base t
-  save tmp19
+  save tmp13
     call safe-add
       bind link a
       bind link q
-  save tmp20
+  save tmp14
     call safe-add
       bind link x
       bind link t
-  save tmp21
+  save tmp15
     call safe-add
-      bind link tmp19
-      bind link tmp20
-  save tmp22
+      bind link tmp13
+      bind link tmp14
+  save tmp16
     call bit-rotate-left
-      bind link tmp21
+      bind link tmp15
       bind link s
-  save tmp23
+  save tmp17
     call safe-add
-      bind link tmp22
+      bind link tmp16
       bind link b
-  turn seed, link tmp23
+  turn seed, link tmp17
+
 task md5ff
   base a
   base b
@@ -202,30 +106,31 @@ task md5ff
   base x
   base s
   base t
-  save tmp24
+  save tmp18
     call bitwise-and
       bind a, link b
       bind b, link c
-  save tmp25
+  save tmp19
     call bitflip
       bind bits, link b
-  save tmp26
+  save tmp20
     call bitwise-and
-      bind a, link tmp25
+      bind a, link tmp19
       bind b, link d
-  save tmp27
+  save tmp21
     call bitwise-or
-      bind a, link tmp24
-      bind b, link tmp26
-  save tmp28
+      bind a, link tmp18
+      bind b, link tmp20
+  save tmp22
     call md5cmn
-      bind link tmp27
+      bind link tmp21
       bind link a
       bind link b
       bind link x
       bind link s
       bind link t
-  turn seed, link tmp28
+  turn seed, link tmp22
+
 task md5gg
   base a
   base b
@@ -234,30 +139,31 @@ task md5gg
   base x
   base s
   base t
-  save tmp29
+  save tmp23
     call bitwise-and
       bind a, link b
       bind b, link d
-  save tmp30
+  save tmp24
     call bitflip
       bind bits, link d
-  save tmp31
+  save tmp25
     call bitwise-and
       bind a, link c
-      bind b, link tmp30
-  save tmp32
+      bind b, link tmp24
+  save tmp26
     call bitwise-or
-      bind a, link tmp29
-      bind b, link tmp31
-  save tmp33
+      bind a, link tmp23
+      bind b, link tmp25
+  save tmp27
     call md5cmn
-      bind link tmp32
+      bind link tmp26
       bind link a
       bind link b
       bind link x
       bind link s
       bind link t
-  turn seed, link tmp33
+  turn seed, link tmp27
+
 task md5hh
   base a
   base b
@@ -266,23 +172,24 @@ task md5hh
   base x
   base s
   base t
-  save tmp34
+  save tmp28
     call bitwise-xor
       bind a, link b
       bind b, link c
-  save tmp35
+  save tmp29
     call bitwise-xor
-      bind a, link tmp34
+      bind a, link tmp28
       bind b, link d
-  save tmp36
+  save tmp30
     call md5cmn
-      bind link tmp35
+      bind link tmp29
       bind link a
       bind link b
       bind link x
       bind link s
       bind link t
-  turn seed, link tmp36
+  turn seed, link tmp30
+
 task md5ii
   base a
   base b
@@ -291,58 +198,59 @@ task md5ii
   base x
   base s
   base t
-  save tmp37
+  save tmp31
     call bitflip
       bind bits, link d
-  save tmp38
+  save tmp32
     call bitwise-or
       bind a, link b
-      bind b, link tmp37
-  save tmp39
+      bind b, link tmp31
+  save tmp33
     call bitwise-xor
       bind a, link c
-      bind b, link tmp38
-  save tmp40
+      bind b, link tmp32
+  save tmp34
     call md5cmn
-      bind link tmp39
+      bind link tmp33
       bind link a
       bind link b
       bind link x
       bind link s
       bind link t
-  turn seed, link tmp40
+  turn seed, link tmp34
+
 task binl-m-d5
   base x
   base len
-  save tmp41
+  save tmp35
     call shift-right
       bind a, link len
       bind b, size 5
-  save tmp42
+  save tmp36
     call modulo
       bind a, link len
       bind b, size 32
-  save x[tmp41]
+  save x[tmp35]
     call shift-left
       bind a, size 128
-      bind b, link tmp42
-  save tmp43
+      bind b, link tmp36
+  save tmp37
     call add
       bind a, link len
       bind b, size 64
-  save tmp44
+  save tmp38
     call unsigned-shift-right
-      bind a, link tmp43
+      bind a, link tmp37
       bind b, size 9
-  save tmp45
+  save tmp39
     call shift-left
-      bind a, link tmp44
+      bind a, link tmp38
       bind b, size 4
-  save tmp46
+  save tmp40
     call add
-      bind a, link tmp45
+      bind a, link tmp39
       bind b, size 14
-  save x[tmp46], link len
+  save x[tmp40], link len
   save i
   save olda
   save oldb
@@ -359,18 +267,18 @@ task binl-m-d5
   save i, size 0
   call loop
     hook test
-      save tmp47
+      save tmp41
         call lt
           bind a, link i
           bind b, link x/length
       call check
-        bind test, link tmp47
+        bind test, link tmp41
     hook match
       save olda, link a
       save oldb, link b
       save oldc, link c
       save oldd, link d
-      save tmp48
+      save tmp42
         call negative
           bind bits, size 680876936
       save a
@@ -381,12 +289,12 @@ task binl-m-d5
           bind link d
           bind link x[i]
           bind size 7
-          bind link tmp48
-      save tmp49
+          bind link tmp42
+      save tmp43
         call add
           bind a, link i
           bind b, size 1
-      save tmp50
+      save tmp44
         call negative
           bind bits, size 389564586
       save d
@@ -395,10 +303,10 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp49]
+          bind link x[tmp43]
           bind size 12
-          bind link tmp50
-      save tmp51
+          bind link tmp44
+      save tmp45
         call add
           bind a, link i
           bind b, size 2
@@ -408,14 +316,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp51]
+          bind link x[tmp45]
           bind size 17
           bind size 606105819
-      save tmp52
+      save tmp46
         call add
           bind a, link i
           bind b, size 3
-      save tmp53
+      save tmp47
         call negative
           bind bits, size 1044525330
       save b
@@ -424,14 +332,14 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp52]
+          bind link x[tmp46]
           bind size 22
-          bind link tmp53
-      save tmp54
+          bind link tmp47
+      save tmp48
         call add
           bind a, link i
           bind b, size 4
-      save tmp55
+      save tmp49
         call negative
           bind bits, size 176418897
       save a
@@ -440,10 +348,10 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp54]
+          bind link x[tmp48]
           bind size 7
-          bind link tmp55
-      save tmp56
+          bind link tmp49
+      save tmp50
         call add
           bind a, link i
           bind b, size 5
@@ -453,14 +361,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp56]
+          bind link x[tmp50]
           bind size 12
           bind size 1200080426
-      save tmp57
+      save tmp51
         call add
           bind a, link i
           bind b, size 6
-      save tmp58
+      save tmp52
         call negative
           bind bits, size 1473231341
       save c
@@ -469,14 +377,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp57]
+          bind link x[tmp51]
           bind size 17
-          bind link tmp58
-      save tmp59
+          bind link tmp52
+      save tmp53
         call add
           bind a, link i
           bind b, size 7
-      save tmp60
+      save tmp54
         call negative
           bind bits, size 45705983
       save b
@@ -485,10 +393,10 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp59]
+          bind link x[tmp53]
           bind size 22
-          bind link tmp60
-      save tmp61
+          bind link tmp54
+      save tmp55
         call add
           bind a, link i
           bind b, size 8
@@ -498,14 +406,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp61]
+          bind link x[tmp55]
           bind size 7
           bind size 1770035416
-      save tmp62
+      save tmp56
         call add
           bind a, link i
           bind b, size 9
-      save tmp63
+      save tmp57
         call negative
           bind bits, size 1958414417
       save d
@@ -514,14 +422,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp62]
+          bind link x[tmp56]
           bind size 12
-          bind link tmp63
-      save tmp64
+          bind link tmp57
+      save tmp58
         call add
           bind a, link i
           bind b, size 10
-      save tmp65
+      save tmp59
         call negative
           bind bits, size 42063
       save c
@@ -530,14 +438,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp64]
+          bind link x[tmp58]
           bind size 17
-          bind link tmp65
-      save tmp66
+          bind link tmp59
+      save tmp60
         call add
           bind a, link i
           bind b, size 11
-      save tmp67
+      save tmp61
         call negative
           bind bits, size 1990404162
       save b
@@ -546,10 +454,10 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp66]
+          bind link x[tmp60]
           bind size 22
-          bind link tmp67
-      save tmp68
+          bind link tmp61
+      save tmp62
         call add
           bind a, link i
           bind b, size 12
@@ -559,14 +467,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp68]
+          bind link x[tmp62]
           bind size 7
           bind size 1804603682
-      save tmp69
+      save tmp63
         call add
           bind a, link i
           bind b, size 13
-      save tmp70
+      save tmp64
         call negative
           bind bits, size 40341101
       save d
@@ -575,14 +483,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp69]
+          bind link x[tmp63]
           bind size 12
-          bind link tmp70
-      save tmp71
+          bind link tmp64
+      save tmp65
         call add
           bind a, link i
           bind b, size 14
-      save tmp72
+      save tmp66
         call negative
           bind bits, size 1502002290
       save c
@@ -591,10 +499,10 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp71]
+          bind link x[tmp65]
           bind size 17
-          bind link tmp72
-      save tmp73
+          bind link tmp66
+      save tmp67
         call add
           bind a, link i
           bind b, size 15
@@ -604,16 +512,73 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp73]
+          bind link x[tmp67]
           bind size 22
           bind size 1236535329
-      save tmp74
+      save tmp68
         call add
           bind a, link i
           bind b, size 1
-      save tmp75
+      save tmp69
         call negative
           bind bits, size 165796510
+      save a
+        call md5gg
+          bind link a
+          bind link b
+          bind link c
+          bind link d
+          bind link x[tmp68]
+          bind size 5
+          bind link tmp69
+      save tmp70
+        call add
+          bind a, link i
+          bind b, size 6
+      save tmp71
+        call negative
+          bind bits, size 1069501632
+      save d
+        call md5gg
+          bind link d
+          bind link a
+          bind link b
+          bind link c
+          bind link x[tmp70]
+          bind size 9
+          bind link tmp71
+      save tmp72
+        call add
+          bind a, link i
+          bind b, size 11
+      save c
+        call md5gg
+          bind link c
+          bind link d
+          bind link a
+          bind link b
+          bind link x[tmp72]
+          bind size 14
+          bind size 643717713
+      save tmp73
+        call negative
+          bind bits, size 373897302
+      save b
+        call md5gg
+          bind link b
+          bind link c
+          bind link d
+          bind link a
+          bind link x[i]
+          bind size 20
+          bind link tmp73
+      save tmp74
+        call add
+          bind a, link i
+          bind b, size 5
+      save tmp75
+        call negative
+          bind bits, size 701558691
       save a
         call md5gg
           bind link a
@@ -626,10 +591,7 @@ task binl-m-d5
       save tmp76
         call add
           bind a, link i
-          bind b, size 6
-      save tmp77
-        call negative
-          bind bits, size 1069501632
+          bind b, size 10
       save d
         call md5gg
           bind link d
@@ -638,66 +600,12 @@ task binl-m-d5
           bind link c
           bind link x[tmp76]
           bind size 9
-          bind link tmp77
-      save tmp78
-        call add
-          bind a, link i
-          bind b, size 11
-      save c
-        call md5gg
-          bind link c
-          bind link d
-          bind link a
-          bind link b
-          bind link x[tmp78]
-          bind size 14
-          bind size 643717713
-      save tmp79
-        call negative
-          bind bits, size 373897302
-      save b
-        call md5gg
-          bind link b
-          bind link c
-          bind link d
-          bind link a
-          bind link x[i]
-          bind size 20
-          bind link tmp79
-      save tmp80
-        call add
-          bind a, link i
-          bind b, size 5
-      save tmp81
-        call negative
-          bind bits, size 701558691
-      save a
-        call md5gg
-          bind link a
-          bind link b
-          bind link c
-          bind link d
-          bind link x[tmp80]
-          bind size 5
-          bind link tmp81
-      save tmp82
-        call add
-          bind a, link i
-          bind b, size 10
-      save d
-        call md5gg
-          bind link d
-          bind link a
-          bind link b
-          bind link c
-          bind link x[tmp82]
-          bind size 9
           bind size 38016083
-      save tmp83
+      save tmp77
         call add
           bind a, link i
           bind b, size 15
-      save tmp84
+      save tmp78
         call negative
           bind bits, size 660478335
       save c
@@ -706,14 +614,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp83]
+          bind link x[tmp77]
           bind size 14
-          bind link tmp84
-      save tmp85
+          bind link tmp78
+      save tmp79
         call add
           bind a, link i
           bind b, size 4
-      save tmp86
+      save tmp80
         call negative
           bind bits, size 405537848
       save b
@@ -722,10 +630,10 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp85]
+          bind link x[tmp79]
           bind size 20
-          bind link tmp86
-      save tmp87
+          bind link tmp80
+      save tmp81
         call add
           bind a, link i
           bind b, size 9
@@ -735,14 +643,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp87]
+          bind link x[tmp81]
           bind size 5
           bind size 568446438
-      save tmp88
+      save tmp82
         call add
           bind a, link i
           bind b, size 14
-      save tmp89
+      save tmp83
         call negative
           bind bits, size 1019803690
       save d
@@ -751,14 +659,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp88]
+          bind link x[tmp82]
           bind size 9
-          bind link tmp89
-      save tmp90
+          bind link tmp83
+      save tmp84
         call add
           bind a, link i
           bind b, size 3
-      save tmp91
+      save tmp85
         call negative
           bind bits, size 187363961
       save c
@@ -767,10 +675,10 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp90]
+          bind link x[tmp84]
           bind size 14
-          bind link tmp91
-      save tmp92
+          bind link tmp85
+      save tmp86
         call add
           bind a, link i
           bind b, size 8
@@ -780,14 +688,14 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp92]
+          bind link x[tmp86]
           bind size 20
           bind size 1163531501
-      save tmp93
+      save tmp87
         call add
           bind a, link i
           bind b, size 13
-      save tmp94
+      save tmp88
         call negative
           bind bits, size 1444681467
       save a
@@ -796,14 +704,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp93]
+          bind link x[tmp87]
           bind size 5
-          bind link tmp94
-      save tmp95
+          bind link tmp88
+      save tmp89
         call add
           bind a, link i
           bind b, size 2
-      save tmp96
+      save tmp90
         call negative
           bind bits, size 51403784
       save d
@@ -812,10 +720,10 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp95]
+          bind link x[tmp89]
           bind size 9
-          bind link tmp96
-      save tmp97
+          bind link tmp90
+      save tmp91
         call add
           bind a, link i
           bind b, size 7
@@ -825,14 +733,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp97]
+          bind link x[tmp91]
           bind size 14
           bind size 1735328473
-      save tmp98
+      save tmp92
         call add
           bind a, link i
           bind b, size 12
-      save tmp99
+      save tmp93
         call negative
           bind bits, size 1926607734
       save b
@@ -841,14 +749,14 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp98]
+          bind link x[tmp92]
           bind size 20
-          bind link tmp99
-      save tmp100
+          bind link tmp93
+      save tmp94
         call add
           bind a, link i
           bind b, size 5
-      save tmp101
+      save tmp95
         call negative
           bind bits, size 378558
       save a
@@ -857,14 +765,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp100]
+          bind link x[tmp94]
           bind size 4
-          bind link tmp101
-      save tmp102
+          bind link tmp95
+      save tmp96
         call add
           bind a, link i
           bind b, size 8
-      save tmp103
+      save tmp97
         call negative
           bind bits, size 2022574463
       save d
@@ -873,10 +781,10 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp102]
+          bind link x[tmp96]
           bind size 11
-          bind link tmp103
-      save tmp104
+          bind link tmp97
+      save tmp98
         call add
           bind a, link i
           bind b, size 11
@@ -886,14 +794,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp104]
+          bind link x[tmp98]
           bind size 16
           bind size 1839030562
-      save tmp105
+      save tmp99
         call add
           bind a, link i
           bind b, size 14
-      save tmp106
+      save tmp100
         call negative
           bind bits, size 35309556
       save b
@@ -902,14 +810,14 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp105]
+          bind link x[tmp99]
           bind size 23
-          bind link tmp106
-      save tmp107
+          bind link tmp100
+      save tmp101
         call add
           bind a, link i
           bind b, size 1
-      save tmp108
+      save tmp102
         call negative
           bind bits, size 1530992060
       save a
@@ -918,10 +826,10 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp107]
+          bind link x[tmp101]
           bind size 4
-          bind link tmp108
-      save tmp109
+          bind link tmp102
+      save tmp103
         call add
           bind a, link i
           bind b, size 4
@@ -931,16 +839,73 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp109]
+          bind link x[tmp103]
           bind size 11
           bind size 1272893353
-      save tmp110
+      save tmp104
         call add
           bind a, link i
           bind b, size 7
-      save tmp111
+      save tmp105
         call negative
           bind bits, size 155497632
+      save c
+        call md5hh
+          bind link c
+          bind link d
+          bind link a
+          bind link b
+          bind link x[tmp104]
+          bind size 16
+          bind link tmp105
+      save tmp106
+        call add
+          bind a, link i
+          bind b, size 10
+      save tmp107
+        call negative
+          bind bits, size 1094730640
+      save b
+        call md5hh
+          bind link b
+          bind link c
+          bind link d
+          bind link a
+          bind link x[tmp106]
+          bind size 23
+          bind link tmp107
+      save tmp108
+        call add
+          bind a, link i
+          bind b, size 13
+      save a
+        call md5hh
+          bind link a
+          bind link b
+          bind link c
+          bind link d
+          bind link x[tmp108]
+          bind size 4
+          bind size 681279174
+      save tmp109
+        call negative
+          bind bits, size 358537222
+      save d
+        call md5hh
+          bind link d
+          bind link a
+          bind link b
+          bind link c
+          bind link x[i]
+          bind size 11
+          bind link tmp109
+      save tmp110
+        call add
+          bind a, link i
+          bind b, size 3
+      save tmp111
+        call negative
+          bind bits, size 722521979
       save c
         call md5hh
           bind link c
@@ -953,10 +918,7 @@ task binl-m-d5
       save tmp112
         call add
           bind a, link i
-          bind b, size 10
-      save tmp113
-        call negative
-          bind bits, size 1094730640
+          bind b, size 6
       save b
         call md5hh
           bind link b
@@ -965,66 +927,12 @@ task binl-m-d5
           bind link a
           bind link x[tmp112]
           bind size 23
-          bind link tmp113
-      save tmp114
-        call add
-          bind a, link i
-          bind b, size 13
-      save a
-        call md5hh
-          bind link a
-          bind link b
-          bind link c
-          bind link d
-          bind link x[tmp114]
-          bind size 4
-          bind size 681279174
-      save tmp115
-        call negative
-          bind bits, size 358537222
-      save d
-        call md5hh
-          bind link d
-          bind link a
-          bind link b
-          bind link c
-          bind link x[i]
-          bind size 11
-          bind link tmp115
-      save tmp116
-        call add
-          bind a, link i
-          bind b, size 3
-      save tmp117
-        call negative
-          bind bits, size 722521979
-      save c
-        call md5hh
-          bind link c
-          bind link d
-          bind link a
-          bind link b
-          bind link x[tmp116]
-          bind size 16
-          bind link tmp117
-      save tmp118
-        call add
-          bind a, link i
-          bind b, size 6
-      save b
-        call md5hh
-          bind link b
-          bind link c
-          bind link d
-          bind link a
-          bind link x[tmp118]
-          bind size 23
           bind size 76029189
-      save tmp119
+      save tmp113
         call add
           bind a, link i
           bind b, size 9
-      save tmp120
+      save tmp114
         call negative
           bind bits, size 640364487
       save a
@@ -1033,14 +941,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp119]
+          bind link x[tmp113]
           bind size 4
-          bind link tmp120
-      save tmp121
+          bind link tmp114
+      save tmp115
         call add
           bind a, link i
           bind b, size 12
-      save tmp122
+      save tmp116
         call negative
           bind bits, size 421815835
       save d
@@ -1049,10 +957,10 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp121]
+          bind link x[tmp115]
           bind size 11
-          bind link tmp122
-      save tmp123
+          bind link tmp116
+      save tmp117
         call add
           bind a, link i
           bind b, size 15
@@ -1062,14 +970,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp123]
+          bind link x[tmp117]
           bind size 16
           bind size 530742520
-      save tmp124
+      save tmp118
         call add
           bind a, link i
           bind b, size 2
-      save tmp125
+      save tmp119
         call negative
           bind bits, size 995338651
       save b
@@ -1078,10 +986,10 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp124]
+          bind link x[tmp118]
           bind size 23
-          bind link tmp125
-      save tmp126
+          bind link tmp119
+      save tmp120
         call negative
           bind bits, size 198630844
       save a
@@ -1092,8 +1000,8 @@ task binl-m-d5
           bind link d
           bind link x[i]
           bind size 6
-          bind link tmp126
-      save tmp127
+          bind link tmp120
+      save tmp121
         call add
           bind a, link i
           bind b, size 7
@@ -1103,14 +1011,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp127]
+          bind link x[tmp121]
           bind size 10
           bind size 1126891415
-      save tmp128
+      save tmp122
         call add
           bind a, link i
           bind b, size 14
-      save tmp129
+      save tmp123
         call negative
           bind bits, size 1416354905
       save c
@@ -1119,14 +1027,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp128]
+          bind link x[tmp122]
           bind size 15
-          bind link tmp129
-      save tmp130
+          bind link tmp123
+      save tmp124
         call add
           bind a, link i
           bind b, size 5
-      save tmp131
+      save tmp125
         call negative
           bind bits, size 57434055
       save b
@@ -1135,10 +1043,10 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp130]
+          bind link x[tmp124]
           bind size 21
-          bind link tmp131
-      save tmp132
+          bind link tmp125
+      save tmp126
         call add
           bind a, link i
           bind b, size 12
@@ -1148,14 +1056,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp132]
+          bind link x[tmp126]
           bind size 6
           bind size 1700485571
-      save tmp133
+      save tmp127
         call add
           bind a, link i
           bind b, size 3
-      save tmp134
+      save tmp128
         call negative
           bind bits, size 1894986606
       save d
@@ -1164,14 +1072,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp133]
+          bind link x[tmp127]
           bind size 10
-          bind link tmp134
-      save tmp135
+          bind link tmp128
+      save tmp129
         call add
           bind a, link i
           bind b, size 10
-      save tmp136
+      save tmp130
         call negative
           bind bits, size 1051523
       save c
@@ -1180,14 +1088,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp135]
+          bind link x[tmp129]
           bind size 15
-          bind link tmp136
-      save tmp137
+          bind link tmp130
+      save tmp131
         call add
           bind a, link i
           bind b, size 1
-      save tmp138
+      save tmp132
         call negative
           bind bits, size 2054922799
       save b
@@ -1196,10 +1104,10 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp137]
+          bind link x[tmp131]
           bind size 21
-          bind link tmp138
-      save tmp139
+          bind link tmp132
+      save tmp133
         call add
           bind a, link i
           bind b, size 8
@@ -1209,14 +1117,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp139]
+          bind link x[tmp133]
           bind size 6
           bind size 1873313359
-      save tmp140
+      save tmp134
         call add
           bind a, link i
           bind b, size 15
-      save tmp141
+      save tmp135
         call negative
           bind bits, size 30611744
       save d
@@ -1225,14 +1133,14 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp140]
+          bind link x[tmp134]
           bind size 10
-          bind link tmp141
-      save tmp142
+          bind link tmp135
+      save tmp136
         call add
           bind a, link i
           bind b, size 6
-      save tmp143
+      save tmp137
         call negative
           bind bits, size 1560198380
       save c
@@ -1241,10 +1149,10 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp142]
+          bind link x[tmp136]
           bind size 15
-          bind link tmp143
-      save tmp144
+          bind link tmp137
+      save tmp138
         call add
           bind a, link i
           bind b, size 13
@@ -1254,14 +1162,14 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp144]
+          bind link x[tmp138]
           bind size 21
           bind size 1309151649
-      save tmp145
+      save tmp139
         call add
           bind a, link i
           bind b, size 4
-      save tmp146
+      save tmp140
         call negative
           bind bits, size 145523070
       save a
@@ -1270,14 +1178,14 @@ task binl-m-d5
           bind link b
           bind link c
           bind link d
-          bind link x[tmp145]
+          bind link x[tmp139]
           bind size 6
-          bind link tmp146
-      save tmp147
+          bind link tmp140
+      save tmp141
         call add
           bind a, link i
           bind b, size 11
-      save tmp148
+      save tmp142
         call negative
           bind bits, size 1120210379
       save d
@@ -1286,10 +1194,10 @@ task binl-m-d5
           bind link a
           bind link b
           bind link c
-          bind link x[tmp147]
+          bind link x[tmp141]
           bind size 10
-          bind link tmp148
-      save tmp149
+          bind link tmp142
+      save tmp143
         call add
           bind a, link i
           bind b, size 2
@@ -1299,14 +1207,14 @@ task binl-m-d5
           bind link d
           bind link a
           bind link b
-          bind link x[tmp149]
+          bind link x[tmp143]
           bind size 15
           bind size 718787259
-      save tmp150
+      save tmp144
         call add
           bind a, link i
           bind b, size 9
-      save tmp151
+      save tmp145
         call negative
           bind bits, size 343485551
       save b
@@ -1315,9 +1223,9 @@ task binl-m-d5
           bind link c
           bind link d
           bind link a
-          bind link x[tmp150]
+          bind link x[tmp144]
           bind size 21
-          bind link tmp151
+          bind link tmp145
       save a
         call safe-add
           bind link a
@@ -1338,6 +1246,7 @@ task binl-m-d5
     hook fault
       turn seed, link false
   turn seed, link undefined
+
 task binl2rstr
   base input
   save i
@@ -1349,58 +1258,59 @@ task binl2rstr
   save i, size 0
   call loop
     hook test
-      save tmp152
+      save tmp146
         call lt
           bind a, link i
           bind b, link length32
       call check
-        bind test, link tmp152
+        bind test, link tmp146
     hook match
-      save tmp153
+      save tmp147
         call shift-right
           bind a, link i
           bind b, size 5
-      save tmp154
+      save tmp148
         call modulo
           bind a, link i
           bind b, size 32
-      save tmp155
+      save tmp149
         call unsigned-shift-right
-          bind a, link input[tmp153]
-          bind b, link tmp154
-      save tmp156
+          bind a, link input[tmp147]
+          bind b, link tmp148
+      save tmp150
         call bitwise-and
-          bind a, link tmp155
+          bind a, link tmp149
           bind b, size 255
       save output
         call string/from-char-code
-          bind link tmp156
+          bind link tmp150
       save i, size 8
     hook fault
       turn seed, link false
   turn seed, link output
+
 task rstr2binl
   base input
   save i
   save output, make list
-  save tmp157
+  save tmp151
     call shift-right
       bind a, link input/length
       bind b, size 2
-  save tmp158
+  save tmp152
     call negative
-      bind a, link tmp157
+      bind a, link tmp151
       bind b, size 1
-  save output[tmp158], link undefined
+  save output[tmp152], link void
   save i, size 0
   call loop
     hook test
-      save tmp159
+      save tmp153
         call lt
           bind a, link i
           bind b, link output/length
       call check
-        bind test, link tmp159
+        bind test, link tmp153
     hook match
       save output[i], size 0
       save i, size 1
@@ -1413,57 +1323,59 @@ task rstr2binl
   save i, size 0
   call loop
     hook test
-      save tmp160
+      save tmp154
         call lt
           bind a, link i
           bind b, link length8
       call check
-        bind test, link tmp160
+        bind test, link tmp154
     hook match
-      save tmp161
+      save tmp155
         call shift-right
           bind a, link i
           bind b, size 5
-      save tmp162
+      save tmp156
         call divide
           bind a, link i
           bind b, size 8
-      save tmp163
+      save tmp157
         call input/char-code-at
-          bind link tmp162
-      save tmp164
+          bind link tmp156
+      save tmp158
         call bitwise-and
-          bind a, link tmp163
+          bind a, link tmp157
           bind b, size 255
-      save tmp165
+      save tmp159
         call modulo
           bind a, link i
           bind b, size 32
-      save output[tmp161]
+      save output[tmp155]
         call shift-left
-          bind a, link tmp164
-          bind b, link tmp165
+          bind a, link tmp158
+          bind b, link tmp159
       save i, size 8
     hook fault
       turn seed, link false
   turn seed, link output
+
 task rstr-m-d5
   base s
-  save tmp166
+  save tmp160
     call rstr2binl
       bind link s
-  save tmp167
+  save tmp161
     call multiply
       bind a, link s/length
       bind b, size 8
-  save tmp168
+  save tmp162
     call binl-m-d5
-      bind link tmp166
-      bind link tmp167
-  save tmp169
+      bind link tmp160
+      bind link tmp161
+  save tmp163
     call binl2rstr
-      bind link tmp168
-  turn seed, link tmp169
+      bind link tmp162
+  turn seed, link tmp163
+
 task rstr-h-m-a-c-m-d5
   base key
   base data
@@ -1474,31 +1386,32 @@ task rstr-h-m-a-c-m-d5
   save ipad, make list
   save opad, make list
   save hash
-  save ipad[15], save opad[15], link undefined
-  save tmp170
+  save ipad[15], link void
+  save opad[15], link void
+  save tmp164
     call gt
       bind a, link bkey/length
       bind b, size 16
   call check
-    bind test, link tmp170
+    bind test, link tmp164
     hook match
-      save tmp171
+      save tmp165
         call multiply
           bind a, link key/length
           bind b, size 8
       save bkey
         call binl-m-d5
           bind link bkey
-          bind link tmp171
+          bind link tmp165
   save i, size 0
   call loop
     hook test
-      save tmp172
+      save tmp166
         call lt
           bind a, link i
           bind b, size 16
       call check
-        bind test, link tmp172
+        bind test, link tmp166
     hook match
       save ipad[i]
         call bitwise-xor
@@ -1511,39 +1424,40 @@ task rstr-h-m-a-c-m-d5
       save i, size 1
     hook fault
       turn seed, link false
-  save tmp173
+  save tmp167
     call rstr2binl
       bind link data
-  save tmp174
+  save tmp168
     call ipad/concat
-      bind link tmp173
-  save tmp175
+      bind link tmp167
+  save tmp169
     call multiply
       bind a, link data/length
       bind b, size 8
-  save tmp176
+  save tmp170
     call add
       bind a, size 512
-      bind b, link tmp175
+      bind b, link tmp169
   save hash
     call binl-m-d5
-      bind link tmp174
-      bind link tmp176
-  save tmp177
+      bind link tmp168
+      bind link tmp170
+  save tmp171
     call opad/concat
       bind link hash
-  save tmp178
+  save tmp172
     call add
       bind a, size 512
       bind b, size 128
-  save tmp179
+  save tmp173
     call binl-m-d5
-      bind link tmp177
-      bind link tmp178
-  save tmp180
+      bind link tmp171
+      bind link tmp172
+  save tmp174
     call binl2rstr
-      bind link tmp179
-  turn seed, link tmp180
+      bind link tmp173
+  turn seed, link tmp174
+
 task rstr2hex
   base input
   save hex-tab, text <0123456789abcdef>
@@ -1553,131 +1467,137 @@ task rstr2hex
   save i, size 0
   call loop
     hook test
-      save tmp181
+      save tmp175
         call lt
           bind a, link i
           bind b, link input/length
       call check
-        bind test, link tmp181
+        bind test, link tmp175
     hook match
       save x
         call input/char-code-at
           bind link i
-      save tmp182
+      save tmp176
         call unsigned-shift-right
           bind a, link x
           bind b, size 4
-      save tmp183
+      save tmp177
         call bitwise-and
-          bind a, link tmp182
+          bind a, link tmp176
           bind b, size 15
-      save tmp184
+      save tmp178
         call hex-tab/char-at
-          bind link tmp183
-      save tmp185
+          bind link tmp177
+      save tmp179
         call bitwise-and
           bind a, link x
           bind b, size 15
-      save tmp186
+      save tmp180
         call hex-tab/char-at
-          bind link tmp185
+          bind link tmp179
       save output
         call add
-          bind a, link tmp184
-          bind b, link tmp186
+          bind a, link tmp178
+          bind b, link tmp180
       save i, size 1
     hook fault
       turn seed, link false
   turn seed, link output
+
 task str2rstr-u-t-f8
   base input
-  save tmp187
+  save tmp181
     call encode-u-r-i-component
       bind link input
-  save tmp188
+  save tmp182
     call unescape
-      bind link tmp187
-  turn seed, link tmp188
+      bind link tmp181
+  turn seed, link tmp182
+
 task raw-m-d5
   base s
-  save tmp189
+  save tmp183
     call str2rstr-u-t-f8
       bind link s
-  save tmp190
+  save tmp184
     call rstr-m-d5
-      bind link tmp189
-  turn seed, link tmp190
+      bind link tmp183
+  turn seed, link tmp184
+
 task hex-m-d5
   base s
-  save tmp191
+  save tmp185
     call raw-m-d5
       bind link s
-  save tmp192
+  save tmp186
     call rstr2hex
-      bind link tmp191
-  turn seed, link tmp192
+      bind link tmp185
+  turn seed, link tmp186
+
 task raw-h-m-a-c-m-d5
   base k
   base d
-  save tmp193
+  save tmp187
     call str2rstr-u-t-f8
       bind link k
-  save tmp194
+  save tmp188
     call str2rstr-u-t-f8
       bind link d
-  save tmp195
+  save tmp189
     call rstr-h-m-a-c-m-d5
-      bind link tmp193
-      bind link tmp194
-  turn seed, link tmp195
+      bind link tmp187
+      bind link tmp188
+  turn seed, link tmp189
+
 task hex-h-m-a-c-m-d5
   base k
   base d
-  save tmp196
+  save tmp190
     call raw-h-m-a-c-m-d5
       bind link k
       bind link d
-  save tmp197
+  save tmp191
     call rstr2hex
-      bind link tmp196
-  turn seed, link tmp197
+      bind link tmp190
+  turn seed, link tmp191
+
 task md5
   base string
   base key
   base raw
-  save tmp198
+  save tmp192
     call not
       bind bits, link key
   call check
-    bind test, link tmp198
+    bind test, link tmp192
     hook match
-      save tmp199
+      save tmp193
         call not
           bind bits, link raw
       call check
-        bind test, link tmp199
+        bind test, link tmp193
         hook match
-          save tmp200
+          save tmp194
             call hex-m-d5
               bind link string
-          turn seed, link tmp200
-      save tmp201
+          turn seed, link tmp194
+      save tmp195
         call raw-m-d5
           bind link string
-      turn seed, link tmp201
-  save tmp202
+      turn seed, link tmp195
+  save tmp196
     call not
       bind bits, link raw
   call check
-    bind test, link tmp202
+    bind test, link tmp196
     hook match
-      save tmp203
+      save tmp197
         call hex-h-m-a-c-m-d5
           bind link key
           bind link string
-      turn seed, link tmp203
-  save tmp204
+      turn seed, link tmp197
+  save tmp198
     call raw-h-m-a-c-m-d5
       bind link key
       bind link string
-  turn seed, link tmp204
+  turn seed, link tmp198

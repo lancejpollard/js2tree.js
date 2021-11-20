@@ -38,6 +38,7 @@ const transforms = {
   FunctionDeclaration: transformFunctionDeclaration,
   UnaryExpression: transformUnaryExpression,
   UpdateExpression: transformUpdateExpression,
+  EmptyStatement: transformEmptyStatement,
 }
 
 const binaries = {
@@ -117,6 +118,10 @@ function walk(node, scope) {
       walk(val, scope)
     }
   })
+}
+
+function transformEmptyStatement(node, scope) {
+
 }
 
 function transformUpdateExpression(node, scope) {
@@ -358,7 +363,11 @@ function transformOptionallyToLink(site) {
   if (!site) return site
   switch (site.form) {
     case 'site': return { form: 'link', site }
-    case 'term': return { form: 'link', site }
+    case 'term':
+      if (site.term === 'undefined') {
+        site.term = 'void'
+      }
+      return { form: 'link', site }
   }
   return site
 }
