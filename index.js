@@ -92,7 +92,7 @@ function transformUpdateExpression(node, scope) {
 }
 
 function transformUnaryExpression(node, scope) {
-  const argument = call(transforms, node.argument.type, node.argument, scope)
+  const argument = transformOptionallyToLink(call(transforms, node.argument.type, node.argument, scope))
   const name = toTerm(transformName(node.operator))
   return createCall(name, [
     createBind(toTerm('bits'), argument)
