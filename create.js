@@ -79,10 +79,18 @@ function createText(text) {
 }
 
 function createBind(name, sift) {
-  return {
-    form: 'bind',
-    name,
-    sift
+  if (!sift) {
+    return {
+      form: 'bind',
+      name: null,
+      sift: name
+    }
+  } else {
+    return {
+      form: 'bind',
+      name,
+      sift
+    }
   }
 }
 
