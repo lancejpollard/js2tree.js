@@ -1,6 +1,7 @@
 {
   "name": "@lancejpollard/js2link.js",
   "dependencies": {
-    "@lancejpollard/normalize-ast.js": "*"
+    "@lancejpollard/normalize-ast.js": "*",
+    "to-case": "^2.0.0"
   }
 }

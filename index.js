@@ -1,5 +1,6 @@
 
 const n = require('@lancejpollard/normalize-ast.js')
+const to = require('to-case')
 const {
   createTask,
   createHostZone,
@@ -55,9 +56,24 @@ const binaries = {
   '<<': 'shift-left',
   '++': 'increment',
   '--': 'decrement',
-  '+=': 'increment-by',
-  '-=': 'decrement-by',
-  '^': 'xor',
+  '+=': 'assign-increment',
+  '-=': 'assign-decrement',
+  '*=': 'assign-multiple',
+  '/=': 'assign-division',
+  '%=': 'assign-modulo',
+  '**=': 'assign-exponent',
+  '<<=': 'assign-left-shift',
+  '>>=': 'assign-right-shift',
+  '>>>=': 'assign-unsigned-right-shift',
+  '&=': 'assign-bitwise-and',
+  '^=': 'assign-bitwise-xor',
+  '|=': 'assign-bitwise-or',
+  '??': 'nullish',
+  '^': 'bitwise-xor',
+  '==': 'equal',
+  '===': 'strictly-equal',
+  '!==': 'not-strictly-equal',
+  '!=': 'not-equal',
   '<': 'lt',
   '>': 'gt',
   '<=': 'lte',
@@ -71,7 +87,7 @@ module.exports = transform
 function transform(source) {
   const node = n.normalize(n.parse(source))
   const nodes = []
-  const scope = { index: 0 }
+  const scope = { index: 0, names: {} }
   node.body.forEach(bd => {
     const t = transformBodyNode(bd, scope)
     if (Array.isArray(t)) {
@@ -80,7 +96,27 @@ function transform(source) {
       nodes.push(t)
     }
   })
+  nodes.forEach(node => walk(node, scope))
   return nodes
+}
+
+function walk(node, scope) {
+  if (!node || typeof node !== 'object') {
+    return
+  }
+
+  if (node.form === 'term') {
+    normalizeName(node, scope)
+  }
+
+  Object.keys(node).forEach(key => {
+    const val = node[key]
+    if (Array.isArray(val)) {
+      val.forEach(v => walk(v, scope))
+    } else {
+      walk(val, scope)
+    }
+  })
 }
 
 function transformUpdateExpression(node, scope) {
@@ -99,9 +135,15 @@ function transformUnaryExpression(node, scope) {
   ])
 }
 
+function normalizeName(term, scope) {
+  term.term = scope.names[term.term] = scope.names[term.term] || to.slug(term.term)
+  return term
+}
+
 function transformFunctionDeclaration(node, scope) {
   const base = []
-  const name = `tmp${scope.index++}`
+  const id = node.id && call(transforms, node.id.type, node.id, scope)
+  const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
     base.push(createBase(param.name))
   })
@@ -354,7 +396,8 @@ function transformAssignmentExpression(node, scope) {
 
 function transformFunctionExpression(node, scope) {
   const base = []
-  const name = `tmp${scope.index++}`
+  const id = node.id && call(transforms, node.id.type, node.id, scope)
+  const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
     base.push(createBase(param.name))
   })

@@ -87,7 +87,7 @@ function printLink(node) {
 
 function printTask(node) {
   const text = []
-  text.push(`task ${node.name}`)
+  text.push(`task ${printName(node.name)}`)
   node.base.forEach(b => {
     printBase(b).forEach(line => {
       text.push(`  ${line}`)
@@ -184,7 +184,6 @@ function printHook(name, hook) {
     })
   })
   hook.zone.forEach(z => {
-    console.log(z)
     call(printers, z.form, z).forEach(line => {
       text.push(`  ${line}`)
     })
