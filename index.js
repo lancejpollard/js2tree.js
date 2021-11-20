@@ -58,6 +58,12 @@ const binaries = {
   '+=': 'increment-by',
   '-=': 'decrement-by',
   '^': 'xor',
+  '<': 'lt',
+  '>': 'gt',
+  '<=': 'lte',
+  '>=': 'gte',
+  '%': 'modulo',
+  '!': 'not'
 }
 
 module.exports = transform
@@ -78,10 +84,8 @@ function transform(source) {
 }
 
 function transformUpdateExpression(node, scope) {
-  let value = call(transforms, node.argument.type, node.argument, scope)
-  const name = toTerm(binaries[node.operator])
-  if (value.form === 'term') value = { form: 'link', site: value }
-  if (value.form === 'site') value = { form: 'link', site: value }
+  let value = transformOptionallyToLink(call(transforms, node.argument.type, node.argument, scope))
+  const name = toTerm(transformName(node.operator))
   return createCall(name, [
     createBind(toTerm('value'), value)
   ])
@@ -89,7 +93,7 @@ function transformUpdateExpression(node, scope) {
 
 function transformUnaryExpression(node, scope) {
   const argument = call(transforms, node.argument.type, node.argument, scope)
-  const name = toTerm(binaries[node.operator])
+  const name = toTerm(transformName(node.operator))
   return createCall(name, [
     createBind(toTerm('bits'), argument)
   ])
@@ -115,9 +119,7 @@ function transformFunctionDeclaration(node, scope) {
 
 function transformProperty(node, scope) {
   const key = call(transforms, node.key.type, node.key, scope)
-  let value = call(transforms, node.value.type, node.value, scope)
-  if (value.form === 'term') value = { form: 'link', site: value }
-  if (value.form === 'site') value = { form: 'link', site: value }
+  let value = transformOptionallyToLink(call(transforms, node.value.type, node.value, scope))
   return createBind(key, value)
 }
 
@@ -132,9 +134,7 @@ function transformSpreadElement(node, scope) {
 function transformArrayExpression(node, scope) {
   const properties = []
   node.elements.forEach(p => {
-    let value = call(transforms, p.type, p, scope)
-    if (value.form === 'term') value = { form: 'link', site: value }
-    if (value.form === 'site') value = { form: 'link', site: value }
+    let value = transformOptionallyToLink(call(transforms, p.type, p, scope))
     properties.push(createBind(value))
   })
 
@@ -148,6 +148,10 @@ function transformArrayExpression(node, scope) {
 function transformBreakStatement(node, scope) {
   return {
     form: 'turn',
+    site: {
+      form: 'term',
+      term: 'false'
+    }
   }
 }
 
@@ -166,12 +170,17 @@ function transformObjectExpression(node, scope) {
 function transformLogicalExpression(node, scope) {
   const left = call(transforms, node.left.type, node.left, scope)
   const right = call(transforms, node.right.type, node.right, scope)
-  const operator = binaries[node.operator]
+  const operator = transformName(node.operator)
   const name = toTerm(operator)
   return createCall(name, [
     createBind(toTerm('a'), left),
     createBind(toTerm('b'), right)
   ])
+}
+
+function transformName(key) {
+  if (!binaries[key]) throw new Error(key)
+  return binaries[key]
 }
 
 function transformWhileStatement(node, scope) {
@@ -181,10 +190,10 @@ function transformWhileStatement(node, scope) {
 
   ]
   const lastCall = body[body.length - 1]
-  lastCall.zone.push({
-    form: 'call-turn',
-    term: 'seed'
-  })
+  // lastCall.zone.push({
+  //   form: 'call-turn',
+  //   term: 'seed'
+  // })
   const lastHook = lastCall.hook
   lastCall.hook = {}
   const hook = {
@@ -234,13 +243,13 @@ function transformIfStatement(node, scope) {
     base: [],
     zone: consequent
   }
-  // if (alternate) {
-  //   hook.fault = {
-  //     form: 'hook',
-  //     base: [],
-  //     zone: alternate
-  //   }
-  // }
+  if (alternate) {
+    hook.fault = {
+      form: 'hook',
+      base: [],
+      zone: Array.isArray(alternate) ? alternate : [alternate]
+    }
+  }
   const name = toTerm('check')
   return createCall(name, bind, hook)
 }
@@ -254,7 +263,7 @@ function transformVariableDeclarationStandalone(node, scope) {
       const save = createSave(id, init)
       list.push(save)
     } else {
-      list.push(createHostZone(id, init))
+      list.push(createHostZone(id, transformOptionallyToLink(init)))
     }
   })
   return list
@@ -280,18 +289,7 @@ function transformCallExpression(node, scope) {
   const name = call(transforms, node.callee.type, node.callee, scope)
   const bind = []
   node.arguments.forEach(arg => {
-    let value = call(transforms, arg.type, arg, scope)
-    if (value.form === 'site') {
-      value = {
-        form: 'link',
-        site: value
-      }
-    } else if (value.form === 'term') {
-      value = {
-        form: 'link',
-        site: value
-      }
-    }
+    let value = transformOptionallyToLink(call(transforms, arg.type, arg, scope))
     bind.push(createBind(value))
   })
   return {
@@ -314,13 +312,20 @@ function transformIdentifier(node, scope) {
   return toTerm(node.name)
 }
 
+function transformOptionallyToLink(site) {
+  if (!site) return site
+  switch (site.form) {
+    case 'site': return { form: 'link', site }
+    case 'term': return { form: 'link', site }
+  }
+  return site
+}
+
 function transformBinaryExpression(node, scope) {
-  const name = toTerm(binaries[node.operator])
+  const name = toTerm(transformName(node.operator))
   const bind = []
-  let left = call(transforms, node.left.type, node.left, scope)
-  let right = call(transforms, node.right.type, node.right, scope)
-  if (left.form === 'term') left = { form: 'link', site: left }
-  if (right.form === 'term') right = { form: 'link', site: right }
+  let left = transformOptionallyToLink(call(transforms, node.left.type, node.left, scope))
+  let right = transformOptionallyToLink(call(transforms, node.right.type, node.right, scope))
   bind.push(createBind(toTerm('a'), left))
   bind.push(createBind(toTerm('b'), right))
   return createCall(name, bind)
@@ -343,7 +348,7 @@ function createTerm(value) {
 
 function transformAssignmentExpression(node, scope) {
   const left = call(transforms, node.left.type, node.left, scope)
-  const right = call(transforms, node.right.type, node.right, scope)
+  const right = transformOptionallyToLink(call(transforms, node.right.type, node.right, scope))
   return createSave(left, right)
 }
 

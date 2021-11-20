@@ -79,7 +79,7 @@ function printSite(node) {
 
 function printLink(node) {
   if (node.site.form === 'term') {
-    return [node.site.term]
+    return [`link ${node.site.term}`]
   } else {
     return [node.term]
   }
@@ -184,6 +184,7 @@ function printHook(name, hook) {
     })
   })
   hook.zone.forEach(z => {
+    console.log(z)
     call(printers, z.form, z).forEach(line => {
       text.push(`  ${line}`)
     })
