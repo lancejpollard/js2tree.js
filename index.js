@@ -39,6 +39,9 @@ const transforms = {
   UnaryExpression: transformUnaryExpression,
   UpdateExpression: transformUpdateExpression,
   EmptyStatement: transformEmptyStatement,
+  ThrowStatement: transformThrowStatement,
+  NewExpression: transformNewExpression,
+  ThisExpression: transformThisExpression,
 }
 
 const binaries = {
@@ -80,7 +83,9 @@ const binaries = {
   '<=': 'lte',
   '>=': 'gte',
   '%': 'modulo',
-  '!': 'not'
+  '!': 'not',
+  'typeof': 'get-type-of',
+  'instanceof': 'get-instance-of'
 }
 
 module.exports = transform
@@ -118,6 +123,31 @@ function walk(node, scope) {
       walk(val, scope)
     }
   })
+}
+
+function transformThisExpression(node, scope) {
+  return toTerm('this')
+}
+
+function transformThrowStatement(node, scope) {
+  const argument = call(transforms, node.argument.type, node.argument, scope)
+  return {
+    form: 'halt',
+    site: argument
+  }
+}
+
+function transformNewExpression(node, scope) {
+  const bind = []
+  const name = call(transforms, node.callee.type, node.callee, scope)
+  node.arguments.forEach(arg => {
+    bind.push(call(transforms, arg.type, arg, scope))
+  })
+  return {
+    form: 'make',
+    name: name,
+    bind
+  }
 }
 
 function transformEmptyStatement(node, scope) {
@@ -237,10 +267,6 @@ function transformWhileStatement(node, scope) {
 
   ]
   const lastCall = body[body.length - 1]
-  // lastCall.zone.push({
-  //   form: 'call-turn',
-  //   term: 'seed'
-  // })
   const lastHook = lastCall.hook
   lastCall.hook = {}
   const hook = {
@@ -290,6 +316,7 @@ function transformIfStatement(node, scope) {
     base: [],
     zone: consequent
   }
+  if (!consequent[0]) console.log(node.consequent.body)
   if (alternate) {
     hook.fault = {
       form: 'hook',
@@ -393,7 +420,7 @@ function transformLiteral(node, scope) {
 function createTerm(value) {
   return {
     form: 'term',
-    name: String(value)
+    term: String(value)
   }
 }
 

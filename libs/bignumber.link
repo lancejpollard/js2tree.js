@@ -1,0 +1,5659 @@
+text <use strict>
+save parse-integer
+  
+  task tmp0
+    base s
+    base from
+    base to
+    base radix
+    save i
+      call negative
+        bind a, link from
+        bind b, size 1
+    save n, size 0
+    save tmp0
+      call lt
+        bind a, link radix
+        bind b, size 10
+    save tmp1
+    call check
+      bind test, link tmp0
+      hook match
+        save tmp1, link radix
+      hook fault
+        save tmp1, size 10
+    save y, link tmp1
+    call loop
+      hook test
+        save tmp2
+          call lt
+            bind a
+              call increment
+                bind value, link i
+            bind b, link to
+        call check
+          bind test, link tmp2
+      hook match
+        save code
+          call s/char-code-at
+            bind link i
+        save tmp3
+          call undefined/char-code-at
+            bind size 0
+        save v
+          call negative
+            bind a, link code
+            bind b, link tmp3
+        save tmp4
+          call lt
+            bind a, link v
+            bind b, size 0
+        save tmp5
+          call lte
+            bind a, link y
+            bind b, link v
+        save tmp6
+          call or
+            bind a, tmp4
+            bind b, tmp5
+        call check
+          bind test, link tmp6
+          hook match
+            save tmp7
+              call undefined/char-code-at
+                bind size 0
+            save tmp8
+              call negative
+                bind a, size 10
+                bind b, link tmp7
+            save v
+              call add
+                bind a, link tmp8
+                bind b, link code
+            save tmp9
+              call lt
+                bind a, link v
+                bind b, size 10
+            save tmp10
+              call lte
+                bind a, link radix
+                bind b, link v
+            save tmp11
+              call or
+                bind a, tmp9
+                bind b, tmp10
+            call check
+              bind test, link tmp11
+              hook match
+                save tmp12
+                  call undefined/char-code-at
+                    bind size 0
+                save tmp13
+                  call negative
+                    bind a, size 10
+                    bind b, link tmp12
+                save v
+                  call add
+                    bind a, link tmp13
+                    bind b, link code
+                save tmp14
+                  call lt
+                    bind a, link v
+                    bind b, size 10
+                save tmp15
+                  call lte
+                    bind a, link radix
+                    bind b, link v
+                save tmp16
+                  call or
+                    bind a, tmp14
+                    bind b, tmp15
+                call check
+                  bind test, link tmp16
+                  hook match
+                    halt make range-error
+        save tmp17
+          call multiply
+            bind a, link n
+            bind b, link radix
+        save n
+          call add
+            bind a, link tmp17
+            bind b, link v
+      hook fault
+        turn seed, link false
+    turn seed, link n
+save create-array
+  
+  task tmp1
+    base length
+    save x
+      make array
+        bind 
+    save i
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp18
+          call lt
+            bind a
+              call increment
+                bind value, link i
+            bind b, link length
+        call check
+          bind test, link tmp18
+      hook match
+        save x[i], size 0
+      hook fault
+        turn seed, link false
+    turn seed, link x
+save tmp19
+  call add
+    bind a, size 9007199254740991
+    bind b, size 1
+save epsilon
+  call divide
+    bind a, size 2
+    bind b, link tmp19
+call loop
+  hook test
+    save tmp20
+      call divide
+        bind a, link epsilon
+        bind b, size 2
+    save tmp21
+      call add
+        bind a, size 1
+        bind b, link tmp20
+    save tmp22
+      call not-strictly-equal
+        bind a, link tmp21
+        bind b, size 1
+    call check
+      bind test, link tmp22
+  hook match
+    save epsilon, size 2
+  hook fault
+    turn seed, link false
+save base
+  call divide
+    bind a, size 2
+    bind b, link epsilon
+save s, size 134217728
+call loop
+  hook test
+    save tmp23
+      call multiply
+        bind a, link s
+        bind b, link s
+    save tmp24
+      call divide
+        bind a, size 2
+        bind b, link epsilon
+    save tmp25
+      call lt
+        bind a, link tmp23
+        bind b, link tmp24
+    call check
+      bind test, link tmp25
+  hook match
+    save s, size 2
+  hook fault
+    turn seed, link false
+save split
+  call add
+    bind a, link s
+    bind b, size 1
+save tmp26
+  call math/log
+    bind link base
+save tmp27
+  call math/log
+    bind size 2
+save tmp28
+  call divide
+    bind a, link tmp26
+    bind b, link tmp27
+save baselog2
+  call math/ceil
+    bind link tmp28
+save fma
+  
+  task tmp2
+    base a
+    base b
+    base product
+    save at
+      call multiply
+        bind a, link split
+        bind b, link a
+    save tmp29
+      call negative
+        bind a, link at
+        bind b, link a
+    save ahi
+      call negative
+        bind a, link at
+        bind b, link tmp29
+    save alo
+      call negative
+        bind a, link a
+        bind b, link ahi
+    save bt
+      call multiply
+        bind a, link split
+        bind b, link b
+    save tmp30
+      call negative
+        bind a, link bt
+        bind b, link b
+    save bhi
+      call negative
+        bind a, link bt
+        bind b, link tmp30
+    save blo
+      call negative
+        bind a, link b
+        bind b, link bhi
+    save tmp31
+      call multiply
+        bind a, link ahi
+        bind b, link bhi
+    save tmp32
+      call add
+        bind a, link tmp31
+        bind b, link product
+    save tmp33
+      call multiply
+        bind a, link ahi
+        bind b, link blo
+    save tmp34
+      call add
+        bind a, link tmp32
+        bind b, link tmp33
+    save tmp35
+      call multiply
+        bind a, link alo
+        bind b, link bhi
+    save tmp36
+      call add
+        bind a, link tmp34
+        bind b, link tmp35
+    save tmp37
+      call multiply
+        bind a, link alo
+        bind b, link blo
+    save error
+      call add
+        bind a, link tmp36
+        bind b, link tmp37
+    turn seed, link error
+save fast-trunc
+  
+  task tmp3
+    base x
+    save tmp38
+      call negative
+        bind a, link x
+        bind b, link base
+    save v
+      call add
+        bind a, link tmp38
+        bind b, link base
+    save tmp39
+      call gt
+        bind a, link v
+        bind b, link x
+    save tmp40
+      call negative
+        bind a, link v
+        bind b, size 1
+    save tmp41
+    call check
+      bind test, link tmp39
+      hook match
+        save tmp41, link tmp40
+      hook fault
+        save tmp41, link v
+    turn seed, link tmp41
+save perform-multiplication
+  
+  task tmp4
+    base carry
+    base a
+    base b
+    save product
+      call multiply
+        bind a, link a
+        bind b, link b
+    save tmp42
+      call negative
+        bind bits, link product
+    save error
+      call fma
+        bind link a
+        bind link b
+        bind link tmp42
+    save tmp43
+      call divide
+        bind a, link product
+        bind b, link base
+    save tmp44
+      call negative
+        bind a, link tmp43
+        bind b, link base
+    save hi
+      call add
+        bind a, link tmp44
+        bind b, link base
+    save tmp45
+      call multiply
+        bind a, link hi
+        bind b, link base
+    save tmp46
+      call negative
+        bind a, link product
+        bind b, link tmp45
+    save lo
+      call add
+        bind a, link tmp46
+        bind b, link error
+    save tmp47
+      call gte
+        bind a, link lo
+        bind b, size 0
+    call check
+      bind test, link tmp47
+      hook match
+        save lo, link base
+        save hi, size 1
+    save lo, link carry
+    save tmp48
+      call lt
+        bind a, link lo
+        bind b, size 0
+    call check
+      bind test, link tmp48
+      hook match
+        save lo, link base
+        save hi, size 1
+    save tmp49
+      make object
+        bind lo, link lo
+        bind hi, link hi
+    turn seed, link tmp49
+save perform-division
+  
+  task tmp5
+    base a
+    base b
+    base divisor
+    save tmp50
+      call gte
+        bind a, link a
+        bind b, link divisor
+    call check
+      bind test, link tmp50
+      hook match
+        halt make range-error
+    save p
+      call multiply
+        bind a, link a
+        bind b, link base
+    save tmp51
+      call divide
+        bind a, link p
+        bind b, link divisor
+    save q
+      call fast-trunc
+        bind link tmp51
+    save tmp52
+      call negative
+        bind bits, link p
+    save tmp53
+      call fma
+        bind link q
+        bind link divisor
+        bind link tmp52
+    save r
+      call negative
+        bind a, size 0
+        bind b, link tmp53
+    save tmp54
+      call lt
+        bind a, link r
+        bind b, size 0
+    call check
+      bind test, link tmp54
+      hook match
+        save q, size 1
+        save r, link divisor
+    save r
+      call negative
+        bind a, link b
+        bind b, link divisor
+    save tmp55
+      call lt
+        bind a, link r
+        bind b, size 0
+    call check
+      bind test, link tmp55
+      hook match
+        save r, link divisor
+      hook fault
+        save q, size 1
+    save tmp56
+      call divide
+        bind a, link r
+        bind b, link divisor
+    save y
+      call fast-trunc
+        bind link tmp56
+    save r
+      call multiply
+        bind a, link y
+        bind b, link divisor
+    save q, link y
+    save tmp57
+      make object
+        bind q, link q
+        bind r, link r
+    turn seed, link tmp57
+
+task big-integer-internal
+  base sign
+  base magnitude
+  base length
+  save this/sign, link sign
+  save this/magnitude, link magnitude
+  save this/length, link length
+save create-big-integer
+  
+  task tmp6
+    base sign
+    base magnitude
+    base length
+    turn seed, link undefined
+save from-huge-number
+  
+  task tmp7
+    base n
+    save tmp58
+      call lt
+        bind a, link n
+        bind b, size 0
+    save tmp59
+    call check
+      bind test, link tmp58
+      hook match
+        save tmp59, size 1
+      hook fault
+        save tmp59, size 0
+    save sign, link tmp59
+    save tmp60
+      call lt
+        bind a, link n
+        bind b, size 0
+    save tmp61
+      call negative
+        bind a, size 0
+        bind b, link n
+    save tmp62
+      call add
+        bind a, size 0
+        bind b, link n
+    save tmp63
+    call check
+      bind test, link tmp60
+      hook match
+        save tmp63, link tmp61
+      hook fault
+        save tmp63, link tmp62
+    save a, link tmp63
+    save tmp64
+      call divide
+        bind a, size 1
+        bind b, size 0
+    save tmp65
+      call strictly-equal
+        bind a, link a
+        bind b, link tmp64
+    call check
+      bind test, link tmp65
+      hook match
+        halt make range-error
+    save tmp66
+      call math/pow
+        bind size 2
+        bind size 53
+    save tmp67
+      call strictly-equal
+        bind a, link base
+        bind b, link tmp66
+    call console/assert
+      bind link tmp67
+    save i, size 0
+    call loop
+      hook test
+        save tmp68
+          call math/pow
+            bind link base
+            bind size 2
+        save tmp69
+          call gte
+            bind a, link a
+            bind b, link tmp68
+        call check
+          bind test, link tmp69
+      hook match
+        save a, link base
+        save i, size 1
+      hook fault
+        turn seed, link false
+    save tmp70
+      call divide
+        bind a, link a
+        bind b, link base
+    save hi
+      call math/floor
+        bind link tmp70
+    save tmp71
+      call multiply
+        bind a, link hi
+        bind b, link base
+    save lo
+      call negative
+        bind a, link a
+        bind b, link tmp71
+    save tmp72
+      call add
+        bind a, link i
+        bind b, size 2
+    save digits
+      call create-array
+        bind link tmp72
+    save tmp73
+      call add
+        bind a, link i
+        bind b, size 1
+    save digits[tmp73], link hi
+    save tmp74
+      call add
+        bind a, link i
+        bind b, size 0
+    save digits[tmp74], link lo
+    save tmp75
+      call add
+        bind a, link i
+        bind b, size 2
+    save tmp76
+      call create-big-integer
+        bind link sign
+        bind link digits
+        bind link tmp75
+    turn seed, link tmp76
+save from-number
+  
+  task tmp8
+    base n
+    save tmp77
+      call math/floor
+        bind link n
+    save tmp78
+      call not-strictly-equal
+        bind a, link tmp77
+        bind b, link n
+    call check
+      bind test, link tmp78
+      hook match
+        halt make range-error
+    save tmp79
+      call lt
+        bind a, link n
+        bind b, link base
+    save tmp80
+      call negative
+        bind a, size 0
+        bind b, link n
+    save tmp81
+      call lt
+        bind a, link tmp80
+        bind b, link base
+    save tmp82
+      call and
+        bind a, tmp79
+        bind b, tmp81
+    call check
+      bind test, link tmp82
+      hook match
+        save a
+          call create-array
+            bind size 1
+        save tmp83
+          call lt
+            bind a, link n
+            bind b, size 0
+        save tmp84
+          call negative
+            bind a, size 0
+            bind b, link n
+        save tmp85
+          call add
+            bind a, size 0
+            bind b, link n
+        save tmp86
+        call check
+          bind test, link tmp83
+          hook match
+            save tmp86, link tmp84
+          hook fault
+            save tmp86, link tmp85
+        save a[0], link tmp86
+        save tmp87
+          call lt
+            bind a, link n
+            bind b, size 0
+        save tmp88
+        call check
+          bind test, link tmp87
+          hook match
+            save tmp88, size 1
+          hook fault
+            save tmp88, size 0
+        save tmp89
+          call strictly-equal
+            bind a, link n
+            bind b, size 0
+        save tmp90
+        call check
+          bind test, link tmp89
+          hook match
+            save tmp90, size 0
+          hook fault
+            save tmp90, size 1
+        save tmp91
+          call create-big-integer
+            bind link tmp88
+            bind link a
+            bind link tmp90
+        turn seed, link tmp91
+    save tmp92
+      call from-huge-number
+        bind link n
+    turn seed, link tmp92
+save from-string
+  
+  task tmp9
+    base s
+    save length, link s/length
+    save tmp93
+      call strictly-equal
+        bind a, link length
+        bind b, size 0
+    call check
+      bind test, link tmp93
+      hook match
+        halt make range-error
+    save sign, size 0
+    save sign-char-code
+      call s/char-code-at
+        bind size 0
+    save from, size 0
+    save tmp94
+      call undefined/char-code-at
+        bind size 0
+    save tmp95
+      call strictly-equal
+        bind a, link sign-char-code
+        bind b, link tmp94
+    call check
+      bind test, link tmp95
+      hook match
+        save from, size 1
+    save tmp96
+      call undefined/char-code-at
+        bind size 0
+    save tmp97
+      call strictly-equal
+        bind a, link sign-char-code
+        bind b, link tmp96
+    call check
+      bind test, link tmp97
+      hook match
+        save from, size 1
+        save sign, size 1
+    save radix, size 10
+    save tmp98
+      call strictly-equal
+        bind a, link from
+        bind b, size 0
+    save tmp99
+      call gte
+        bind a, link length
+        bind b, size 2
+    save tmp100
+      call and
+        bind a, tmp98
+        bind b, tmp99
+    save tmp101
+      call s/char-code-at
+        bind size 0
+    save tmp102
+      call undefined/char-code-at
+        bind size 0
+    save tmp103
+      call strictly-equal
+        bind a, link tmp101
+        bind b, link tmp102
+    save tmp104
+      call and
+        bind a, tmp100
+        bind b, tmp103
+    call check
+      bind test, link tmp104
+      hook match
+        save tmp105
+          call s/char-code-at
+            bind size 1
+        save tmp106
+          call undefined/char-code-at
+            bind size 0
+        save tmp107
+          call strictly-equal
+            bind a, link tmp105
+            bind b, link tmp106
+        save tmp108
+          call s/char-code-at
+            bind size 1
+        save tmp109
+          call undefined/char-code-at
+            bind size 0
+        save tmp110
+          call strictly-equal
+            bind a, link tmp108
+            bind b, link tmp109
+        save tmp111
+          call s/char-code-at
+            bind size 1
+        save tmp112
+          call undefined/char-code-at
+            bind size 0
+        save tmp113
+          call strictly-equal
+            bind a, link tmp111
+            bind b, link tmp112
+        call check
+          bind test, link tmp107
+          hook match
+            save radix, size 2
+            save from, size 2
+          hook fault
+            call check
+              bind test, link tmp110
+              hook match
+                save radix, size 8
+                save from, size 2
+              hook fault
+                call check
+                  bind test, link tmp113
+                  hook match
+                    save radix, size 16
+                    save from, size 2
+    save length, link from
+    save tmp114
+      call strictly-equal
+        bind a, link length
+        bind b, size 0
+    call check
+      bind test, link tmp114
+      hook match
+        halt make range-error
+    save group-length, size 0
+    save group-radix, size 1
+    save tmp115
+      call divide
+        bind a, link base
+        bind b, link radix
+    save limit
+      call fast-trunc
+        bind link tmp115
+    call loop
+      hook test
+        save tmp116
+          call lte
+            bind a, link group-radix
+            bind b, link limit
+        call check
+          bind test, link tmp116
+      hook match
+        save group-length, size 1
+        save group-radix, link radix
+      hook fault
+        turn seed, link false
+    save tmp117
+      call negative
+        bind a, link length
+        bind b, size 1
+    save tmp118
+      call divide
+        bind a, link tmp117
+        bind b, link group-length
+    save tmp119
+      call math/floor
+        bind link tmp118
+    save size
+      call add
+        bind a, link tmp119
+        bind b, size 1
+    save magnitude
+      call create-array
+        bind link size
+    save tmp120
+      call add
+        bind a, link from
+        bind b, size 1
+    save tmp121
+      call negative
+        bind a, link length
+        bind b, size 1
+    save tmp122
+      call negative
+        bind a, link size
+        bind b, size 1
+    save tmp123
+      call multiply
+        bind a, link tmp122
+        bind b, link group-length
+    save tmp124
+      call negative
+        bind a, link tmp121
+        bind b, link tmp123
+    save tmp125
+      call add
+        bind a, link tmp120
+        bind b, link tmp124
+    save start
+      call negative
+        bind a, link tmp125
+        bind b, link group-length
+    save j
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp126
+          call lt
+            bind a
+              call increment
+                bind value, link j
+            bind b, link size
+        call check
+          bind test, link tmp126
+      hook match
+        save tmp127
+          call multiply
+            bind a, link j
+            bind b, link group-length
+        save group-start
+          call add
+            bind a, link start
+            bind b, link tmp127
+        save tmp128
+          call gte
+            bind a, link group-start
+            bind b, link from
+        save tmp129
+        call check
+          bind test, link tmp128
+          hook match
+            save tmp129, link group-start
+          hook fault
+            save tmp129, link from
+        save tmp130
+          call add
+            bind a, link group-start
+            bind b, link group-length
+        save c
+          call parse-integer
+            bind link s
+            bind link tmp129
+            bind link tmp130
+            bind link radix
+        save l
+          call negative
+            bind bits, size 1
+        call loop
+          hook test
+            save tmp131
+              call lt
+                bind a
+                  call increment
+                    bind value, link l
+                bind b, link j
+            call check
+              bind test, link tmp131
+          hook match
+            save tmp
+              call perform-multiplication
+                bind link c
+                bind link magnitude[l]
+                bind link group-radix
+            save lo, link tmp/lo
+            save hi, link tmp/hi
+            save magnitude[l], link lo
+            save c, link hi
+          hook fault
+            turn seed, link false
+        save magnitude[j], link c
+      hook fault
+        turn seed, link false
+    call loop
+      hook test
+        save tmp132
+          call gt
+            bind a, link size
+            bind b, size 0
+        save tmp133
+          call negative
+            bind a, link size
+            bind b, size 1
+        save tmp134
+          call strictly-equal
+            bind a, link magnitude[tmp133]
+            bind b, size 0
+        save tmp135
+          call and
+            bind a, tmp132
+            bind b, tmp134
+        call check
+          bind test, link tmp135
+      hook match
+        save size, size 1
+      hook fault
+        turn seed, link false
+    save tmp136
+      call strictly-equal
+        bind a, link size
+        bind b, size 0
+    save tmp137
+    call check
+      bind test, link tmp136
+      hook match
+        save tmp137, size 0
+      hook fault
+        save tmp137, link sign
+    save tmp138
+      call create-big-integer
+        bind link tmp137
+        bind link magnitude
+        bind link size
+    turn seed, link tmp138
+
+task exp
+  base x
+  base n
+  save a, size 1
+  call loop
+    hook test
+      save tmp139
+        call not-strictly-equal
+          bind a, link n
+          bind b, size 0
+      call check
+        bind test, link tmp139
+    hook match
+      save q
+        call shift-right
+          bind a, link n
+          bind b, size 1
+      save tmp140
+        call shift-left
+          bind a, link q
+          bind b, size 1
+      save tmp141
+        call not-strictly-equal
+          bind a, link n
+          bind b, link tmp140
+      call check
+        bind test, link tmp141
+        hook match
+          save a, link x
+      save n, link q
+      save x, link x
+    hook fault
+      turn seed, link false
+  turn seed, link a
+save big-integer-internal/big-int
+  
+  task tmp10
+    base x
+    save tmp142
+      call get-type-of
+        bind bits, link x
+    save tmp143
+      call strictly-equal
+        bind a, link tmp142
+        bind b, text <number>
+    call check
+      bind test, link tmp143
+      hook match
+        save tmp144
+          call from-number
+            bind link x
+        turn seed, link tmp144
+    save tmp145
+      call get-type-of
+        bind bits, link x
+    save tmp146
+      call strictly-equal
+        bind a, link tmp145
+        bind b, text <string>
+    call check
+      bind test, link tmp146
+      hook match
+        save tmp147
+          call from-string
+            bind link x
+        turn seed, link tmp147
+    save tmp148
+      call get-type-of
+        bind bits, link x
+    save tmp149
+      call strictly-equal
+        bind a, link tmp148
+        bind b, text <bigint>
+    call check
+      bind test, link tmp149
+      hook match
+        save tmp150, call x/function toString() { [native code] }
+        save tmp151
+          call from-string
+            bind link tmp150
+        turn seed, link tmp151
+    save tmp152
+      call get-instance-of
+        bind a, link x
+        bind b, link big-integer-internal
+    call check
+      bind test, link tmp152
+      hook match
+        turn seed, link x
+    save tmp153
+      call get-type-of
+        bind bits, link x
+    save tmp154
+      call strictly-equal
+        bind a, link tmp153
+        bind b, text <boolean>
+    call check
+      bind test, link tmp154
+      hook match
+        save tmp155
+          call number
+            bind link x
+        save tmp156
+          call from-number
+            bind link tmp155
+        turn seed, link tmp156
+    halt make range-error
+save big-integer-internal/as-uint-n
+  
+  task tmp11
+    base bits
+    base bigint
+    save tmp157
+      call lt
+        bind a, link bits
+        bind b, size 0
+    call check
+      bind test, link tmp157
+      hook match
+        halt make range-error
+    save tmp158
+      call divide
+        bind a, link bits
+        bind b, link baselog2
+    save n
+      call math/ceil
+        bind link tmp158
+    save bits
+      call multiply
+        bind a, link baselog2
+        bind b, link n
+    save tmp159
+      call strictly-equal
+        bind a, link bigint/sign
+        bind b, size 1
+    call check
+      bind test, link tmp159
+      hook match
+        halt make range-error,  bind 
+    save tmp160
+      call gt
+        bind a, link n
+        bind b, link bigint/length
+    call check
+      bind test, link tmp160
+      hook match
+        turn seed, link bigint
+    save array
+      call create-array
+        bind link n
+    save i, size 0
+    call loop
+      hook test
+        save tmp161
+          call lt
+            bind a, link i
+            bind b, link n
+        call check
+          bind test, link tmp161
+      hook match
+        save array[i], 
+        save i, size 1
+      hook fault
+        turn seed, link false
+    save tmp162
+      call add
+        bind a, link baselog2
+        bind b, link bits
+    save m
+      call exp
+        bind size 2
+        bind link tmp162
+    save tmp163
+      call negative
+        bind a, link n
+        bind b, size 1
+    save tmp164
+      call negative
+        bind a, link n
+        bind b, size 1
+    save tmp165
+      call negative
+        bind a, link n
+        bind b, size 1
+    save tmp166
+      call divide
+        bind a, link array[tmp165]
+        bind b, link m
+    save tmp167
+      call math/floor
+        bind link tmp166
+    save tmp168
+      call multiply
+        bind a, link tmp167
+        bind b, link m
+    save array[tmp163]
+      call negative
+        bind a, link array[tmp164]
+        bind b, link tmp168
+    call loop
+      hook test
+        save tmp169
+          call gte
+            bind a, link n
+            bind b, size 0
+        save tmp170
+          call negative
+            bind a, link n
+            bind b, size 1
+        save tmp171
+          call strictly-equal
+            bind a, link array[tmp170]
+            bind b, size 0
+        save tmp172
+          call and
+            bind a, tmp169
+            bind b, tmp171
+        call check
+          bind test, link tmp172
+      hook match
+        save n, size 1
+      hook fault
+        turn seed, link false
+    save tmp173
+      call create-big-integer
+        bind size 0
+        bind link array
+        bind link n
+    turn seed, link tmp173
+save big-integer-internal/to-number
+  
+  task tmp12
+    base a
+    save tmp174
+      call strictly-equal
+        bind a, link a/length
+        bind b, size 0
+    call check
+      bind test, link tmp174
+      hook match
+        turn seed, link 0
+    save tmp175
+      call strictly-equal
+        bind a, link a/length
+        bind b, size 1
+    call check
+      bind test, link tmp175
+      hook match
+        save tmp176
+          call strictly-equal
+            bind a, link a/sign
+            bind b, size 1
+        save tmp177
+          call negative
+            bind a, size 0
+            bind b, link a/magnitude[0]
+        save tmp178
+        call check
+          bind test, link tmp176
+          hook match
+            save tmp178, link tmp177
+          hook fault
+            save tmp178, 
+        turn seed, link tmp178
+    save tmp179
+      call add
+        bind a, link base
+        bind b, size 1
+    save tmp180
+      call not-strictly-equal
+        bind a, link tmp179
+        bind b, link base
+    call check
+      bind test, link tmp180
+      hook match
+        halt make range-error
+    save tmp181
+      call negative
+        bind a, link a/length
+        bind b, size 1
+    save x, link a/magnitude[tmp181]
+    save tmp182
+      call negative
+        bind a, link a/length
+        bind b, size 2
+    save y, link a/magnitude[tmp182]
+    save i
+      call negative
+        bind a, link a/length
+        bind b, size 3
+    call loop
+      hook test
+        save tmp183
+          call gte
+            bind a, link i
+            bind b, size 0
+        save tmp184
+          call strictly-equal
+            bind a, link a/magnitude[i]
+            bind b, size 0
+        save tmp185
+          call and
+            bind a, tmp183
+            bind b, tmp184
+        call check
+          bind test, link tmp185
+      hook match
+        save i, size 1
+      hook fault
+        turn seed, link false
+    save tmp186
+      call gte
+        bind a, link i
+        bind b, size 0
+    save tmp187
+      call not-strictly-equal
+        bind a, link x
+        bind b, size 1
+    save tmp188
+      call modulo
+        bind a, link y
+        bind b, size 2
+    save tmp189
+      call strictly-equal
+        bind a, link tmp188
+        bind b, size 0
+    save tmp190
+      call and
+        bind a, tmp187
+        bind b, tmp189
+    save tmp191
+      call strictly-equal
+        bind a, link x
+        bind b, size 1
+    save tmp192
+      call modulo
+        bind a, link y
+        bind b, size 2
+    save tmp193
+      call strictly-equal
+        bind a, link tmp192
+        bind b, size 1
+    save tmp194
+      call and
+        bind a, tmp191
+        bind b, tmp193
+    save tmp195
+      call or
+        bind a, tmp190
+        bind b, tmp194
+    save tmp196
+      call and
+        bind a, tmp186
+        bind b, tmp195
+    call check
+      bind test, link tmp196
+      hook match
+        save y, size 1
+    save tmp197
+      call multiply
+        bind a, link x
+        bind b, link base
+    save tmp198
+      call add
+        bind a, link tmp197
+        bind b, link y
+    save tmp199
+      call negative
+        bind a, link a/length
+        bind b, size 2
+    save tmp200
+      call exp
+        bind link base
+        bind link tmp199
+    save z
+      call multiply
+        bind a, link tmp198
+        bind b, link tmp200
+    save tmp201
+      call strictly-equal
+        bind a, link a/sign
+        bind b, size 1
+    save tmp202
+      call negative
+        bind a, size 0
+        bind b, link z
+    save tmp203
+    call check
+      bind test, link tmp201
+      hook match
+        save tmp203, link tmp202
+      hook fault
+        save tmp203, link z
+    turn seed, link tmp203
+save compare-magnitude
+  
+  task tmp13
+    base a
+    base b
+    save tmp204
+      call strictly-equal
+        bind a, link a
+        bind b, link b
+    call check
+      bind test, link tmp204
+      hook match
+        turn seed, link 0
+    save c1
+      call negative
+        bind a, link a/length
+        bind b, link b/length
+    save tmp205
+      call not-strictly-equal
+        bind a, link c1
+        bind b, size 0
+    call check
+      bind test, link tmp205
+      hook match
+        save tmp206
+          call lt
+            bind a, link c1
+            bind b, size 0
+        save tmp207
+          call negative
+            bind bits, size 1
+        save tmp208
+          call add
+            bind bits, size 1
+        save tmp209
+        call check
+          bind test, link tmp206
+          hook match
+            save tmp209, link tmp207
+          hook fault
+            save tmp209, link tmp208
+        turn seed, link tmp209
+    save i, link a/length
+    call loop
+      hook test
+        save tmp210
+          call gte
+            bind a
+              call decrement
+                bind value, link i
+            bind b, size 0
+        call check
+          bind test, link tmp210
+      hook match
+        save c
+          call negative
+            bind a, link a/magnitude[i]
+            bind b, link b/magnitude[i]
+        save tmp211
+          call not-strictly-equal
+            bind a, link c
+            bind b, size 0
+        call check
+          bind test, link tmp211
+          hook match
+            save tmp212
+              call lt
+                bind a, link c
+                bind b, size 0
+            save tmp213
+              call negative
+                bind bits, size 1
+            save tmp214
+              call add
+                bind bits, size 1
+            save tmp215
+            call check
+              bind test, link tmp212
+              hook match
+                save tmp215, link tmp213
+              hook fault
+                save tmp215, link tmp214
+            turn seed, link tmp215
+      hook fault
+        turn seed, link false
+    turn seed, link 0
+save compare-to
+  
+  task tmp14
+    base a
+    base b
+    save tmp216
+      call strictly-equal
+        bind a, link a/sign
+        bind b, link b/sign
+    save tmp217
+      call compare-magnitude
+        bind link a
+        bind link b
+    save tmp218
+    call check
+      bind test, link tmp216
+      hook match
+        save tmp218, link tmp217
+      hook fault
+        save tmp218, size 1
+    save c, link tmp218
+    save tmp219
+      call strictly-equal
+        bind a, link a/sign
+        bind b, size 1
+    save tmp220
+      call negative
+        bind a, size 0
+        bind b, link c
+    save tmp221
+    call check
+      bind test, link tmp219
+      hook match
+        save tmp221, link tmp220
+      hook fault
+        save tmp221, link c
+    turn seed, link tmp221
+save add-and-subtract
+  
+  task tmp15
+    base a
+    base b
+    base isSubtraction
+    save z
+      call compare-magnitude
+        bind link a
+        bind link b
+    save tmp222
+      call lt
+        bind a, link z
+        bind b, size 0
+    save tmp223
+      call not-strictly-equal
+        bind a, link is-subtraction
+        bind b, size 0
+    save tmp224
+      call negative
+        bind a, size 1
+        bind b, link b/sign
+    save tmp225
+    call check
+      bind test, link tmp223
+      hook match
+        save tmp225, link tmp224
+      hook fault
+        save tmp225, 
+    save tmp226
+    call check
+      bind test, link tmp222
+      hook match
+        save tmp226, link tmp225
+      hook fault
+        save tmp226, 
+    save result-sign, link tmp226
+    save tmp227
+      call lt
+        bind a, link z
+        bind b, size 0
+    save tmp228
+    call check
+      bind test, link tmp227
+      hook match
+        save tmp228, link a
+      hook fault
+        save tmp228, link b
+    save min, link tmp228
+    save tmp229
+      call lt
+        bind a, link z
+        bind b, size 0
+    save tmp230
+    call check
+      bind test, link tmp229
+      hook match
+        save tmp230, link b
+      hook fault
+        save tmp230, link a
+    save max, link tmp230
+    save tmp231
+      call strictly-equal
+        bind a, link min/length
+        bind b, size 0
+    call check
+      bind test, link tmp231
+      hook match
+        save tmp232
+          call create-big-integer
+            bind link result-sign
+            bind link max/magnitude
+            bind link max/length
+        turn seed, link tmp232
+    save subtract, size 0
+    save result-length, link max/length
+    save tmp233
+      call not-strictly-equal
+        bind a, link is-subtraction
+        bind b, size 0
+    save tmp234
+      call negative
+        bind a, size 1
+        bind b, link b/sign
+    save tmp235
+    call check
+      bind test, link tmp233
+      hook match
+        save tmp235, link tmp234
+      hook fault
+        save tmp235, 
+    save tmp236
+      call not-strictly-equal
+        bind a, link a/sign
+        bind b, link tmp235
+    call check
+      bind test, link tmp236
+      hook match
+        save subtract, size 1
+        save tmp237
+          call strictly-equal
+            bind a, link min/length
+            bind b, link result-length
+        call check
+          bind test, link tmp237
+          hook match
+            call loop
+              hook test
+                save tmp238
+                  call gt
+                    bind a, link result-length
+                    bind b, size 0
+                save tmp239
+                  call negative
+                    bind a, link result-length
+                    bind b, size 1
+                save tmp240
+                  call negative
+                    bind a, link result-length
+                    bind b, size 1
+                save tmp241
+                  call strictly-equal
+                    bind a, link min/magnitude[tmp239]
+                    bind b, link max/magnitude[tmp240]
+                save tmp242
+                  call and
+                    bind a, tmp238
+                    bind b, tmp241
+                call check
+                  bind test, link tmp242
+              hook match
+                save result-length, size 1
+              hook fault
+                turn seed, link false
+        save tmp243
+          call strictly-equal
+            bind a, link result-length
+            bind b, size 0
+        call check
+          bind test, link tmp243
+          hook match
+            save tmp244
+              call create-array
+                bind size 0
+            save tmp245
+              call create-big-integer
+                bind size 0
+                bind link tmp244
+                bind size 0
+            turn seed, link tmp245
+    save tmp246
+      call negative
+        bind a, size 1
+        bind b, link subtract
+    save tmp247
+      call add
+        bind a, link result-length
+        bind b, link tmp246
+    save result
+      call create-array
+        bind link tmp247
+    save i
+      call negative
+        bind bits, size 1
+    save c, size 0
+    call loop
+      hook test
+        save tmp248
+          call lt
+            bind a
+              call increment
+                bind value, link i
+            bind b, link min/length
+        call check
+          bind test, link tmp248
+      hook match
+        save a-digit, link min/magnitude[i]
+        save tmp249
+          call not-strictly-equal
+            bind a, link subtract
+            bind b, size 0
+        save tmp250
+          call negative
+            bind a, size 0
+            bind b, link a-digit
+        save tmp251
+          call negative
+            bind a, link a-digit
+            bind b, link base
+        save tmp252
+        call check
+          bind test, link tmp249
+          hook match
+            save tmp252, link tmp250
+          hook fault
+            save tmp252, link tmp251
+        save c
+          call add
+            bind a, link max/magnitude[i]
+            bind b, link tmp252
+        save tmp253
+          call lt
+            bind a, link c
+            bind b, size 0
+        call check
+          bind test, link tmp253
+          hook match
+            save result[i]
+              call add
+                bind a, link base
+                bind b, link c
+            save c
+              call negative
+                bind a, size 0
+                bind b, link subtract
+          hook fault
+            save result[i], link c
+            save c
+              call negative
+                bind a, size 1
+                bind b, link subtract
+      hook fault
+        turn seed, link false
+    save i, size 1
+    call loop
+      hook test
+        save tmp254
+          call lt
+            bind a
+              call increment
+                bind value, link i
+            bind b, link result-length
+        call check
+          bind test, link tmp254
+      hook match
+        save tmp255
+          call not-strictly-equal
+            bind a, link subtract
+            bind b, size 0
+        save tmp256
+          call negative
+            bind a, size 0
+            bind b, link base
+        save tmp257
+        call check
+          bind test, link tmp255
+          hook match
+            save tmp257, size 0
+          hook fault
+            save tmp257, link tmp256
+        save c
+          call add
+            bind a, link max/magnitude[i]
+            bind b, link tmp257
+        save tmp258
+          call lt
+            bind a, link c
+            bind b, size 0
+        call check
+          bind test, link tmp258
+          hook match
+            save result[i]
+              call add
+                bind a, link base
+                bind b, link c
+            save c
+              call negative
+                bind a, size 0
+                bind b, link subtract
+          hook fault
+            save result[i], link c
+            save c
+              call negative
+                bind a, size 1
+                bind b, link subtract
+      hook fault
+        turn seed, link false
+    save tmp259
+      call strictly-equal
+        bind a, link subtract
+        bind b, size 0
+    call check
+      bind test, link tmp259
+      hook match
+        save result[result-length], link c
+        save tmp260
+          call not-strictly-equal
+            bind a, link c
+            bind b, size 0
+        save tmp261
+        call check
+          bind test, link tmp260
+          hook match
+            save tmp261, size 1
+          hook fault
+            save tmp261, size 0
+        save result-length, link tmp261
+      hook fault
+        call loop
+          hook test
+            save tmp262
+              call gt
+                bind a, link result-length
+                bind b, size 0
+            save tmp263
+              call negative
+                bind a, link result-length
+                bind b, size 1
+            save tmp264
+              call strictly-equal
+                bind a, link result[tmp263]
+                bind b, size 0
+            save tmp265
+              call and
+                bind a, tmp262
+                bind b, tmp264
+            call check
+              bind test, link tmp265
+          hook match
+            save result-length, size 1
+          hook fault
+            turn seed, link false
+    save tmp266
+      call create-big-integer
+        bind link result-sign
+        bind link result
+        bind link result-length
+    turn seed, link tmp266
+save big-integer-internal/add
+  
+  task tmp16
+    base a
+    base b
+    save tmp267
+      call add-and-subtract
+        bind link a
+        bind link b
+        bind size 0
+    turn seed, link tmp267
+save big-integer-internal/subtract
+  
+  task tmp17
+    base a
+    base b
+    save tmp268
+      call add-and-subtract
+        bind link a
+        bind link b
+        bind size 1
+    turn seed, link tmp268
+save big-integer-internal/multiply
+  
+  task tmp18
+    base a
+    base b
+    save tmp269
+      call lt
+        bind a, link a/length
+        bind b, link b/length
+    call check
+      bind test, link tmp269
+      hook match
+        save tmp, link a
+        save a, link b
+        save b, link tmp
+    save alength, link a/length
+    save blength, link b/length
+    save am, link a/magnitude
+    save bm, link b/magnitude
+    save asign, link a/sign
+    save bsign, link b/sign
+    save tmp270
+      call strictly-equal
+        bind a, link alength
+        bind b, size 0
+    save tmp271
+      call strictly-equal
+        bind a, link blength
+        bind b, size 0
+    save tmp272
+      call or
+        bind a, tmp270
+        bind b, tmp271
+    call check
+      bind test, link tmp272
+      hook match
+        save tmp273
+          call create-array
+            bind size 0
+        save tmp274
+          call create-big-integer
+            bind size 0
+            bind link tmp273
+            bind size 0
+        turn seed, link tmp274
+    save tmp275
+      call strictly-equal
+        bind a, link alength
+        bind b, size 1
+    save tmp276
+      call strictly-equal
+        bind a, link am[0]
+        bind b, size 1
+    save tmp277
+      call and
+        bind a, tmp275
+        bind b, tmp276
+    call check
+      bind test, link tmp277
+      hook match
+        save tmp278
+          call strictly-equal
+            bind a, link asign
+            bind b, size 1
+        save tmp279
+          call negative
+            bind a, size 1
+            bind b, link bsign
+        save tmp280
+        call check
+          bind test, link tmp278
+          hook match
+            save tmp280, link tmp279
+          hook fault
+            save tmp280, link bsign
+        save tmp281
+          call create-big-integer
+            bind link tmp280
+            bind link bm
+            bind link blength
+        turn seed, link tmp281
+    save tmp282
+      call strictly-equal
+        bind a, link blength
+        bind b, size 1
+    save tmp283
+      call strictly-equal
+        bind a, link bm[0]
+        bind b, size 1
+    save tmp284
+      call and
+        bind a, tmp282
+        bind b, tmp283
+    call check
+      bind test, link tmp284
+      hook match
+        save tmp285
+          call strictly-equal
+            bind a, link asign
+            bind b, size 1
+        save tmp286
+          call negative
+            bind a, size 1
+            bind b, link bsign
+        save tmp287
+        call check
+          bind test, link tmp285
+          hook match
+            save tmp287, link tmp286
+          hook fault
+            save tmp287, link bsign
+        save tmp288
+          call create-big-integer
+            bind link tmp287
+            bind link am
+            bind link alength
+        turn seed, link tmp288
+    save astart, size 0
+    call loop
+      hook test
+        save tmp289
+          call strictly-equal
+            bind a, link am[astart]
+            bind b, size 0
+        call check
+          bind test, link tmp289
+      hook match
+        save astart, size 1
+      hook fault
+        turn seed, link false
+    save tmp290
+      call strictly-equal
+        bind a, link asign
+        bind b, size 1
+    save tmp291
+      call negative
+        bind a, size 1
+        bind b, link bsign
+    save tmp292
+    call check
+      bind test, link tmp290
+      hook match
+        save tmp292, link tmp291
+      hook fault
+        save tmp292, link bsign
+    save result-sign, link tmp292
+    save result-length
+      call add
+        bind a, link alength
+        bind b, link blength
+    save result
+      call create-array
+        bind link result-length
+    save i
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp293
+          call lt
+            bind a
+              call increment
+                bind value, link i
+            bind b, link blength
+        call check
+          bind test, link tmp293
+      hook match
+        save digit, link bm[i]
+        save tmp294
+          call not-strictly-equal
+            bind a, link digit
+            bind b, size 0
+        call check
+          bind test, link tmp294
+          hook match
+            save c, size 0
+            save j
+              call negative
+                bind a, link astart
+                bind b, size 1
+            call loop
+              hook test
+                save tmp295
+                  call lt
+                    bind a
+                      call increment
+                        bind value, link j
+                    bind b, link alength
+                call check
+                  bind test, link tmp295
+              hook match
+                save carry, size 1
+                save tmp296
+                  call add
+                    bind a, link j
+                    bind b, link i
+                save c
+                  call negative
+                    bind a, link result[tmp296]
+                    bind b, link base
+                save tmp297
+                  call lt
+                    bind a, link c
+                    bind b, size 0
+                call check
+                  bind test, link tmp297
+                  hook match
+                    save c, link base
+                    save carry, size 0
+                save tmp
+                  call perform-multiplication
+                    bind link c
+                    bind link am[j]
+                    bind link digit
+                save lo, link tmp/lo
+                save hi, link tmp/hi
+                save tmp298
+                  call add
+                    bind a, link j
+                    bind b, link i
+                save result[tmp298], link lo
+                save c
+                  call add
+                    bind a, link hi
+                    bind b, link carry
+              hook fault
+                turn seed, link false
+            save tmp299
+              call add
+                bind a, link alength
+                bind b, link i
+            save result[tmp299], link c
+      hook fault
+        turn seed, link false
+    save tmp300
+      call negative
+        bind a, link result-length
+        bind b, size 1
+    save tmp301
+      call strictly-equal
+        bind a, link result[tmp300]
+        bind b, size 0
+    call check
+      bind test, link tmp301
+      hook match
+        save result-length, size 1
+    save tmp302
+      call create-big-integer
+        bind link result-sign
+        bind link result
+        bind link result-length
+    turn seed, link tmp302
+save divide-and-remainder
+  
+  task tmp19
+    base a
+    base b
+    base isDivision
+    save tmp303
+      call strictly-equal
+        bind a, link b/length
+        bind b, size 0
+    call check
+      bind test, link tmp303
+      hook match
+        halt make range-error
+    save tmp304
+      call strictly-equal
+        bind a, link a/length
+        bind b, size 0
+    call check
+      bind test, link tmp304
+      hook match
+        save tmp305
+          call create-array
+            bind size 0
+        save tmp306
+          call create-big-integer
+            bind size 0
+            bind link tmp305
+            bind size 0
+        turn seed, link tmp306
+    save tmp307
+      call strictly-equal
+        bind a, link a/sign
+        bind b, size 1
+    save tmp308
+      call negative
+        bind a, size 1
+        bind b, link b/sign
+    save tmp309
+    call check
+      bind test, link tmp307
+      hook match
+        save tmp309, link tmp308
+      hook fault
+        save tmp309, 
+    save quotient-sign, link tmp309
+    save tmp310
+      call strictly-equal
+        bind a, link b/length
+        bind b, size 1
+    save tmp311
+      call strictly-equal
+        bind a, link b/magnitude[0]
+        bind b, size 1
+    save tmp312
+      call and
+        bind a, tmp310
+        bind b, tmp311
+    call check
+      bind test, link tmp312
+      hook match
+        save tmp313
+          call not-strictly-equal
+            bind a, link is-division
+            bind b, size 0
+        call check
+          bind test, link tmp313
+          hook match
+            save tmp314
+              call create-big-integer
+                bind link quotient-sign
+                bind link a/magnitude
+                bind link a/length
+            turn seed, link tmp314
+        save tmp315
+          call create-array
+            bind size 0
+        save tmp316
+          call create-big-integer
+            bind size 0
+            bind link tmp315
+            bind size 0
+        turn seed, link tmp316
+    save divisor-offset
+      call add
+        bind a, link a/length
+        bind b, size 1
+    save tmp317
+      call add
+        bind a, link divisor-offset
+        bind b, link b/length
+    save tmp318
+      call add
+        bind a, link tmp317
+        bind b, size 1
+    save divisor-and-remainder
+      call create-array
+        bind link tmp318
+    save divisor, link divisor-and-remainder
+    save remainder, link divisor-and-remainder
+    save n
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp319
+          call lt
+            bind a
+              call increment
+                bind value, link n
+            bind b, link a/length
+        call check
+          bind test, link tmp319
+      hook match
+        save remainder[n], 
+      hook fault
+        turn seed, link false
+    save m
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp320
+          call lt
+            bind a
+              call increment
+                bind value, link m
+            bind b, link b/length
+        call check
+          bind test, link tmp320
+      hook match
+        save tmp321
+          call add
+            bind a, link divisor-offset
+            bind b, link m
+        save divisor[tmp321], 
+      hook fault
+        turn seed, link false
+    save tmp322
+      call add
+        bind a, link divisor-offset
+        bind b, link b/length
+    save tmp323
+      call negative
+        bind a, link tmp322
+        bind b, size 1
+    save top, link divisor[tmp323]
+    save lambda, size 1
+    save tmp324
+      call gt
+        bind a, link b/length
+        bind b, size 1
+    call check
+      bind test, link tmp324
+      hook match
+        save tmp325
+          call add
+            bind a, link top
+            bind b, size 1
+        save tmp326
+          call divide
+            bind a, link base
+            bind b, link tmp325
+        save lambda
+          call fast-trunc
+            bind link tmp326
+        save tmp327
+          call gt
+            bind a, link lambda
+            bind b, size 1
+        call check
+          bind test, link tmp327
+          hook match
+            save carry, size 0
+            save l
+              call negative
+                bind bits, size 1
+            call loop
+              hook test
+                save tmp328
+                  call add
+                    bind a, link divisor-offset
+                    bind b, link b/length
+                save tmp329
+                  call lt
+                    bind a
+                      call increment
+                        bind value, link l
+                    bind b, link tmp328
+                call check
+                  bind test, link tmp329
+              hook match
+                save tmp
+                  call perform-multiplication
+                    bind link carry
+                    bind link divisor-and-remainder[l]
+                    bind link lambda
+                save lo, link tmp/lo
+                save hi, link tmp/hi
+                save divisor-and-remainder[l], link lo
+                save carry, link hi
+              hook fault
+                turn seed, link false
+            save tmp330
+              call add
+                bind a, link divisor-offset
+                bind b, link b/length
+            save divisor-and-remainder[tmp330], link carry
+            save tmp331
+              call add
+                bind a, link divisor-offset
+                bind b, link b/length
+            save tmp332
+              call negative
+                bind a, link tmp331
+                bind b, size 1
+            save top, 
+        save tmp333
+          call divide
+            bind a, link base
+            bind b, size 2
+        save tmp334
+          call fast-trunc
+            bind link tmp333
+        save tmp335
+          call lt
+            bind a, link top
+            bind b, link tmp334
+        call check
+          bind test, link tmp335
+          hook match
+            halt make range-error
+    save tmp336
+      call negative
+        bind a, link a/length
+        bind b, link b/length
+    save shift
+      call add
+        bind a, link tmp336
+        bind b, size 1
+    save tmp337
+      call lt
+        bind a, link shift
+        bind b, size 0
+    call check
+      bind test, link tmp337
+      hook match
+        save shift, size 0
+    save quotient, link void
+    save quotient-length, size 0
+    save last-non-zero, size 0
+    call loop
+      hook test
+        save tmp338
+          call add
+            bind a, link divisor-offset
+            bind b, link last-non-zero
+        save tmp339
+          call strictly-equal
+            bind a, link divisor[tmp338]
+            bind b, size 0
+        call check
+          bind test, link tmp339
+      hook match
+        save last-non-zero, size 1
+      hook fault
+        turn seed, link false
+    save i, link shift
+    call loop
+      hook test
+        save tmp340
+          call gte
+            bind a
+              call decrement
+                bind value, link i
+            bind b, size 0
+        call check
+          bind test, link tmp340
+      hook match
+        save t
+          call add
+            bind a, link b/length
+            bind b, link i
+        save q
+          call negative
+            bind a, link base
+            bind b, size 1
+        save tmp341
+          call not-strictly-equal
+            bind a, link remainder[t]
+            bind b, link top
+        call check
+          bind test, link tmp341
+          hook match
+            save tmp342
+              call negative
+                bind a, link t
+                bind b, size 1
+            save tmp2
+              call perform-division
+                bind link remainder[t]
+                bind link remainder[tmp342]
+                bind link top
+            save q2, link tmp2/q
+            save q, link q2
+        save ax, size 0
+        save bx, size 0
+        save tmp343
+          call negative
+            bind a, link i
+            bind b, size 1
+        save j
+          call add
+            bind a, link tmp343
+            bind b, link last-non-zero
+        call loop
+          hook test
+            save tmp344
+              call lte
+                bind a
+                  call increment
+                    bind value, link j
+                bind b, link t
+            call check
+              bind test, link tmp344
+          hook match
+            save tmp345
+              call add
+                bind a, link divisor-offset
+                bind b, link j
+            save tmp346
+              call negative
+                bind a, link tmp345
+                bind b, link i
+            save tmp3
+              call perform-multiplication
+                bind link bx
+                bind link q
+                bind link divisor[tmp346]
+            save lo3, link tmp3/lo
+            save hi3, link tmp3/hi
+            save bx, link hi3
+            save ax
+              call negative
+                bind a, link remainder[j]
+                bind b, link lo3
+            save tmp347
+              call lt
+                bind a, link ax
+                bind b, size 0
+            call check
+              bind test, link tmp347
+              hook match
+                save remainder[j]
+                  call add
+                    bind a, link base
+                    bind b, link ax
+                save ax
+                  call negative
+                    bind bits, size 1
+              hook fault
+                save remainder[j], link ax
+                save ax, size 0
+          hook fault
+            turn seed, link false
+        call loop
+          hook test
+            save tmp348
+              call not-strictly-equal
+                bind a, link ax
+                bind b, size 0
+            call check
+              bind test, link tmp348
+          hook match
+            save q, size 1
+            save c, size 0
+            save tmp349
+              call negative
+                bind a, link i
+                bind b, size 1
+            save k
+              call add
+                bind a, link tmp349
+                bind b, link last-non-zero
+            call loop
+              hook test
+                save tmp350
+                  call lte
+                    bind a
+                      call increment
+                        bind value, link k
+                    bind b, link t
+                call check
+                  bind test, link tmp350
+              hook match
+                save tmp351
+                  call negative
+                    bind a, link remainder[k]
+                    bind b, link base
+                save tmp352
+                  call add
+                    bind a, link divisor-offset
+                    bind b, link k
+                save tmp353
+                  call negative
+                    bind a, link tmp352
+                    bind b, link i
+                save c
+                  call add
+                    bind a, link tmp351
+                    bind b, link divisor[tmp353]
+                save tmp354
+                  call lt
+                    bind a, link c
+                    bind b, size 0
+                call check
+                  bind test, link tmp354
+                  hook match
+                    save remainder[k]
+                      call add
+                        bind a, link base
+                        bind b, link c
+                    save c, size 0
+                  hook fault
+                    save remainder[k], link c
+                    save c
+                      call add
+                        bind bits, size 1
+              hook fault
+                turn seed, link false
+            save ax, link c
+          hook fault
+            turn seed, link false
+        save tmp355
+          call not-strictly-equal
+            bind a, link is-division
+            bind b, size 0
+        save tmp356
+          call not-strictly-equal
+            bind a, link q
+            bind b, size 0
+        save tmp357
+          call and
+            bind a, tmp355
+            bind b, tmp356
+        call check
+          bind test, link tmp357
+          hook match
+            save tmp358
+              call strictly-equal
+                bind a, link quotient-length
+                bind b, size 0
+            call check
+              bind test, link tmp358
+              hook match
+                save quotient-length
+                  call add
+                    bind a, link i
+                    bind b, size 1
+                save quotient
+                  call create-array
+                    bind link quotient-length
+            save quotient[i], link q
+      hook fault
+        turn seed, link false
+    save tmp359
+      call not-strictly-equal
+        bind a, link is-division
+        bind b, size 0
+    call check
+      bind test, link tmp359
+      hook match
+        save tmp360
+          call strictly-equal
+            bind a, link quotient-length
+            bind b, size 0
+        call check
+          bind test, link tmp360
+          hook match
+            save tmp361
+              call create-array
+                bind size 0
+            save tmp362
+              call create-big-integer
+                bind size 0
+                bind link tmp361
+                bind size 0
+            turn seed, link tmp362
+        save tmp363
+          call create-big-integer
+            bind link quotient-sign
+            bind link quotient
+            bind link quotient-length
+        turn seed, link tmp363
+    save remainder-length
+      call add
+        bind a, link a/length
+        bind b, size 1
+    save tmp364
+      call gt
+        bind a, link lambda
+        bind b, size 1
+    call check
+      bind test, link tmp364
+      hook match
+        save r, size 0
+        save p, link remainder-length
+        call loop
+          hook test
+            save tmp365
+              call gte
+                bind a
+                  call decrement
+                    bind value, link p
+                bind b, size 0
+            call check
+              bind test, link tmp365
+          hook match
+            save tmp4
+              call perform-division
+                bind link r
+                bind link remainder[p]
+                bind link lambda
+            save q4, link tmp4/q
+            save r4, link tmp4/r
+            save remainder[p], link q4
+            save r, link r4
+          hook fault
+            turn seed, link false
+        save tmp366
+          call not-strictly-equal
+            bind a, link r
+            bind b, size 0
+        call check
+          bind test, link tmp366
+          hook match
+            halt make range-error
+    call loop
+      hook test
+        save tmp367
+          call gt
+            bind a, link remainder-length
+            bind b, size 0
+        save tmp368
+          call negative
+            bind a, link remainder-length
+            bind b, size 1
+        save tmp369
+          call strictly-equal
+            bind a, link remainder[tmp368]
+            bind b, size 0
+        save tmp370
+          call and
+            bind a, tmp367
+            bind b, tmp369
+        call check
+          bind test, link tmp370
+      hook match
+        save remainder-length, size 1
+      hook fault
+        turn seed, link false
+    save tmp371
+      call strictly-equal
+        bind a, link remainder-length
+        bind b, size 0
+    call check
+      bind test, link tmp371
+      hook match
+        save tmp372
+          call create-array
+            bind size 0
+        save tmp373
+          call create-big-integer
+            bind size 0
+            bind link tmp372
+            bind size 0
+        turn seed, link tmp373
+    save result
+      call create-array
+        bind link remainder-length
+    save o
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp374
+          call lt
+            bind a
+              call increment
+                bind value, link o
+            bind b, link remainder-length
+        call check
+          bind test, link tmp374
+      hook match
+        save result[o], 
+      hook fault
+        turn seed, link false
+    save tmp375
+      call create-big-integer
+        bind link a/sign
+        bind link result
+        bind link remainder-length
+    turn seed, link tmp375
+save big-integer-internal/divide
+  
+  task tmp20
+    base a
+    base b
+    save tmp376
+      call divide-and-remainder
+        bind link a
+        bind link b
+        bind size 1
+    turn seed, link tmp376
+save big-integer-internal/remainder
+  
+  task tmp21
+    base a
+    base b
+    save tmp377
+      call divide-and-remainder
+        bind link a
+        bind link b
+        bind size 0
+    turn seed, link tmp377
+save big-integer-internal/unary-minus
+  
+  task tmp22
+    base a
+    save tmp378
+      call strictly-equal
+        bind a, link a/length
+        bind b, size 0
+    save tmp379
+      call negative
+        bind a, size 1
+        bind b, link a/sign
+    save tmp380
+    call check
+      bind test, link tmp378
+      hook match
+        save tmp380, 
+      hook fault
+        save tmp380, link tmp379
+    save tmp381
+      call create-big-integer
+        bind link tmp380
+        bind link a/magnitude
+        bind link a/length
+    turn seed, link tmp381
+save big-integer-internal/equal
+  
+  task tmp23
+    base a
+    base b
+    save tmp382
+      call compare-to
+        bind link a
+        bind link b
+    save tmp383
+      call strictly-equal
+        bind a, link tmp382
+        bind b, size 0
+    turn seed, link tmp383
+save big-integer-internal/less-than
+  
+  task tmp24
+    base a
+    base b
+    save tmp384
+      call compare-to
+        bind link a
+        bind link b
+    save tmp385
+      call lt
+        bind a, link tmp384
+        bind b, size 0
+    turn seed, link tmp385
+save big-integer-internal/greater-than
+  
+  task tmp25
+    base a
+    base b
+    save tmp386
+      call compare-to
+        bind link a
+        bind link b
+    save tmp387
+      call gt
+        bind a, link tmp386
+        bind b, size 0
+    turn seed, link tmp387
+save big-integer-internal/not-equal
+  
+  task tmp26
+    base a
+    base b
+    save tmp388
+      call compare-to
+        bind link a
+        bind link b
+    save tmp389
+      call not-strictly-equal
+        bind a, link tmp388
+        bind b, size 0
+    turn seed, link tmp389
+save big-integer-internal/less-than-or-equal
+  
+  task tmp27
+    base a
+    base b
+    save tmp390
+      call compare-to
+        bind link a
+        bind link b
+    save tmp391
+      call lte
+        bind a, link tmp390
+        bind b, size 0
+    turn seed, link tmp391
+save big-integer-internal/greater-than-or-equal
+  
+  task tmp28
+    base a
+    base b
+    save tmp392
+      call compare-to
+        bind link a
+        bind link b
+    save tmp393
+      call gte
+        bind a, link tmp392
+        bind b, size 0
+    turn seed, link tmp393
+save big-integer-internal/exponentiate
+  
+  task tmp29
+    base a
+    base b
+    save n
+      call big-integer-internal/to-number
+        bind link b
+    save tmp394
+      call lt
+        bind a, link n
+        bind b, size 0
+    call check
+      bind test, link tmp394
+      hook match
+        halt make range-error
+    save tmp395
+      call gt
+        bind a, link n
+        bind b, size 9007199254740991
+    call check
+      bind test, link tmp395
+      hook match
+        save y
+          call big-integer-internal/to-number
+            bind link a
+        save tmp396
+          call strictly-equal
+            bind a, link y
+            bind b, size 0
+        save tmp397
+          call negative
+            bind bits, size 1
+        save tmp398
+          call strictly-equal
+            bind a, link y
+            bind b, link tmp397
+        save tmp399
+          call or
+            bind a, tmp396
+            bind b, tmp398
+        save tmp400
+          call add
+            bind bits, size 1
+        save tmp401
+          call strictly-equal
+            bind a, link y
+            bind b, link tmp400
+        save tmp402
+          call or
+            bind a, tmp399
+            bind b, tmp401
+        call check
+          bind test, link tmp402
+          hook match
+            save tmp403
+              call negative
+                bind bits, size 1
+            save tmp404
+              call strictly-equal
+                bind a, link y
+                bind b, link tmp403
+            save tmp405
+              call big-integer-internal/big-int
+                bind size 2
+            save tmp406
+              call big-integer-internal/remainder
+                bind link b
+                bind link tmp405
+            save tmp407
+              call big-integer-internal/to-number
+                bind link tmp406
+            save tmp408
+              call strictly-equal
+                bind a, link tmp407
+                bind b, size 0
+            save tmp409
+              call and
+                bind a, tmp404
+                bind b, tmp408
+            save tmp410
+              call big-integer-internal/unary-minus
+                bind link a
+            save tmp411
+            call check
+              bind test, link tmp409
+              hook match
+                save tmp411, link tmp410
+              hook fault
+                save tmp411, link a
+            turn seed, link tmp411
+        halt make range-error
+    save tmp412
+      call strictly-equal
+        bind a, link n
+        bind b, size 0
+    call check
+      bind test, link tmp412
+      hook match
+        save tmp413
+          call big-integer-internal/big-int
+            bind size 1
+        turn seed, link tmp413
+    save tmp414
+      call strictly-equal
+        bind a, link a/length
+        bind b, size 1
+    save tmp415
+      call strictly-equal
+        bind a, link a/magnitude[0]
+        bind b, size 2
+    save tmp416
+      call strictly-equal
+        bind a, link a/magnitude[0]
+        bind b, size 16
+    save tmp417
+      call or
+        bind a, tmp415
+        bind b, tmp416
+    save tmp418
+      call and
+        bind a, tmp414
+        bind b, tmp417
+    call check
+      bind test, link tmp418
+      hook match
+        save tmp419
+          call math/log
+            bind link base
+        save tmp420
+          call math/log
+            bind size 2
+        save tmp421
+          call divide
+            bind a, link tmp419
+            bind b, link tmp420
+        save tmp422
+          call add
+            bind a, link tmp421
+            bind b, size 0.5
+        save bits
+          call math/floor
+            bind link tmp422
+        save tmp423
+          call math/log
+            bind link a/magnitude[0]
+        save tmp424
+          call math/log
+            bind size 2
+        save tmp425
+          call divide
+            bind a, link tmp423
+            bind b, link tmp424
+        save tmp426
+          call add
+            bind a, link tmp425
+            bind b, size 0.5
+        save abits
+          call math/floor
+            bind link tmp426
+        save nn
+          call multiply
+            bind a, link abits
+            bind b, link n
+        save tmp427
+          call divide
+            bind a, link nn
+            bind b, link bits
+        save q
+          call math/floor
+            bind link tmp427
+        save tmp428
+          call multiply
+            bind a, link q
+            bind b, link bits
+        save r
+          call negative
+            bind a, link nn
+            bind b, link tmp428
+        save tmp429
+          call add
+            bind a, link q
+            bind b, size 1
+        save array
+          call create-array
+            bind link tmp429
+        save array[q]
+          call math/pow
+            bind size 2
+            bind link r
+        save tmp430
+          call strictly-equal
+            bind a, link a/sign
+            bind b, size 0
+        save tmp431
+          call modulo
+            bind a, link n
+            bind b, size 2
+        save tmp432
+          call strictly-equal
+            bind a, link tmp431
+            bind b, size 0
+        save tmp433
+          call or
+            bind a, tmp430
+            bind b, tmp432
+        save tmp434
+        call check
+          bind test, link tmp433
+          hook match
+            save tmp434, size 0
+          hook fault
+            save tmp434, size 1
+        save tmp435
+          call add
+            bind a, link q
+            bind b, size 1
+        save tmp436
+          call create-big-integer
+            bind link tmp434
+            bind link array
+            bind link tmp435
+        turn seed, link tmp436
+    save x, link a
+    call loop
+      hook test
+        save tmp437
+          call modulo
+            bind a, link n
+            bind b, size 2
+        save tmp438
+          call strictly-equal
+            bind a, link tmp437
+            bind b, size 0
+        call check
+          bind test, link tmp438
+      hook match
+        save tmp439
+          call divide
+            bind a, link n
+            bind b, size 2
+        save n
+          call math/floor
+            bind link tmp439
+        save x
+          call big-integer-internal/multiply
+            bind link x
+            bind link x
+      hook fault
+        turn seed, link false
+    save accumulator, link x
+    save n, size 1
+    save tmp440
+      call gte
+        bind a, link n
+        bind b, size 2
+    call check
+      bind test, link tmp440
+      hook match
+        call loop
+          hook test
+            save tmp441
+              call gte
+                bind a, link n
+                bind b, size 2
+            call check
+              bind test, link tmp441
+          hook match
+            save tmp442
+              call divide
+                bind a, link n
+                bind b, size 2
+            save t
+              call math/floor
+                bind link tmp442
+            save tmp443
+              call multiply
+                bind a, link t
+                bind b, size 2
+            save tmp444
+              call not-strictly-equal
+                bind a, link tmp443
+                bind b, link n
+            call check
+              bind test, link tmp444
+              hook match
+                save accumulator
+                  call big-integer-internal/multiply
+                    bind link accumulator
+                    bind link x
+            save n, link t
+            save x
+              call big-integer-internal/multiply
+                bind link x
+                bind link x
+          hook fault
+            turn seed, link false
+        save accumulator
+          call big-integer-internal/multiply
+            bind link accumulator
+            bind link x
+    turn seed, link accumulator
+save big-integer-internal/prototype/function toString() { [native code] }
+  
+  task tmp30
+    base radix
+    save tmp445
+      call equal
+        bind a, link radix
+        bind b, link void
+    call check
+      bind test, link tmp445
+      hook match
+        save radix, size 10
+    save tmp446
+      call not-strictly-equal
+        bind a, link radix
+        bind b, size 10
+    save tmp447
+      call lt
+        bind a, link radix
+        bind b, size 2
+    save tmp448
+      call gt
+        bind a, link radix
+        bind b, size 36
+    save tmp449
+      call or
+        bind a, tmp447
+        bind b, tmp448
+    save tmp450
+      call math/floor
+        bind link radix
+    save tmp451
+      call not-strictly-equal
+        bind a, link radix
+        bind b, link tmp450
+    save tmp452
+      call or
+        bind a, tmp449
+        bind b, tmp451
+    save tmp453
+      call and
+        bind a, tmp446
+        bind b, tmp452
+    call check
+      bind test, link tmp453
+      hook match
+        halt make range-error,  bind 
+    save tmp454
+      call gt
+        bind a, link this/length
+        bind b, size 8
+    save tmp455
+      call and
+        bind a, tmp454
+        bind b, true
+    call check
+      bind test, link tmp455
+      hook match
+        save tmp456
+          call strictly-equal
+            bind a, link this/sign
+            bind b, size 1
+        call check
+          bind test, link tmp456
+          hook match
+            save tmp457
+              call big-integer-internal/unary-minus
+                bind link this
+            save tmp458
+              call tmp457/function toString() { [native code] }
+                bind link radix
+            save tmp459
+              call add
+                bind a, text <->
+                bind b, link tmp458
+            turn seed, link tmp459
+        save tmp460
+          call math/log
+            bind link base
+        save tmp461
+          call multiply
+            bind a, link this/length
+            bind b, link tmp460
+        save tmp462
+          call math/log
+            bind link radix
+        save tmp463
+          call divide
+            bind a, link tmp461
+            bind b, link tmp462
+        save tmp464
+          call divide
+            bind a, link tmp463
+            bind b, size 2
+        save tmp465
+          call add
+            bind a, link tmp464
+            bind b, size 0.5
+        save tmp466
+          call negative
+            bind a, link tmp465
+            bind b, size 1
+        save s
+          call math/floor
+            bind link tmp466
+        save tmp467
+          call big-integer-internal/big-int
+            bind link radix
+        save tmp468
+          call big-integer-internal/big-int
+            bind link s
+        save split
+          call big-integer-internal/exponentiate
+            bind link tmp467
+            bind link tmp468
+        save q
+          call big-integer-internal/divide
+            bind link this
+            bind link split
+        save tmp469
+          call big-integer-internal/multiply
+            bind link q
+            bind link split
+        save r
+          call big-integer-internal/subtract
+            bind link this
+            bind link tmp469
+        save a
+          call r/function toString() { [native code] }
+            bind link radix
+        save tmp470
+          call q/function toString() { [native code] }
+            bind link radix
+        save tmp471
+          call negative
+            bind a, link s
+            bind b, link a/length
+        save tmp472
+          call undefined/repeat
+            bind link tmp471
+        save tmp473
+          call add
+            bind a, link tmp470
+            bind b, link tmp472
+        save tmp474
+          call add
+            bind a, link tmp473
+            bind b, link a
+        turn seed, link tmp474
+    save a, link this
+    save tmp475
+      call strictly-equal
+        bind a, link a/sign
+        bind b, size 1
+    save tmp476
+    call check
+      bind test, link tmp475
+      hook match
+        save tmp476, text <->
+      hook fault
+        save tmp476, text <>
+    save result, link tmp476
+    save remainder-length, link a/length
+    save tmp477
+      call strictly-equal
+        bind a, link remainder-length
+        bind b, size 0
+    call check
+      bind test, link tmp477
+      hook match
+        turn seed, link undefined
+    save tmp478
+      call strictly-equal
+        bind a, link remainder-length
+        bind b, size 1
+    call check
+      bind test, link tmp478
+      hook match
+        save result
+          call a/magnitude[0]/function toString() { [native code] }
+            bind link radix
+        turn seed, link result
+    save group-length, size 0
+    save group-radix, size 1
+    save tmp479
+      call divide
+        bind a, link base
+        bind b, link radix
+    save limit
+      call fast-trunc
+        bind link tmp479
+    call loop
+      hook test
+        save tmp480
+          call lte
+            bind a, link group-radix
+            bind b, link limit
+        call check
+          bind test, link tmp480
+      hook match
+        save group-length, size 1
+        save group-radix, link radix
+      hook fault
+        turn seed, link false
+    save tmp481
+      call multiply
+        bind a, link group-radix
+        bind b, link radix
+    save tmp482
+      call lte
+        bind a, link tmp481
+        bind b, link base
+    call check
+      bind test, link tmp482
+      hook match
+        halt make range-error
+    save tmp483
+      call negative
+        bind a, link remainder-length
+        bind b, size 1
+    save tmp484
+      call divide
+        bind a, link tmp483
+        bind b, link group-length
+    save tmp485
+      call math/floor
+        bind link tmp484
+    save tmp486
+      call add
+        bind a, link remainder-length
+        bind b, link tmp485
+    save size
+      call add
+        bind a, link tmp486
+        bind b, size 1
+    save remainder
+      call create-array
+        bind link size
+    save n
+      call negative
+        bind bits, size 1
+    call loop
+      hook test
+        save tmp487
+          call lt
+            bind a
+              call increment
+                bind value, link n
+            bind b, link remainder-length
+        call check
+          bind test, link tmp487
+      hook match
+        save remainder[n], 
+      hook fault
+        turn seed, link false
+    save k, link size
+    call loop
+      hook test
+        save tmp488
+          call not-strictly-equal
+            bind a, link remainder-length
+            bind b, size 0
+        call check
+          bind test, link tmp488
+      hook match
+        save group-digit, size 0
+        save i, link remainder-length
+        call loop
+          hook test
+            save tmp489
+              call gte
+                bind a
+                  call decrement
+                    bind value, link i
+                bind b, size 0
+            call check
+              bind test, link tmp489
+          hook match
+            save tmp
+              call perform-division
+                bind link group-digit
+                bind link remainder[i]
+                bind link group-radix
+            save q, link tmp/q
+            save r, link tmp/r
+            save remainder[i], link q
+            save group-digit, link r
+          hook fault
+            turn seed, link false
+        call loop
+          hook test
+            save tmp490
+              call gt
+                bind a, link remainder-length
+                bind b, size 0
+            save tmp491
+              call negative
+                bind a, link remainder-length
+                bind b, size 1
+            save tmp492
+              call strictly-equal
+                bind a, link remainder[tmp491]
+                bind b, size 0
+            save tmp493
+              call and
+                bind a, tmp490
+                bind b, tmp492
+            call check
+              bind test, link tmp493
+          hook match
+            save remainder-length, size 1
+          hook fault
+            turn seed, link false
+        save k, size 1
+        save remainder[k], link group-digit
+      hook fault
+        turn seed, link false
+    save result
+      call remainder[k]/function toString() { [native code] }
+        bind link radix
+    call loop
+      hook test
+        save tmp494
+          call lt
+            bind a
+              call increment
+                bind value, link k
+            bind b, link size
+        call check
+          bind test, link tmp494
+      hook match
+        save t
+          call remainder[k]/function toString() { [native code] }
+            bind link radix
+        save tmp495
+          call negative
+            bind a, link group-length
+            bind b, link t/length
+        save tmp496
+          call undefined/repeat
+            bind link tmp495
+        save result
+          call add
+            bind a, link tmp496
+            bind b, link t
+      hook fault
+        turn seed, link false
+    turn seed, link result
+save signed-right-shift
+  
+  task tmp31
+    base x
+    base n
+    save tmp497
+      call strictly-equal
+        bind a, link x/length
+        bind b, size 0
+    call check
+      bind test, link tmp497
+      hook match
+        turn seed, link x
+    save tmp498
+      call divide
+        bind a, link n
+        bind b, link baselog2
+    save shift
+      call math/floor
+        bind link tmp498
+    save length
+      call negative
+        bind a, link x/length
+        bind b, link shift
+    save tmp499
+      call lte
+        bind a, link length
+        bind b, size 0
+    call check
+      bind test, link tmp499
+      hook match
+        save tmp500
+          call strictly-equal
+            bind a, link x/sign
+            bind b, size 1
+        call check
+          bind test, link tmp500
+          hook match
+            save minus-one
+              call create-array
+                bind size 1
+            save minus-one[0], size 1
+            save tmp501
+              call create-big-integer
+                bind size 1
+                bind link minus-one
+                bind size 1
+            turn seed, link tmp501
+        save tmp502
+          call create-array
+            bind size 0
+        save tmp503
+          call create-big-integer
+            bind size 0
+            bind link tmp502
+            bind size 0
+        turn seed, link tmp503
+    save tmp504
+      call strictly-equal
+        bind a, link x/sign
+        bind b, size 1
+    save tmp505
+    call check
+      bind test, link tmp504
+      hook match
+        save tmp505, size 1
+      hook fault
+        save tmp505, size 0
+    save tmp506
+      call add
+        bind a, link length
+        bind b, link tmp505
+    save digits
+      call create-array
+        bind link tmp506
+    save i, size 0
+    call loop
+      hook test
+        save tmp507
+          call lt
+            bind a, link i
+            bind b, link length
+        call check
+          bind test, link tmp507
+      hook match
+        save tmp508
+          call add
+            bind a, link i
+            bind b, link shift
+        save tmp509
+          call lt
+            bind a, link tmp508
+            bind b, size 0
+        save tmp510
+          call add
+            bind a, link i
+            bind b, link shift
+        save tmp511
+        call check
+          bind test, link tmp509
+          hook match
+            save tmp511, size 0
+          hook fault
+            save tmp511, 
+        save digits[i], link tmp511
+        save i, size 1
+      hook fault
+        turn seed, link false
+    save n
+      call multiply
+        bind a, link shift
+        bind b, link baselog2
+    save s
+      call exp
+        bind size 2
+        bind link n
+    save tmp512
+      call divide
+        bind a, link base
+        bind b, link s
+    save s1
+      call math/floor
+        bind link tmp512
+    save pr, size 0
+    save i
+      call negative
+        bind a, link length
+        bind b, size 1
+    call loop
+      hook test
+        save tmp513
+          call gte
+            bind a, link i
+            bind b, size 0
+        call check
+          bind test, link tmp513
+      hook match
+        save tmp514
+          call divide
+            bind a, link digits[i]
+            bind b, link s
+        save q
+          call math/floor
+            bind link tmp514
+        save tmp515
+          call multiply
+            bind a, link q
+            bind b, link s
+        save r
+          call negative
+            bind a, link digits[i]
+            bind b, link tmp515
+        save tmp516
+          call multiply
+            bind a, link pr
+            bind b, link s1
+        save digits[i]
+          call add
+            bind a, link q
+            bind b, link tmp516
+        save pr, link r
+        save i, size 1
+      hook fault
+        turn seed, link false
+    save tmp517
+      call gte
+        bind a, link length
+        bind b, size 1
+    save tmp518
+      call negative
+        bind a, link length
+        bind b, size 1
+    save tmp519
+      call strictly-equal
+        bind a, link digits[tmp518]
+        bind b, size 0
+    save tmp520
+      call and
+        bind a, tmp517
+        bind b, tmp519
+    call check
+      bind test, link tmp520
+      hook match
+        save length, size 1
+    save tmp521
+      call strictly-equal
+        bind a, link x/sign
+        bind b, size 1
+    call check
+      bind test, link tmp521
+      hook match
+        save has-remainder
+          call gt
+            bind a, link pr
+            bind b, size 0
+        save i, size 0
+        call loop
+          hook test
+            save tmp522
+              call lt
+                bind a, link i
+                bind b, link shift
+            save tmp523
+              call not
+                bind bits, link has-remainder
+            save tmp524
+              call and
+                bind a, tmp522
+                bind b, tmp523
+            call check
+              bind test, link tmp524
+          hook match
+            save has-remainder
+              call not-strictly-equal
+                bind a, link x/magnitude[i]
+                bind b, size 0
+            save i, size 1
+          hook fault
+            turn seed, link false
+        call check
+          bind test, link has-remainder
+          hook match
+            save tmp525
+              call strictly-equal
+                bind a, link length
+                bind b, size 0
+            call check
+              bind test, link tmp525
+              hook match
+                save length, size 1
+                save digits[0], size 1
+              hook fault
+                save i, size 0
+                call loop
+                  hook test
+                    save tmp526
+                      call lt
+                        bind a, link i
+                        bind b, link length
+                    save tmp527
+                      call negative
+                        bind a, link base
+                        bind b, size 1
+                    save tmp528
+                      call strictly-equal
+                        bind a, link digits[i]
+                        bind b, link tmp527
+                    save tmp529
+                      call and
+                        bind a, tmp526
+                        bind b, tmp528
+                    call check
+                      bind test, link tmp529
+                  hook match
+                    save digits[i], size 0
+                    save i, size 1
+                  hook fault
+                    turn seed, link false
+                save tmp530
+                  call lt
+                    bind a, link i
+                    bind b, link length
+                call check
+                  bind test, link tmp530
+                  hook match
+                    save digits[i], size 1
+                  hook fault
+                    save length, size 1
+                    save digits[i], size 1
+    save tmp531
+      call create-big-integer
+        bind link x/sign
+        bind link digits
+        bind link length
+    turn seed, link tmp531
+save big-integer-internal/signed-right-shift
+  
+  task tmp32
+    base x
+    base n
+    save tmp532
+      call big-integer-internal/to-number
+        bind link n
+    save tmp533
+      call signed-right-shift
+        bind link x
+        bind link tmp532
+    turn seed, link tmp533
+save big-integer-internal/left-shift
+  
+  task tmp33
+    base x
+    base n
+    save tmp534
+      call big-integer-internal/to-number
+        bind link n
+    save tmp535
+      call negative
+        bind a, size 0
+        bind b, link tmp534
+    save tmp536
+      call signed-right-shift
+        bind link x
+        bind link tmp535
+    turn seed, link tmp536
+save big-integer-internal/prototype/function valueOf() { [native code] }
+  
+  task tmp34
+    call console/error
+      bind text <BigIntegerInternal#valueOf is called>
+    turn seed, link this
+save internal, link big-integer-internal
+save n
+  
+  task tmp35
+    base f
+    turn seed, link undefined
+save tmp538
+  call multiply
+    bind a, size 16
+    bind b, size 2
+save tmp539
+  call add
+    bind a, link tmp538
+    bind b, size 1
+save cache
+  make array
+    bind 
+save i, size 0
+call loop
+  hook test
+    save tmp540
+      call lt
+        bind a, link i
+        bind b, link cache/length
+    call check
+      bind test, link tmp540
+  hook match
+    save cache[i], link void
+    save i, size 1
+  hook fault
+    turn seed, link false
+
+task last-two-map
+  save this/a, link void
+  save this/a-key, size 0
+  save this/b, link void
+  save this/b-key, size 0
+  save this/last, size 0
+save last-two-map/prototype/get
+  
+  task tmp37
+    base key
+    save tmp541
+      call strictly-equal
+        bind a, link this/a-key
+        bind b, link key
+    call check
+      bind test, link tmp541
+      hook match
+        save this/last, size 0
+        turn seed, link this/a
+    save tmp542
+      call strictly-equal
+        bind a, link this/b-key
+        bind b, link key
+    call check
+      bind test, link tmp542
+      hook match
+        save this/last, size 1
+        turn seed, link this/b
+    turn seed, link undefined
+save last-two-map/prototype/set
+  
+  task tmp38
+    base key
+    base value
+    save tmp543
+      call strictly-equal
+        bind a, link this/last
+        bind b, size 0
+    call check
+      bind test, link tmp543
+      hook match
+        save this/b-key, link key
+        save this/b, link value
+        save this/last, size 1
+      hook fault
+        save this/a-key, link key
+        save this/a, link value
+        save this/last, size 0
+save map, make last-two-map
+save to-number
+  call n
+    bind
+      
+      task tmp39
+        base a
+        save tmp544
+          call internal/to-number
+            bind link a
+        turn seed, link tmp544
+save function valueOf() { [native code] }
+  
+  task tmp40
+    base x
+    save tmp545
+      call get-type-of
+        bind bits, link x
+    save tmp546
+      call strictly-equal
+        bind a, link tmp545
+        bind b, text <number>
+    call check
+      bind test, link tmp546
+      hook match
+        save tmp547
+          call negative
+            bind bits, size 16
+        save tmp548
+          call gte
+            bind a, link x
+            bind b, link tmp547
+        save tmp549
+          call add
+            bind bits, size 16
+        save tmp550
+          call lte
+            bind a, link x
+            bind b, link tmp549
+        save tmp551
+          call and
+            bind a, tmp548
+            bind b, tmp550
+        call check
+          bind test, link tmp551
+          hook match
+            save tmp552
+              call add
+                bind a, link x
+                bind b, size 16
+            save value, link cache[tmp552]
+            save tmp553
+              call equal
+                bind a, link value
+                bind b, link void
+            call check
+              bind test, link tmp553
+              hook match
+                save value
+                  call internal/big-int
+                    bind link x
+                save tmp554
+                  call add
+                    bind a, link x
+                    bind b, size 16
+                save cache[tmp554], link value
+            turn seed, link value
+        save value
+          call map/get
+            bind link x
+        save tmp555
+          call equal
+            bind a, link value
+            bind b, link void
+        call check
+          bind test, link tmp555
+          hook match
+            save value
+              call internal/big-int
+                bind link x
+            call map/set
+              bind link x
+              bind link value
+        turn seed, link value
+    turn seed, link x
+save to-result
+  
+  task tmp41
+    base x
+    save value
+      call internal/to-number
+        bind link x
+    save tmp556
+      call negative
+        bind bits, size 9007199254740991
+    save tmp557
+      call gte
+        bind a, link value
+        bind b, link tmp556
+    save tmp558
+      call add
+        bind bits, size 9007199254740991
+    save tmp559
+      call lte
+        bind a, link value
+        bind b, link tmp558
+    save tmp560
+      call and
+        bind a, tmp557
+        bind b, tmp559
+    call check
+      bind test, link tmp560
+      hook match
+        turn seed, link value
+    turn seed, link x
+save add
+  call n
+    bind
+      
+      task tmp42
+        base x
+        base y
+        save tmp561
+          call get-type-of
+            bind bits, link x
+        save tmp562
+          call strictly-equal
+            bind a, link tmp561
+            bind b, text <number>
+        save tmp563
+          call strictly-equal
+            bind a, link x
+            bind b, size 0
+        save tmp564
+          call and
+            bind a, tmp562
+            bind b, tmp563
+        call check
+          bind test, link tmp564
+          hook match
+            turn seed, link y
+        save tmp565
+          call get-type-of
+            bind bits, link y
+        save tmp566
+          call strictly-equal
+            bind a, link tmp565
+            bind b, text <number>
+        save tmp567
+          call strictly-equal
+            bind a, link y
+            bind b, size 0
+        save tmp568
+          call and
+            bind a, tmp566
+            bind b, tmp567
+        call check
+          bind test, link tmp568
+          hook match
+            turn seed, link x
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save b
+          call function valueOf() { [native code] }
+            bind link y
+        save sum
+          call internal/add
+            bind link a
+            bind link b
+        save tmp569
+          call get-type-of
+            bind bits, link x
+        save tmp570
+          call strictly-equal
+            bind a, link tmp569
+            bind b, text <number>
+        save tmp571
+          call get-type-of
+            bind bits, link y
+        save tmp572
+          call strictly-equal
+            bind a, link tmp571
+            bind b, text <number>
+        save tmp573
+          call and
+            bind a, tmp570
+            bind b, tmp572
+        save tmp574
+          call to-result
+            bind link sum
+        save tmp575
+        call check
+          bind test, link tmp573
+          hook match
+            save tmp575, link sum
+          hook fault
+            save tmp575, link tmp574
+        turn seed, link tmp575
+save subtract
+  call n
+    bind
+      
+      task tmp43
+        base x
+        base y
+        save tmp576
+          call get-type-of
+            bind bits, link x
+        save tmp577
+          call strictly-equal
+            bind a, link tmp576
+            bind b, text <number>
+        save tmp578
+          call strictly-equal
+            bind a, link x
+            bind b, size 0
+        save tmp579
+          call and
+            bind a, tmp577
+            bind b, tmp578
+        call check
+          bind test, link tmp579
+          hook match
+            save tmp580
+              call unary-minus
+                bind link y
+            turn seed, link tmp580
+        save tmp581
+          call get-type-of
+            bind bits, link y
+        save tmp582
+          call strictly-equal
+            bind a, link tmp581
+            bind b, text <number>
+        save tmp583
+          call strictly-equal
+            bind a, link y
+            bind b, size 0
+        save tmp584
+          call and
+            bind a, tmp582
+            bind b, tmp583
+        call check
+          bind test, link tmp584
+          hook match
+            turn seed, link x
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save b
+          call function valueOf() { [native code] }
+            bind link y
+        save difference
+          call internal/subtract
+            bind link a
+            bind link b
+        save tmp585
+          call get-type-of
+            bind bits, link x
+        save tmp586
+          call strictly-equal
+            bind a, link tmp585
+            bind b, text <number>
+        save tmp587
+          call get-type-of
+            bind bits, link y
+        save tmp588
+          call strictly-equal
+            bind a, link tmp587
+            bind b, text <number>
+        save tmp589
+          call and
+            bind a, tmp586
+            bind b, tmp588
+        save tmp590
+          call to-result
+            bind link difference
+        save tmp591
+        call check
+          bind test, link tmp589
+          hook match
+            save tmp591, link difference
+          hook fault
+            save tmp591, link tmp590
+        turn seed, link tmp591
+save multiply
+  call n
+    bind
+      
+      task tmp44
+        base x
+        base y
+        save tmp592
+          call get-type-of
+            bind bits, link x
+        save tmp593
+          call strictly-equal
+            bind a, link tmp592
+            bind b, text <number>
+        save tmp594
+          call strictly-equal
+            bind a, link x
+            bind b, size 0
+        save tmp595
+          call and
+            bind a, tmp593
+            bind b, tmp594
+        call check
+          bind test, link tmp595
+          hook match
+            turn seed, link 0
+        save tmp596
+          call get-type-of
+            bind bits, link x
+        save tmp597
+          call strictly-equal
+            bind a, link tmp596
+            bind b, text <number>
+        save tmp598
+          call strictly-equal
+            bind a, link x
+            bind b, size 1
+        save tmp599
+          call and
+            bind a, tmp597
+            bind b, tmp598
+        call check
+          bind test, link tmp599
+          hook match
+            turn seed, link y
+        save tmp600
+          call get-type-of
+            bind bits, link x
+        save tmp601
+          call strictly-equal
+            bind a, link tmp600
+            bind b, text <number>
+        save tmp602
+          call negative
+            bind bits, size 1
+        save tmp603
+          call strictly-equal
+            bind a, link x
+            bind b, link tmp602
+        save tmp604
+          call and
+            bind a, tmp601
+            bind b, tmp603
+        call check
+          bind test, link tmp604
+          hook match
+            save tmp605
+              call internal/unary-minus
+                bind link y
+            turn seed, link tmp605
+        save tmp606
+          call get-type-of
+            bind bits, link y
+        save tmp607
+          call strictly-equal
+            bind a, link tmp606
+            bind b, text <number>
+        save tmp608
+          call strictly-equal
+            bind a, link y
+            bind b, size 0
+        save tmp609
+          call and
+            bind a, tmp607
+            bind b, tmp608
+        call check
+          bind test, link tmp609
+          hook match
+            turn seed, link 0
+        save tmp610
+          call get-type-of
+            bind bits, link y
+        save tmp611
+          call strictly-equal
+            bind a, link tmp610
+            bind b, text <number>
+        save tmp612
+          call strictly-equal
+            bind a, link y
+            bind b, size 1
+        save tmp613
+          call and
+            bind a, tmp611
+            bind b, tmp612
+        call check
+          bind test, link tmp613
+          hook match
+            turn seed, link x
+        save tmp614
+          call get-type-of
+            bind bits, link y
+        save tmp615
+          call strictly-equal
+            bind a, link tmp614
+            bind b, text <number>
+        save tmp616
+          call negative
+            bind bits, size 1
+        save tmp617
+          call strictly-equal
+            bind a, link y
+            bind b, link tmp616
+        save tmp618
+          call and
+            bind a, tmp615
+            bind b, tmp617
+        call check
+          bind test, link tmp618
+          hook match
+            save tmp619
+              call internal/unary-minus
+                bind link x
+            turn seed, link tmp619
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save b
+          call function valueOf() { [native code] }
+            bind link y
+        save tmp620
+          call internal/multiply
+            bind link a
+            bind link b
+        turn seed, link tmp620
+save divide
+  call n
+    bind
+      
+      task tmp45
+        base x
+        base y
+        save tmp621
+          call get-type-of
+            bind bits, link x
+        save tmp622
+          call strictly-equal
+            bind a, link tmp621
+            bind b, text <number>
+        call check
+          bind test, link tmp622
+          hook match
+            turn seed, link 0
+        save tmp623
+          call get-type-of
+            bind bits, link y
+        save tmp624
+          call strictly-equal
+            bind a, link tmp623
+            bind b, text <number>
+        save tmp625
+          call strictly-equal
+            bind a, link y
+            bind b, size 1
+        save tmp626
+          call and
+            bind a, tmp624
+            bind b, tmp625
+        call check
+          bind test, link tmp626
+          hook match
+            turn seed, link x
+        save tmp627
+          call get-type-of
+            bind bits, link y
+        save tmp628
+          call strictly-equal
+            bind a, link tmp627
+            bind b, text <number>
+        save tmp629
+          call negative
+            bind bits, size 1
+        save tmp630
+          call strictly-equal
+            bind a, link y
+            bind b, link tmp629
+        save tmp631
+          call and
+            bind a, tmp628
+            bind b, tmp630
+        call check
+          bind test, link tmp631
+          hook match
+            save tmp632
+              call internal/unary-minus
+                bind link x
+            turn seed, link tmp632
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save b
+          call function valueOf() { [native code] }
+            bind link y
+        save tmp633
+          call internal/divide
+            bind link a
+            bind link b
+        save tmp634
+          call to-result
+            bind link tmp633
+        turn seed, link tmp634
+save remainder
+  call n
+    bind
+      
+      task tmp46
+        base x
+        base y
+        save tmp635
+          call get-type-of
+            bind bits, link x
+        save tmp636
+          call strictly-equal
+            bind a, link tmp635
+            bind b, text <number>
+        call check
+          bind test, link tmp636
+          hook match
+            turn seed, link x
+        save tmp637
+          call get-type-of
+            bind bits, link y
+        save tmp638
+          call strictly-equal
+            bind a, link tmp637
+            bind b, text <number>
+        save tmp639
+          call strictly-equal
+            bind a, link y
+            bind b, size 1
+        save tmp640
+          call and
+            bind a, tmp638
+            bind b, tmp639
+        call check
+          bind test, link tmp640
+          hook match
+            turn seed, link 0
+        save tmp641
+          call get-type-of
+            bind bits, link y
+        save tmp642
+          call strictly-equal
+            bind a, link tmp641
+            bind b, text <number>
+        save tmp643
+          call negative
+            bind bits, size 1
+        save tmp644
+          call strictly-equal
+            bind a, link y
+            bind b, link tmp643
+        save tmp645
+          call and
+            bind a, tmp642
+            bind b, tmp644
+        call check
+          bind test, link tmp645
+          hook match
+            turn seed, link 0
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save b
+          call function valueOf() { [native code] }
+            bind link y
+        save tmp646
+          call internal/remainder
+            bind link a
+            bind link b
+        save tmp647
+          call to-result
+            bind link tmp646
+        turn seed, link tmp647
+save exponentiate
+  call n
+    bind
+      
+      task tmp47
+        base x
+        base y
+        save tmp648
+          call get-type-of
+            bind bits, link y
+        save tmp649
+          call strictly-equal
+            bind a, link tmp648
+            bind b, text <number>
+        call check
+          bind test, link tmp649
+          hook match
+            save tmp650
+              call strictly-equal
+                bind a, link y
+                bind b, size 0
+            call check
+              bind test, link tmp650
+              hook match
+                turn seed, link 1
+            save tmp651
+              call strictly-equal
+                bind a, link y
+                bind b, size 1
+            call check
+              bind test, link tmp651
+              hook match
+                turn seed, link x
+            save tmp652
+              call strictly-equal
+                bind a, link y
+                bind b, size 2
+            call check
+              bind test, link tmp652
+              hook match
+                save tmp653
+                  call multiply
+                    bind link x
+                    bind link x
+                turn seed, link tmp653
+            save tmp654
+              call get-type-of
+                bind bits, link x
+            save tmp655
+              call strictly-equal
+                bind a, link tmp654
+                bind b, text <number>
+            save tmp656
+              call math/abs
+                bind link x
+            save tmp657
+              call gt
+                bind a, link tmp656
+                bind b, size 2
+            save tmp658
+              call and
+                bind a, tmp655
+                bind b, tmp657
+            save tmp659
+              call gte
+                bind a, link y
+                bind b, size 0
+            save tmp660
+              call and
+                bind a, tmp658
+                bind b, tmp659
+            call check
+              bind test, link tmp660
+              hook match
+                save tmp661
+                  call gt
+                    bind a, link y
+                    bind b, size 42
+                save tmp662
+                  call modulo
+                    bind a, link x
+                    bind b, size 2
+                save tmp663
+                  call strictly-equal
+                    bind a, link tmp662
+                    bind b, size 0
+                save tmp664
+                  call and
+                    bind a, tmp661
+                    bind b, tmp663
+                call check
+                  bind test, link tmp664
+                  hook match
+                    save tmp665
+                      call exponentiate
+                        bind size 2
+                        bind link y
+                    save tmp666
+                      call divide
+                        bind a, link x
+                        bind b, size 2
+                    save tmp667
+                      call exponentiate
+                        bind link tmp666
+                        bind link y
+                    save tmp668
+                      call multiply
+                        bind link tmp665
+                        bind link tmp667
+                    turn seed, link tmp668
+                save tmp669
+                  call math/log
+                    bind size 9007199254740991
+                save tmp670
+                  call math/abs
+                    bind link x
+                save tmp671
+                  call add
+                    bind a, link tmp670
+                    bind b, size 0.5
+                save tmp672
+                  call math/log
+                    bind link tmp671
+                save tmp673
+                  call divide
+                    bind a, link tmp669
+                    bind b, link tmp672
+                save k
+                  call math/floor
+                    bind link tmp673
+                save tmp674
+                  call gte
+                    bind a, link k
+                    bind b, size 2
+                call check
+                  bind test, link tmp674
+                  hook match
+                    save tmp675
+                      call modulo
+                        bind a, link y
+                        bind b, link k
+                    save tmp676
+                      call math/pow
+                        bind link x
+                        bind link tmp675
+                    save tmp677
+                      call math/pow
+                        bind link x
+                        bind link k
+                    save tmp678
+                      call divide
+                        bind a, link y
+                        bind b, link k
+                    save tmp679
+                      call math/floor
+                        bind link tmp678
+                    save tmp680
+                      call exponentiate
+                        bind link tmp677
+                        bind link tmp679
+                    save tmp681
+                      call multiply
+                        bind link tmp676
+                        bind link tmp680
+                    turn seed, link tmp681
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save b
+          call function valueOf() { [native code] }
+            bind link y
+        save power
+          call internal/exponentiate
+            bind link a
+            bind link b
+        save tmp682
+          call get-type-of
+            bind bits, link x
+        save tmp683
+          call strictly-equal
+            bind a, link tmp682
+            bind b, text <number>
+        save tmp684
+          call math/abs
+            bind link x
+        save tmp685
+          call lte
+            bind a, link tmp684
+            bind b, size 1
+        save tmp686
+          call and
+            bind a, tmp683
+            bind b, tmp685
+        save tmp687
+          call to-result
+            bind link power
+        save tmp688
+        call check
+          bind test, link tmp686
+          hook match
+            save tmp688, link tmp687
+          hook fault
+            save tmp688, link power
+        turn seed, link tmp688
+save unary-minus
+  call n
+    bind
+      
+      task tmp48
+        base x
+        save a
+          call function valueOf() { [native code] }
+            bind link x
+        save tmp689
+          call internal/unary-minus
+            bind link a
+        turn seed, link tmp689
+save equal
+  call n
+    bind
+      
+      task tmp49
+        base x
+        base y
+        save tmp690
+          call get-type-of
+            bind bits, link x
+        save tmp691
+          call strictly-equal
+            bind a, link tmp690
+            bind b, text <number>
+        call check
+          bind test, link tmp691
+          hook match
+            turn seed, link false
+        save tmp692
+          call get-type-of
+            bind bits, link y
+        save tmp693
+          call strictly-equal
+            bind a, link tmp692
+            bind b, text <number>
+        call check
+          bind test, link tmp693
+          hook match
+            turn seed, link false
+        save tmp694
+          call internal/equal
+            bind link x
+            bind link y
+        turn seed, link tmp694
+save less-than
+  call n
+    bind
+      
+      task tmp50
+        base x
+        base y
+        save tmp695
+          call get-type-of
+            bind bits, link x
+        save tmp696
+          call strictly-equal
+            bind a, link tmp695
+            bind b, text <number>
+        call check
+          bind test, link tmp696
+          hook match
+            save tmp697
+              call internal/to-number
+                bind link y
+            save tmp698
+              call lt
+                bind a, link x
+                bind b, link tmp697
+            turn seed, link tmp698
+        save tmp699
+          call get-type-of
+            bind bits, link y
+        save tmp700
+          call strictly-equal
+            bind a, link tmp699
+            bind b, text <number>
+        call check
+          bind test, link tmp700
+          hook match
+            save tmp701
+              call internal/to-number
+                bind link x
+            save tmp702
+              call lt
+                bind a, link tmp701
+                bind b, link y
+            turn seed, link tmp702
+        save tmp703
+          call internal/less-than
+            bind link x
+            bind link y
+        turn seed, link tmp703
+save greater-than
+  call n
+    bind
+      
+      task tmp51
+        base x
+        base y
+        save tmp704
+          call get-type-of
+            bind bits, link x
+        save tmp705
+          call strictly-equal
+            bind a, link tmp704
+            bind b, text <number>
+        call check
+          bind test, link tmp705
+          hook match
+            save tmp706
+              call internal/to-number
+                bind link y
+            save tmp707
+              call gt
+                bind a, link x
+                bind b, link tmp706
+            turn seed, link tmp707
+        save tmp708
+          call get-type-of
+            bind bits, link y
+        save tmp709
+          call strictly-equal
+            bind a, link tmp708
+            bind b, text <number>
+        call check
+          bind test, link tmp709
+          hook match
+            save tmp710
+              call internal/to-number
+                bind link x
+            save tmp711
+              call gt
+                bind a, link tmp710
+                bind b, link y
+            turn seed, link tmp711
+        save tmp712
+          call internal/greater-than
+            bind link x
+            bind link y
+        turn seed, link tmp712
+
+task big-integer
+save big-integer/big-int
+  
+  task tmp52
+    base x
+    save tmp713
+      call get-type-of
+        bind bits, link x
+    save tmp714
+      call strictly-equal
+        bind a, link tmp713
+        bind b, text <number>
+    save tmp715
+      call get-type-of
+        bind bits, link x
+    save tmp716
+      call strictly-equal
+        bind a, link tmp715
+        bind b, text <string>
+    save tmp717
+      call or
+        bind a, tmp714
+        bind b, tmp716
+    save tmp718
+      call get-type-of
+        bind bits, link x
+    save tmp719
+      call strictly-equal
+        bind a, link tmp718
+        bind b, text <bigint>
+    save tmp720
+      call or
+        bind a, tmp717
+        bind b, tmp719
+    call check
+      bind test, link tmp720
+      hook match
+        save tmp721
+          call get-type-of
+            bind bits, link x
+        save tmp722
+          call strictly-equal
+            bind a, link tmp721
+            bind b, text <number>
+        save tmp723
+          call number
+            bind link x
+        save tmp724
+        call check
+          bind test, link tmp722
+          hook match
+            save tmp724, link x
+          hook fault
+            save tmp724, link tmp723
+        save value
+          call add
+            bind a, size 0
+            bind b, link tmp724
+        save tmp725
+          call negative
+            bind bits, size 9007199254740991
+        save tmp726
+          call gte
+            bind a, link value
+            bind b, link tmp725
+        save tmp727
+          call add
+            bind bits, size 9007199254740991
+        save tmp728
+          call lte
+            bind a, link value
+            bind b, link tmp727
+        save tmp729
+          call and
+            bind a, tmp726
+            bind b, tmp728
+        call check
+          bind test, link tmp729
+          hook match
+            turn seed, link value
+    save tmp730
+      call internal/big-int
+        bind link x
+    save tmp731
+      call to-result
+        bind link tmp730
+    turn seed, link tmp731
+save big-integer/as-uint-n
+  
+  task tmp53
+    base n
+    base x
+    save tmp732
+      call get-type-of
+        bind bits, link x
+    save tmp733
+      call strictly-equal
+        bind a, link tmp732
+        bind b, text <number>
+    save tmp734
+      call gte
+        bind a, link x
+        bind b, size 0
+    save tmp735
+      call and
+        bind a, tmp733
+        bind b, tmp734
+    save tmp736
+      call gte
+        bind a, link n
+        bind b, size 0
+    save tmp737
+      call and
+        bind a, tmp735
+        bind b, tmp736
+    save tmp738
+      call lte
+        bind a, link n
+        bind b, size 53
+    save tmp739
+      call and
+        bind a, tmp737
+        bind b, tmp738
+    call check
+      bind test, link tmp739
+      hook match
+        save m
+          call exp
+            bind size 2
+            bind link n
+        save tmp740
+          call divide
+            bind a, link x
+            bind b, link m
+        save tmp741
+          call math/floor
+            bind link tmp740
+        save tmp742
+          call multiply
+            bind a, link tmp741
+            bind b, link m
+        save tmp743
+          call negative
+            bind a, link x
+            bind b, link tmp742
+        turn seed, link tmp743
+    save tmp744
+      call internal/big-int
+        bind link x
+    save tmp745
+      call internal/as-uint-n
+        bind link n
+        bind link tmp744
+    save tmp746
+      call to-result
+        bind link tmp745
+    turn seed, link tmp746
+save big-integer/to-number
+  
+  task tmp54
+    base x
+    save tmp747
+      call get-type-of
+        bind bits, link x
+    save tmp748
+      call strictly-equal
+        bind a, link tmp747
+        bind b, text <number>
+    call check
+      bind test, link tmp748
+      hook match
+        turn seed, link x
+    save tmp749
+      call to-number
+        bind link x
+    turn seed, link tmp749
+save big-integer/add
+  
+  task tmp55
+    base x
+    base y
+    save tmp750
+      call get-type-of
+        bind bits, link x
+    save tmp751
+      call strictly-equal
+        bind a, link tmp750
+        bind b, text <string>
+    save tmp752
+      call get-type-of
+        bind bits, link y
+    save tmp753
+      call strictly-equal
+        bind a, link tmp752
+        bind b, text <string>
+    save tmp754
+      call or
+        bind a, tmp751
+        bind b, tmp753
+    call check
+      bind test, link tmp754
+      hook match
+        save tmp755
+          call add
+            bind a, link x
+            bind b, link y
+        turn seed, link tmp755
+    save tmp756
+      call get-type-of
+        bind bits, link x
+    save tmp757
+      call strictly-equal
+        bind a, link tmp756
+        bind b, text <number>
+    save tmp758
+      call get-type-of
+        bind bits, link y
+    save tmp759
+      call strictly-equal
+        bind a, link tmp758
+        bind b, text <number>
+    save tmp760
+      call and
+        bind a, tmp757
+        bind b, tmp759
+    call check
+      bind test, link tmp760
+      hook match
+        save value
+          call add
+            bind a, link x
+            bind b, link y
+        save tmp761
+          call negative
+            bind bits, size 9007199254740991
+        save tmp762
+          call gte
+            bind a, link value
+            bind b, link tmp761
+        save tmp763
+          call add
+            bind bits, size 9007199254740991
+        save tmp764
+          call lte
+            bind a, link value
+            bind b, link tmp763
+        save tmp765
+          call and
+            bind a, tmp762
+            bind b, tmp764
+        call check
+          bind test, link tmp765
+          hook match
+            turn seed, link value
+    save tmp766
+      call add
+        bind link x
+        bind link y
+    turn seed, link tmp766
+save big-integer/subtract
+  
+  task tmp56
+    base x
+    base y
+    save tmp767
+      call get-type-of
+        bind bits, link x
+    save tmp768
+      call strictly-equal
+        bind a, link tmp767
+        bind b, text <number>
+    save tmp769
+      call get-type-of
+        bind bits, link y
+    save tmp770
+      call strictly-equal
+        bind a, link tmp769
+        bind b, text <number>
+    save tmp771
+      call and
+        bind a, tmp768
+        bind b, tmp770
+    call check
+      bind test, link tmp771
+      hook match
+        save value
+          call negative
+            bind a, link x
+            bind b, link y
+        save tmp772
+          call negative
+            bind bits, size 9007199254740991
+        save tmp773
+          call gte
+            bind a, link value
+            bind b, link tmp772
+        save tmp774
+          call add
+            bind bits, size 9007199254740991
+        save tmp775
+          call lte
+            bind a, link value
+            bind b, link tmp774
+        save tmp776
+          call and
+            bind a, tmp773
+            bind b, tmp775
+        call check
+          bind test, link tmp776
+          hook match
+            turn seed, link value
+    save tmp777
+      call subtract
+        bind link x
+        bind link y
+    turn seed, link tmp777
+save big-integer/multiply
+  
+  task tmp57
+    base x
+    base y
+    save tmp778
+      call get-type-of
+        bind bits, link x
+    save tmp779
+      call strictly-equal
+        bind a, link tmp778
+        bind b, text <number>
+    save tmp780
+      call get-type-of
+        bind bits, link y
+    save tmp781
+      call strictly-equal
+        bind a, link tmp780
+        bind b, text <number>
+    save tmp782
+      call and
+        bind a, tmp779
+        bind b, tmp781
+    call check
+      bind test, link tmp782
+      hook match
+        save tmp783
+          call multiply
+            bind a, link x
+            bind b, link y
+        save value
+          call add
+            bind a, size 0
+            bind b, link tmp783
+        save tmp784
+          call negative
+            bind bits, size 9007199254740991
+        save tmp785
+          call gte
+            bind a, link value
+            bind b, link tmp784
+        save tmp786
+          call add
+            bind bits, size 9007199254740991
+        save tmp787
+          call lte
+            bind a, link value
+            bind b, link tmp786
+        save tmp788
+          call and
+            bind a, tmp785
+            bind b, tmp787
+        call check
+          bind test, link tmp788
+          hook match
+            turn seed, link value
+    save tmp789
+      call multiply
+        bind link x
+        bind link y
+    turn seed, link tmp789
+save big-integer/divide
+  
+  task tmp58
+    base x
+    base y
+    save tmp790
+      call get-type-of
+        bind bits, link x
+    save tmp791
+      call strictly-equal
+        bind a, link tmp790
+        bind b, text <number>
+    save tmp792
+      call get-type-of
+        bind bits, link y
+    save tmp793
+      call strictly-equal
+        bind a, link tmp792
+        bind b, text <number>
+    save tmp794
+      call and
+        bind a, tmp791
+        bind b, tmp793
+    call check
+      bind test, link tmp794
+      hook match
+        save tmp795
+          call not-strictly-equal
+            bind a, link y
+            bind b, size 0
+        call check
+          bind test, link tmp795
+          hook match
+            save tmp796
+              call strictly-equal
+                bind a, link x
+                bind b, size 0
+            save tmp797
+              call gt
+                bind a, link x
+                bind b, size 0
+            save tmp798
+              call gt
+                bind a, link y
+                bind b, size 0
+            save tmp799
+              call and
+                bind a, tmp797
+                bind b, tmp798
+            save tmp800
+              call lt
+                bind a, link x
+                bind b, size 0
+            save tmp801
+              call lt
+                bind a, link y
+                bind b, size 0
+            save tmp802
+              call and
+                bind a, tmp800
+                bind b, tmp801
+            save tmp803
+              call or
+                bind a, tmp799
+                bind b, tmp802
+            save tmp804
+              call divide
+                bind a, link x
+                bind b, link y
+            save tmp805
+              call math/floor
+                bind link tmp804
+            save tmp806
+              call add
+                bind a, size 0
+                bind b, link tmp805
+            save tmp807
+              call negative
+                bind a, size 0
+                bind b, link x
+            save tmp808
+              call divide
+                bind a, link tmp807
+                bind b, link y
+            save tmp809
+              call math/floor
+                bind link tmp808
+            save tmp810
+              call negative
+                bind a, size 0
+                bind b, link tmp809
+            save tmp811
+            call check
+              bind test, link tmp803
+              hook match
+                save tmp811, link tmp806
+              hook fault
+                save tmp811, link tmp810
+            save tmp812
+            call check
+              bind test, link tmp796
+              hook match
+                save tmp812, size 0
+              hook fault
+                save tmp812, link tmp811
+            turn seed, link tmp812
+    save tmp813
+      call divide
+        bind link x
+        bind link y
+    turn seed, link tmp813
+save big-integer/remainder
+  
+  task tmp59
+    base x
+    base y
+    save tmp814
+      call get-type-of
+        bind bits, link x
+    save tmp815
+      call strictly-equal
+        bind a, link tmp814
+        bind b, text <number>
+    save tmp816
+      call get-type-of
+        bind bits, link y
+    save tmp817
+      call strictly-equal
+        bind a, link tmp816
+        bind b, text <number>
+    save tmp818
+      call and
+        bind a, tmp815
+        bind b, tmp817
+    call check
+      bind test, link tmp818
+      hook match
+        save tmp819
+          call not-strictly-equal
+            bind a, link y
+            bind b, size 0
+        call check
+          bind test, link tmp819
+          hook match
+            save tmp820
+              call modulo
+                bind a, link x
+                bind b, link y
+            save tmp821
+              call add
+                bind a, size 0
+                bind b, link tmp820
+            turn seed, link tmp821
+    save tmp822
+      call remainder
+        bind link x
+        bind link y
+    turn seed, link tmp822
+save big-integer/unary-minus
+  
+  task tmp60
+    base x
+    save tmp823
+      call get-type-of
+        bind bits, link x
+    save tmp824
+      call strictly-equal
+        bind a, link tmp823
+        bind b, text <number>
+    call check
+      bind test, link tmp824
+      hook match
+        save tmp825
+          call negative
+            bind a, size 0
+            bind b, link x
+        turn seed, link tmp825
+    save tmp826
+      call unary-minus
+        bind link x
+    turn seed, link tmp826
+save big-integer/equal
+  
+  task tmp61
+    base x
+    base y
+    save tmp827
+      call get-type-of
+        bind bits, link x
+    save tmp828
+      call strictly-equal
+        bind a, link tmp827
+        bind b, text <number>
+    save tmp829
+      call get-type-of
+        bind bits, link y
+    save tmp830
+      call strictly-equal
+        bind a, link tmp829
+        bind b, text <number>
+    save tmp831
+      call and
+        bind a, tmp828
+        bind b, tmp830
+    call check
+      bind test, link tmp831
+      hook match
+        save tmp832
+          call strictly-equal
+            bind a, link x
+            bind b, link y
+        turn seed, link tmp832
+    save tmp833
+      call equal
+        bind link x
+        bind link y
+    turn seed, link tmp833
+save big-integer/less-than
+  
+  task tmp62
+    base x
+    base y
+    save tmp834
+      call get-type-of
+        bind bits, link x
+    save tmp835
+      call strictly-equal
+        bind a, link tmp834
+        bind b, text <number>
+    save tmp836
+      call get-type-of
+        bind bits, link y
+    save tmp837
+      call strictly-equal
+        bind a, link tmp836
+        bind b, text <number>
+    save tmp838
+      call and
+        bind a, tmp835
+        bind b, tmp837
+    call check
+      bind test, link tmp838
+      hook match
+        save tmp839
+          call lt
+            bind a, link x
+            bind b, link y
+        turn seed, link tmp839
+    save tmp840
+      call less-than
+        bind link x
+        bind link y
+    turn seed, link tmp840
+save big-integer/greater-than
+  
+  task tmp63
+    base x
+    base y
+    save tmp841
+      call get-type-of
+        bind bits, link x
+    save tmp842
+      call strictly-equal
+        bind a, link tmp841
+        bind b, text <number>
+    save tmp843
+      call get-type-of
+        bind bits, link y
+    save tmp844
+      call strictly-equal
+        bind a, link tmp843
+        bind b, text <number>
+    save tmp845
+      call and
+        bind a, tmp842
+        bind b, tmp844
+    call check
+      bind test, link tmp845
+      hook match
+        save tmp846
+          call gt
+            bind a, link x
+            bind b, link y
+        turn seed, link tmp846
+    save tmp847
+      call greater-than
+        bind link x
+        bind link y
+    turn seed, link tmp847
+save big-integer/not-equal
+  
+  task tmp64
+    base x
+    base y
+    save tmp848
+      call not
+        bind bits
+          call big-integer/equal
+            bind link x
+            bind link y
+    turn seed, link tmp848
+save big-integer/less-than-or-equal
+  
+  task tmp65
+    base x
+    base y
+    save tmp849
+      call not
+        bind bits
+          call big-integer/greater-than
+            bind link x
+            bind link y
+    turn seed, link tmp849
+save big-integer/greater-than-or-equal
+  
+  task tmp66
+    base x
+    base y
+    save tmp850
+      call not
+        bind bits
+          call big-integer/less-than
+            bind link x
+            bind link y
+    turn seed, link tmp850
+save big-integer/exponentiate
+  
+  task tmp67
+    base x
+    base y
+    save tmp851
+      call get-type-of
+        bind bits, link x
+    save tmp852
+      call strictly-equal
+        bind a, link tmp851
+        bind b, text <number>
+    save tmp853
+      call get-type-of
+        bind bits, link y
+    save tmp854
+      call strictly-equal
+        bind a, link tmp853
+        bind b, text <number>
+    save tmp855
+      call and
+        bind a, tmp852
+        bind b, tmp854
+    call check
+      bind test, link tmp855
+      hook match
+        save tmp856
+          call gte
+            bind a, link y
+            bind b, size 0
+        save tmp857
+          call lt
+            bind a, link y
+            bind b, size 53
+        save tmp858
+          call negative
+            bind bits, size 1
+        save tmp859
+          call gte
+            bind a, link x
+            bind b, link tmp858
+        save tmp860
+          call lte
+            bind a, link x
+            bind b, size 1
+        save tmp861
+          call and
+            bind a, tmp859
+            bind b, tmp860
+        save tmp862
+          call or
+            bind a, tmp857
+            bind b, tmp861
+        save tmp863
+          call and
+            bind a, tmp856
+            bind b, tmp862
+        call check
+          bind test, link tmp863
+          hook match
+            save tmp864
+              call math/pow
+                bind link x
+                bind link y
+            save value
+              call add
+                bind a, size 0
+                bind b, link tmp864
+            save tmp865
+              call negative
+                bind bits, size 9007199254740991
+            save tmp866
+              call gte
+                bind a, link value
+                bind b, link tmp865
+            save tmp867
+              call lte
+                bind a, link value
+                bind b, size 9007199254740991
+            save tmp868
+              call and
+                bind a, tmp866
+                bind b, tmp867
+            call check
+              bind test, link tmp868
+              hook match
+                turn seed, link value
+    save tmp869
+      call exponentiate
+        bind link x
+        bind link y
+    turn seed, link tmp869
+save big-integer/signed-right-shift
+  
+  task tmp68
+    base x
+    base n
+    save tmp870
+      call function valueOf() { [native code] }
+        bind link x
+    save tmp871
+      call function valueOf() { [native code] }
+        bind link n
+    save tmp872
+      call internal/signed-right-shift
+        bind link tmp870
+        bind link tmp871
+    save tmp873
+      call to-result
+        bind link tmp872
+    turn seed, link tmp873
+save big-integer/left-shift
+  
+  task tmp69
+    base x
+    base n
+    save tmp874
+      call function valueOf() { [native code] }
+        bind link x
+    save tmp875
+      call function valueOf() { [native code] }
+        bind link n
+    save tmp876
+      call internal/left-shift
+        bind link tmp874
+        bind link tmp875
+    save tmp877
+      call to-result
+        bind link tmp876
+    turn seed, link tmp877
+save tmp878
+  call or
+    bind a, global
+    bind b, global-this
+save tmp878/big-integer, link big-integer
+save big-integer/getinternal
+  
+  task tmp70
+    turn seed, link internal
+save big-integer/setinternal
+  
+  task tmp71
+    base newInternal
+    save internal, link new-internal

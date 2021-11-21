@@ -45,4 +45,4 @@ function log(x) {
   fs.writeFileSync('libs/md5.link', text)
 }
 
-fs.writeFileSync('libs/keccak32.link', print(t(fs.readFileSync('libs/keccak32.js', 'utf-8'))))
+fs.writeFileSync('libs/bignumber.link', print(t(fs.readFileSync('libs/bignumber.js', 'utf-8'))))

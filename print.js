@@ -14,6 +14,11 @@ const printers = {
   save: printSave,
   size: printSize,
   text: printText,
+  halt: printHalt,
+}
+
+function printHalt(node) {
+  return [`halt ${printSift(node.site)}`]
 }
 
 function printSize(node) {
@@ -188,6 +193,7 @@ function printHook(name, hook) {
       text.push(`  ${line}`)
     })
   })
+  // console.log(name, hook)
   hook.zone.forEach(z => {
     call(printers, z.form, z).forEach(line => {
       text.push(`  ${line}`)
