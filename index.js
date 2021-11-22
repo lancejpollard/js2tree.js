@@ -221,7 +221,6 @@ function transformSwitchStatement(node, scope) {
   })
   const hook = []
   cases.forEach(([test, consequent]) => {
-    console.log(consequent)
     if (test) {
       hook.push({
         name: 'test',
@@ -328,7 +327,6 @@ function transformFunctionDeclaration(node, scope) {
   const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
     const p = call(transforms, param.type, param, scope)
-    console.log(p)
     if (Array.isArray(p)) {
       base.push(createBase(toTerm(p[0].term)))
     } else {
