@@ -54,7 +54,7 @@ function createBase(name, form) {
   }
 }
 
-function createCall(name, bind = [], hook = {}, zone = []) {
+function createCall(name, bind = [], hook = [], zone = []) {
   return {
     form: 'call',
     name,

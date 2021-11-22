@@ -50,4 +50,4 @@ function log(x) {
   fs.writeFileSync('libs/md5.link', text)
 }
 
-fs.writeFileSync('libs/tinycolor.link', print(t(fs.readFileSync('libs/tinycolor.js', 'utf-8'))))
+fs.writeFileSync('libs/jpegdecoder.link', print(t(fs.readFileSync('libs/jpegdecoder.js', 'utf-8'))))

@@ -109,6 +109,7 @@ function printTask(node) {
   const text = []
   text.push(`task ${printName(node.name)}`)
   node.base.forEach(b => {
+    console.log(node, b)
     printBase(b).forEach(line => {
       text.push(`  ${line}`)
     })
@@ -186,9 +187,8 @@ function printCall(node) {
       text.push(`  turn ${z.term}`)
     }
   })
-  Object.keys(node.hook).forEach(name => {
-    const hook = node.hook[name]
-    printHook(name, hook).forEach(line => {
+  node.hook.forEach(hook => {
+    printHook(hook.name, hook).forEach(line => {
       text.push(`  ${line}`)
     })
   })
@@ -199,6 +199,7 @@ function printHook(name, hook) {
   const text = []
   text.push(`hook ${name}`)
   hook.base.forEach(b => {
+    console.log(name, hook, b)
     printBase(b).forEach(line => {
       text.push(`  ${line}`)
     })

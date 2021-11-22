@@ -1,0 +1,5255 @@
+save tmp880, call task jpeg-image
+  text <use strict>
+  save tmp0
+    make list
+      bind size 0
+      bind size 1
+      bind size 8
+      bind size 16
+      bind size 9
+      bind size 2
+      bind size 3
+      bind size 10
+      bind size 17
+      bind size 24
+      bind size 32
+      bind size 25
+      bind size 18
+      bind size 11
+      bind size 4
+      bind size 5
+      bind size 12
+      bind size 19
+      bind size 26
+      bind size 33
+      bind size 40
+      bind size 48
+      bind size 41
+      bind size 34
+      bind size 27
+      bind size 20
+      bind size 13
+      bind size 6
+      bind size 7
+      bind size 14
+      bind size 21
+      bind size 28
+      bind size 35
+      bind size 42
+      bind size 49
+      bind size 56
+      bind size 57
+      bind size 50
+      bind size 43
+      bind size 36
+      bind size 29
+      bind size 22
+      bind size 15
+      bind size 23
+      bind size 30
+      bind size 37
+      bind size 44
+      bind size 51
+      bind size 58
+      bind size 59
+      bind size 52
+      bind size 45
+      bind size 38
+      bind size 31
+      bind size 39
+      bind size 46
+      bind size 53
+      bind size 60
+      bind size 61
+      bind size 54
+      bind size 47
+      bind size 55
+      bind size 62
+      bind size 63
+  save dct-zig-zag
+    make int32-array
+      bind link tmp0
+  save dct-cos1, size 4017
+  save dct-sin1, size 799
+  save dct-cos3, size 3406
+  save dct-sin3, size 2276
+  save dct-cos6, size 1567
+  save dct-sin6, size 3784
+  save dct-sqrt2, size 5793
+  save dct-sqrt1d2, size 2896
+  task constructor
+  task build-huffman-table
+    base code-lengths
+    base values
+    save tmp1, make list
+    save k, size 0
+    save code, link tmp1
+    save i
+    save j
+    save length, size 16
+    call loop
+      hook test
+        save tmp2
+          call gt
+            bind a, link length
+            bind b, size 0
+        save tmp3
+          call subtract
+            bind a, link length
+            bind b, size 1
+        save tmp4
+          call not
+            bind bits, link code-lengths[tmp3]
+        save tmp5
+          call and
+            bind a, link tmp2
+            bind b, link tmp4
+        call check
+          bind test, link tmp5
+      hook match
+        call decrement
+          bind value, link length
+      hook fault
+        turn seed, link false
+    save tmp6
+      make object
+        bind children, make list
+        bind index, size 0
+    call code/push
+      bind link tmp6
+    save p, link code[0]
+    save q
+    save i, size 0
+    call loop
+      hook test
+        save tmp7
+          call lt
+            bind a, link i
+            bind b, link length
+        call check
+          bind test, link tmp7
+      hook match
+        save j, size 0
+        call loop
+          hook test
+            save tmp8
+              call lt
+                bind a, link j
+                bind b, link code-lengths[i]
+            call check
+              bind test, link tmp8
+          hook match
+            save tmp9, call code/pop
+            save p, link tmp9
+            save p/children[p/index], link values[k]
+            call loop
+              hook test
+                save tmp10
+                  call gt
+                    bind a, link p/index
+                    bind b, size 0
+                call check
+                  bind test, link tmp10
+              hook match
+                save tmp11
+                  call strictly-equal
+                    bind a, link code/length
+                    bind b, size 0
+                call check
+                  bind test, link tmp11
+                  hook match
+                    halt make error,  bind text <Could not recreate Huffman Table>
+                save tmp12, call code/pop
+                save p, link tmp12
+              hook fault
+                turn seed, link false
+            call increment
+              bind value, link p/index
+            call code/push
+              bind link p
+            call loop
+              hook test
+                save tmp13
+                  call lte
+                    bind a, link code/length
+                    bind b, link i
+                call check
+                  bind test, link tmp13
+              hook match
+                save tmp14
+                  make object
+                    bind children, make list
+                    bind index, size 0
+                save q, link tmp14
+                call code/push
+                  bind link q
+                save p/children[p/index], link q/children
+                save p, link q
+              hook fault
+                turn seed, link false
+            call increment
+              bind value, link k
+            call increment
+              bind value, link j
+          hook fault
+            turn seed, link false
+        save tmp15
+          call add
+            bind a, link i
+            bind b, size 1
+        save tmp16
+          call lt
+            bind a, link tmp15
+            bind b, link length
+        call check
+          bind test, link tmp16
+          hook match
+            save tmp17
+              make object
+                bind children, make list
+                bind index, size 0
+            save q, link tmp17
+            call code/push
+              bind link q
+            save p/children[p/index], link q/children
+            save p, link q
+        call increment
+          bind value, link i
+      hook fault
+        turn seed, link false
+    turn seed, link code[0]/children
+  task decode-scan
+    base data
+    base offset
+    base frame
+    base components
+    base reset-interval
+    base spectral-start
+    base spectral-end
+    base successive-prev
+    base successive
+    base opts
+    save precision, link frame/precision
+    save samples-per-line, link frame/samples-per-line
+    save scan-lines, link frame/scan-lines
+    save mcus-per-line, link frame/mcus-per-line
+    save progressive, link frame/progressive
+    save max-h, link frame/max-h
+    save max-v, link frame/max-v
+    save start-offset, link offset
+    save bits-data, size 0
+    save bits-count, size 0
+    task read-bit
+      save tmp18
+        call gt
+          bind a, link bits-count
+          bind b, size 0
+      call check
+        bind test, link tmp18
+        hook match
+          call decrement
+            bind value, link bits-count
+          save tmp19
+            call shift-right
+              bind a, link bits-data
+              bind b, link bits-count
+          save tmp20
+            call bitwise-and
+              bind a, link tmp19
+              bind b, size 1
+          turn seed, link tmp20
+      save tmp21
+        call increment
+          bind value, link offset
+      save bits-data, link data[tmp21]
+      save tmp22
+        call equal
+          bind a, link bits-data
+          bind b, size 255
+      call check
+        bind test, link tmp22
+        hook match
+          save tmp23
+            call increment
+              bind value, link offset
+          save next-byte, link data[tmp23]
+          call check
+            bind test, link next-byte
+            hook match
+              save tmp24
+                call shift-left
+                  bind a, link bits-data
+                  bind b, size 8
+              save tmp25
+                call bitwise-or
+                  bind a, link tmp24
+                  bind b, link next-byte
+              save tmp26
+                call tmp25/to-string
+                  bind size 16
+              save tmp27
+                call add
+                  bind a, text <unexpected marker: >
+                  bind b, link tmp26
+              halt make error,  bind link tmp27
+      save bits-count, size 7
+      save tmp28
+        call unsigned-shift-right
+          bind a, link bits-data
+          bind b, size 7
+      turn seed, link tmp28
+    task decode-huffman
+      base tree
+      save node, link tree
+      save bit
+      call loop
+        hook test
+          save tmp29, call read-bit
+          save bit, link tmp29
+          save tmp30
+            call not-strictly-equal
+              bind a, link bit
+              bind b
+          call check
+            bind test, link tmp30
+        hook match
+          save node, link node[bit]
+          save tmp31
+            call get-type-of
+              bind bits, link node
+          save tmp32
+            call strictly-equal
+              bind a, link tmp31
+              bind b, text <number>
+          call check
+            bind test, link tmp32
+            hook match
+              turn seed, link node
+          save tmp33
+            call get-type-of
+              bind bits, link node
+          save tmp34
+            call not-strictly-equal
+              bind a, link tmp33
+              bind b, text <object>
+          call check
+            bind test, link tmp34
+            hook match
+              halt make error,  bind text <invalid huffman sequence>
+        hook fault
+          turn seed, link false
+      turn seed
+    task receive
+      base length
+      save n, size 0
+      call loop
+        hook test
+          save tmp35
+            call gt
+              bind a, link length
+              bind b, size 0
+          call check
+            bind test, link tmp35
+        hook match
+          save tmp36, call read-bit
+          save bit, link tmp36
+          save tmp37
+            call strictly-equal
+              bind a, link bit
+              bind b
+          call check
+            bind test, link tmp37
+            hook match
+              turn seed
+          save tmp38
+            call shift-left
+              bind a, link n
+              bind b, size 1
+          save tmp39
+            call bitwise-or
+              bind a, link tmp38
+              bind b, link bit
+          save n, link tmp39
+          call decrement
+            bind value, link length
+        hook fault
+          turn seed, link false
+      turn seed, link n
+    task receive-and-extend
+      base length
+      save tmp40
+        call receive
+          bind link length
+      save n, link tmp40
+      save tmp41
+        call subtract
+          bind a, link length
+          bind b, size 1
+      save tmp42
+        call shift-left
+          bind a, size 1
+          bind b, link tmp41
+      save tmp43
+        call gte
+          bind a, link n
+          bind b, link tmp42
+      call check
+        bind test, link tmp43
+        hook match
+          turn seed, link n
+      save tmp44
+        call negative
+          bind bits, size 1
+      save tmp45
+        call shift-left
+          bind a, link tmp44
+          bind b, link length
+      save tmp46
+        call add
+          bind a, link n
+          bind b, link tmp45
+      save tmp47
+        call add
+          bind a, link tmp46
+          bind b, size 1
+      turn seed, link tmp47
+    task decode-baseline
+      base component
+      base zz
+      save tmp48
+        call decode-huffman
+          bind link component/huffman-table-d-c
+      save t, link tmp48
+      save tmp49
+        call strictly-equal
+          bind a, link t
+          bind b, size 0
+      save tmp50
+        call receive-and-extend
+          bind link t
+      save tmp51
+      call check
+        bind test, link tmp49
+        hook match
+          save tmp51, size 0
+        hook fault
+          save tmp51, link tmp50
+      save diff, link tmp51
+      save component/pred, link diff
+      save zz[0], link component/pred
+      save k, size 1
+      call loop
+        hook test
+          save tmp52
+            call lt
+              bind a, link k
+              bind b, size 64
+          call check
+            bind test, link tmp52
+        hook match
+          save tmp53
+            call decode-huffman
+              bind link component/huffman-table-a-c
+          save rs, link tmp53
+          save tmp54
+            call bitwise-and
+              bind a, link rs
+              bind b, size 15
+          save tmp55
+            call shift-right
+              bind a, link rs
+              bind b, size 4
+          save s, link tmp54
+          save r, link tmp55
+          save tmp56
+            call strictly-equal
+              bind a, link s
+              bind b, size 0
+          call check
+            bind test, link tmp56
+            hook match
+              save tmp57
+                call lt
+                  bind a, link r
+                  bind b, size 15
+              call check
+                bind test, link tmp57
+                hook match
+                  turn seed, link false
+              save k, size 16
+              turn seed, link true
+          save k, link r
+          save z, link dct-zig-zag[k]
+          save tmp58
+            call receive-and-extend
+              bind link s
+          save zz[z], link tmp58
+          call increment
+            bind value, link k
+        hook fault
+          turn seed, link false
+    task decode-d-c-first
+      base component
+      base zz
+      save tmp59
+        call decode-huffman
+          bind link component/huffman-table-d-c
+      save t, link tmp59
+      save tmp60
+        call strictly-equal
+          bind a, link t
+          bind b, size 0
+      save tmp61
+        call receive-and-extend
+          bind link t
+      save tmp62
+        call shift-left
+          bind a, link tmp61
+          bind b, link successive
+      save tmp63
+      call check
+        bind test, link tmp60
+        hook match
+          save tmp63, size 0
+        hook fault
+          save tmp63, link tmp62
+      save diff, link tmp63
+      save component/pred, link diff
+      save zz[0], link component/pred
+    task decode-d-c-successive
+      base component
+      base zz
+      save tmp64, call read-bit
+      save tmp65
+        call shift-left
+          bind a, link tmp64
+          bind b, link successive
+      save zz[0], link tmp65
+    save eobrun, size 0
+    task decode-a-c-first
+      base component
+      base zz
+      save tmp66
+        call gt
+          bind a, link eobrun
+          bind b, size 0
+      call check
+        bind test, link tmp66
+        hook match
+          call decrement
+            bind value, link eobrun
+          turn seed
+      save k, link spectral-start
+      save e, link spectral-end
+      call loop
+        hook test
+          save tmp67
+            call lte
+              bind a, link k
+              bind b, link e
+          call check
+            bind test, link tmp67
+        hook match
+          save tmp68
+            call decode-huffman
+              bind link component/huffman-table-a-c
+          save rs, link tmp68
+          save tmp69
+            call bitwise-and
+              bind a, link rs
+              bind b, size 15
+          save tmp70
+            call shift-right
+              bind a, link rs
+              bind b, size 4
+          save s, link tmp69
+          save r, link tmp70
+          save tmp71
+            call strictly-equal
+              bind a, link s
+              bind b, size 0
+          call check
+            bind test, link tmp71
+            hook match
+              save tmp72
+                call lt
+                  bind a, link r
+                  bind b, size 15
+              call check
+                bind test, link tmp72
+                hook match
+                  save tmp73
+                    call receive
+                      bind link r
+                  save tmp74
+                    call shift-left
+                      bind a, size 1
+                      bind b, link r
+                  save tmp75
+                    call add
+                      bind a, link tmp73
+                      bind b, link tmp74
+                  save tmp76
+                    call subtract
+                      bind a, link tmp75
+                      bind b, size 1
+                  save eobrun, link tmp76
+                  turn seed, link false
+              save k, size 16
+              turn seed, link true
+          save k, link r
+          save z, link dct-zig-zag[k]
+          save tmp77
+            call receive-and-extend
+              bind link s
+          save tmp78
+            call shift-left
+              bind a, size 1
+              bind b, link successive
+          save tmp79
+            call multiply
+              bind a, link tmp77
+              bind b, link tmp78
+          save zz[z], link tmp79
+          call increment
+            bind value, link k
+        hook fault
+          turn seed, link false
+    save successive-a-c-state, size 0
+    save successive-a-c-next-value
+    task decode-a-c-successive
+      base component
+      base zz
+      save k, link spectral-start
+      save e, link spectral-end
+      save r, size 0
+      call loop
+        hook test
+          save tmp80
+            call lte
+              bind a, link k
+              bind b, link e
+          call check
+            bind test, link tmp80
+        hook match
+          save z, link dct-zig-zag[k]
+          save tmp81
+            call lt
+              bind a, link zz[z]
+              bind b, size 0
+          save tmp82
+            call negative
+              bind bits, size 1
+          save tmp83
+          call check
+            bind test, link tmp81
+            hook match
+              save tmp83, link tmp82
+            hook fault
+              save tmp83, size 1
+          save direction, link tmp83
+          save tmp84
+            call decode-huffman
+              bind link component/huffman-table-a-c
+          save tmp85
+            call bitwise-and
+              bind a, link rs
+              bind b, size 15
+          save tmp86
+            call shift-right
+              bind a, link rs
+              bind b, size 4
+          save tmp87
+            call strictly-equal
+              bind a, link s
+              bind b, size 0
+          call match-first
+            hook test
+              call check-equal
+                bind link successive-a-c-state
+                bind size 0
+            hook match
+              save rs, link tmp84
+              save s, link tmp85
+              save r, link tmp86
+              call check
+                bind test, link tmp87
+                hook match
+                  save tmp88
+                    call lt
+                      bind a, link r
+                      bind b, size 15
+                  call check
+                    bind test, link tmp88
+                    hook match
+                      save tmp89
+                        call receive
+                          bind link r
+                      save tmp90
+                        call shift-left
+                          bind a, size 1
+                          bind b, link r
+                      save tmp91
+                        call add
+                          bind a, link tmp89
+                          bind b, link tmp90
+                      save eobrun, link tmp91
+                      save successive-a-c-state, size 4
+                    hook fault
+                      save r, size 16
+                      save successive-a-c-state, size 1
+                hook fault
+                  save tmp92
+                    call not-strictly-equal
+                      bind a, link s
+                      bind b, size 1
+                  call check
+                    bind test, link tmp92
+                    hook match
+                      halt make error,  bind text <invalid ACn encoding>
+                  save tmp93
+                    call receive-and-extend
+                      bind link s
+                  save successive-a-c-next-value, link tmp93
+                  save tmp94
+                  call check
+                    bind test, link r
+                    hook match
+                      save tmp94, size 2
+                    hook fault
+                      save tmp94, size 3
+                  save successive-a-c-state, link tmp94
+              turn seed, link true
+            hook test
+              call check-equal
+                bind link successive-a-c-state
+                bind size 1
+            hook match
+            hook test
+              call check-equal
+                bind link successive-a-c-state
+                bind size 2
+            hook match
+              call check
+                bind test, link zz[z]
+                hook match
+                  save zz[z], link tmp97
+                hook fault
+                  call decrement
+                    bind value, link r
+                  save tmp98
+                    call strictly-equal
+                      bind a, link r
+                      bind b, size 0
+                  call check
+                    bind test, link tmp98
+                    hook match
+                      save successive-a-c-state, link tmp100
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link successive-a-c-state
+                bind size 3
+            hook match
+              call check
+                bind test, link zz[z]
+                hook match
+                  save zz[z], link tmp103
+                hook fault
+                  save tmp104
+                    call shift-left
+                      bind a, link successive-a-c-next-value
+                      bind b, link successive
+                  save zz[z], link tmp104
+                  save successive-a-c-state, size 0
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link successive-a-c-state
+                bind size 4
+            hook match
+              call check
+                bind test, link zz[z]
+                hook match
+                  save zz[z], link tmp107
+              turn seed, link false
+          call increment
+            bind value, link k
+        hook fault
+          turn seed, link false
+      save tmp108
+        call strictly-equal
+          bind a, link successive-a-c-state
+          bind b, size 4
+      call check
+        bind test, link tmp108
+        hook match
+          call decrement
+            bind value, link eobrun
+          save tmp109
+            call strictly-equal
+              bind a, link eobrun
+              bind b, size 0
+          call check
+            bind test, link tmp109
+            hook match
+              save successive-a-c-state, size 0
+    task decode-mcu
+      base component
+      base decode
+      base mcu
+      base row
+      base col
+      save tmp110
+        call divide
+          bind a, link mcu
+          bind b, link mcus-per-line
+      save tmp111
+        call bitwise-or
+          bind a, link tmp110
+          bind b, size 0
+      save mcu-row, link tmp111
+      save tmp112
+        call modulo
+          bind a, link mcu
+          bind b, link mcus-per-line
+      save mcu-col, link tmp112
+      save tmp113
+        call multiply
+          bind a, link mcu-row
+          bind b, link component/v
+      save tmp114
+        call add
+          bind a, link tmp113
+          bind b, link row
+      save block-row, link tmp114
+      save tmp115
+        call multiply
+          bind a, link mcu-col
+          bind b, link component/h
+      save tmp116
+        call add
+          bind a, link tmp115
+          bind b, link col
+      save block-col, link tmp116
+      save tmp117
+        call strictly-equal
+          bind a, link component/blocks[block-row]
+          bind b, link void
+      save tmp118
+        call and
+          bind a, link tmp117
+          bind b, link opts/tolerant-decoding
+      call check
+        bind test, link tmp118
+        hook match
+          turn seed
+      call decode
+        bind link component
+        bind link component/blocks[block-row][block-col]
+    task decode-block
+      base component
+      base decode
+      base mcu
+      save tmp119
+        call divide
+          bind a, link mcu
+          bind b, link component/blocks-per-line
+      save tmp120
+        call bitwise-or
+          bind a, link tmp119
+          bind b, size 0
+      save block-row, link tmp120
+      save tmp121
+        call modulo
+          bind a, link mcu
+          bind b, link component/blocks-per-line
+      save block-col, link tmp121
+      save tmp122
+        call strictly-equal
+          bind a, link component/blocks[block-row]
+          bind b, link void
+      save tmp123
+        call and
+          bind a, link tmp122
+          bind b, link opts/tolerant-decoding
+      call check
+        bind test, link tmp123
+        hook match
+          turn seed
+      call decode
+        bind link component
+        bind link component/blocks[block-row][block-col]
+    save components-length, link components/length
+    save component
+    save i
+    save j
+    save k
+    save n
+    save decode-fn
+    call check
+      bind test, link progressive
+      hook match
+        save tmp124
+          call strictly-equal
+            bind a, link spectral-start
+            bind b, size 0
+        call check
+          bind test, link tmp124
+          hook match
+            save decode-fn, link tmp126
+          hook fault
+            save decode-fn, link tmp128
+      hook fault
+        save decode-fn, link decode-baseline
+    save mcu, size 0
+    save marker
+    save mcu-expected
+    save tmp129
+      call equal
+        bind a, link components-length
+        bind b, size 1
+    call check
+      bind test, link tmp129
+      hook match
+        save tmp130
+          call multiply
+            bind a, link components[0]/blocks-per-line
+            bind b, link components[0]/blocks-per-column
+        save mcu-expected, link tmp130
+      hook fault
+        save tmp131
+          call multiply
+            bind a, link mcus-per-line
+            bind b, link frame/mcus-per-column
+        save mcu-expected, link tmp131
+    save tmp132
+      call not
+        bind bits, link reset-interval
+    call check
+      bind test, link tmp132
+      hook match
+        save reset-interval, link mcu-expected
+    save h
+    save v
+    call loop
+      hook test
+        save tmp133
+          call lt
+            bind a, link mcu
+            bind b, link mcu-expected
+        call check
+          bind test, link tmp133
+      hook match
+        save i, size 0
+        call loop
+          hook test
+            save tmp134
+              call lt
+                bind a, link i
+                bind b, link components-length
+            call check
+              bind test, link tmp134
+          hook match
+            save components[i]/pred, size 0
+            call increment
+              bind value, link i
+          hook fault
+            turn seed, link false
+        save eobrun, size 0
+        save tmp135
+          call equal
+            bind a, link components-length
+            bind b, size 1
+        call check
+          bind test, link tmp135
+          hook match
+            save component, link components[0]
+            save n, size 0
+            call loop
+              hook test
+                save tmp136
+                  call lt
+                    bind a, link n
+                    bind b, link reset-interval
+                call check
+                  bind test, link tmp136
+              hook match
+                call decode-block
+                  bind link component
+                  bind link decode-fn
+                  bind link mcu
+                call increment
+                  bind value, link mcu
+                call increment
+                  bind value, link n
+              hook fault
+                turn seed, link false
+          hook fault
+            save n, size 0
+            call loop
+              hook test
+                save tmp137
+                  call lt
+                    bind a, link n
+                    bind b, link reset-interval
+                call check
+                  bind test, link tmp137
+              hook match
+                save i, size 0
+                call loop
+                  hook test
+                    save tmp138
+                      call lt
+                        bind a, link i
+                        bind b, link components-length
+                    call check
+                      bind test, link tmp138
+                  hook match
+                    save component, link components[i]
+                    save h, link component/h
+                    save v, link component/v
+                    save j, size 0
+                    call loop
+                      hook test
+                        save tmp139
+                          call lt
+                            bind a, link j
+                            bind b, link v
+                        call check
+                          bind test, link tmp139
+                      hook match
+                        save k, size 0
+                        call loop
+                          hook test
+                            save tmp140
+                              call lt
+                                bind a, link k
+                                bind b, link h
+                            call check
+                              bind test, link tmp140
+                          hook match
+                            call decode-mcu
+                              bind link component
+                              bind link decode-fn
+                              bind link mcu
+                              bind link j
+                              bind link k
+                            call increment
+                              bind value, link k
+                          hook fault
+                            turn seed, link false
+                        call increment
+                          bind value, link j
+                      hook fault
+                        turn seed, link false
+                    call increment
+                      bind value, link i
+                  hook fault
+                    turn seed, link false
+                call increment
+                  bind value, link mcu
+                save tmp141
+                  call strictly-equal
+                    bind a, link mcu
+                    bind b, link mcu-expected
+                call check
+                  bind test, link tmp141
+                  hook match
+                    turn seed, link false
+                call increment
+                  bind value, link n
+              hook fault
+                turn seed, link false
+        save tmp142
+          call strictly-equal
+            bind a, link mcu
+            bind b, link mcu-expected
+        call check
+          bind test, link tmp142
+          hook match
+            call loop
+              hook test
+                save tmp143
+                  call subtract
+                    bind a, link data/length
+                    bind b, size 2
+                save tmp144
+                  call lt
+                    bind a, link offset
+                    bind b, link tmp143
+                call check
+                  bind test, link tmp144
+              hook match
+                save tmp145
+                  call strictly-equal
+                    bind a, link data[offset]
+                    bind b, size 255
+                call check
+                  bind test, link tmp145
+                  hook match
+                    save tmp146
+                      call add
+                        bind a, link offset
+                        bind b, size 1
+                    save tmp147
+                      call not-strictly-equal
+                        bind a, link data[tmp146]
+                        bind b, size 0
+                    call check
+                      bind test, link tmp147
+                      hook match
+                        turn seed, link false
+                save offset, size 1
+              hook fault
+                turn seed, link false
+        save bits-count, size 0
+        save tmp148
+          call shift-left
+            bind a, link data[offset]
+            bind b, size 8
+        save tmp149
+          call add
+            bind a, link offset
+            bind b, size 1
+        save tmp150
+          call bitwise-or
+            bind a, link tmp148
+            bind b, link data[tmp149]
+        save marker, link tmp150
+        save tmp151
+          call lt
+            bind a, link marker
+            bind b, size 65280
+        call check
+          bind test, link tmp151
+          hook match
+            halt make error,  bind text <marker was not found>
+        save tmp152
+          call gte
+            bind a, link marker
+            bind b, size 65488
+        save tmp153
+          call lte
+            bind a, link marker
+            bind b, size 65495
+        save tmp154
+          call and
+            bind a, link tmp152
+            bind b, link tmp153
+        call check
+          bind test, link tmp154
+          hook match
+            save offset, size 2
+          hook fault
+            turn seed, link false
+      hook fault
+        turn seed, link false
+    save tmp155
+      call subtract
+        bind a, link offset
+        bind b, link start-offset
+    turn seed, link tmp155
+  task build-component-data
+    base frame
+    base component
+    save tmp156, make list
+    save lines, link tmp156
+    save blocks-per-line, link component/blocks-per-line
+    save blocks-per-column, link component/blocks-per-column
+    save tmp157
+      call shift-left
+        bind a, link blocks-per-line
+        bind b, size 3
+    save samples-per-line, link tmp157
+    save r
+      make int32-array
+        bind size 64
+    save r
+      make uint8-array
+        bind size 64
+    task quantize-and-inverse
+      base zz
+      base data-out
+      base data-in
+      save qt, link component/quantization-table
+      save v0
+      save v1
+      save v2
+      save v3
+      save v4
+      save v5
+      save v6
+      save v7
+      save t
+      save p, link data-in
+      save i
+      save i, size 0
+      call loop
+        hook test
+          save tmp158
+            call lt
+              bind a, link i
+              bind b, size 64
+          call check
+            bind test, link tmp158
+        hook match
+          save p[i], link tmp159
+          call increment
+            bind value, link i
+        hook fault
+          turn seed, link false
+      save i, size 0
+      call loop
+        hook test
+          save tmp160
+            call lt
+              bind a, link i
+              bind b, size 8
+          call check
+            bind test, link tmp160
+        hook match
+          save tmp161
+            call multiply
+              bind a, size 8
+              bind b, link i
+          save row, link tmp161
+          save tmp162
+            call add
+              bind a, size 1
+              bind b, link row
+          save tmp163
+            call equal
+              bind a, link p[tmp162]
+              bind b, size 0
+          save tmp164
+            call add
+              bind a, size 2
+              bind b, link row
+          save tmp165
+            call equal
+              bind a, link p[tmp164]
+              bind b, size 0
+          save tmp166
+            call and
+              bind a, link tmp163
+              bind b, link tmp165
+          save tmp167
+            call add
+              bind a, size 3
+              bind b, link row
+          save tmp168
+            call equal
+              bind a, link p[tmp167]
+              bind b, size 0
+          save tmp169
+            call and
+              bind a, link tmp166
+              bind b, link tmp168
+          save tmp170
+            call add
+              bind a, size 4
+              bind b, link row
+          save tmp171
+            call equal
+              bind a, link p[tmp170]
+              bind b, size 0
+          save tmp172
+            call and
+              bind a, link tmp169
+              bind b, link tmp171
+          save tmp173
+            call add
+              bind a, size 5
+              bind b, link row
+          save tmp174
+            call equal
+              bind a, link p[tmp173]
+              bind b, size 0
+          save tmp175
+            call and
+              bind a, link tmp172
+              bind b, link tmp174
+          save tmp176
+            call add
+              bind a, size 6
+              bind b, link row
+          save tmp177
+            call equal
+              bind a, link p[tmp176]
+              bind b, size 0
+          save tmp178
+            call and
+              bind a, link tmp175
+              bind b, link tmp177
+          save tmp179
+            call add
+              bind a, size 7
+              bind b, link row
+          save tmp180
+            call equal
+              bind a, link p[tmp179]
+              bind b, size 0
+          save tmp181
+            call and
+              bind a, link tmp178
+              bind b, link tmp180
+          call check
+            bind test, link tmp181
+            hook match
+              save tmp182
+                call add
+                  bind a, size 0
+                  bind b, link row
+              save tmp183
+                call multiply
+                  bind a, link dct-sqrt2
+                  bind b, link p[tmp182]
+              save tmp184
+                call add
+                  bind a, link tmp183
+                  bind b, size 512
+              save tmp185
+                call shift-right
+                  bind a, link tmp184
+                  bind b, size 10
+              save t, link tmp185
+              save tmp186
+                call add
+                  bind a, size 0
+                  bind b, link row
+              save p[tmp186], link t
+              save tmp187
+                call add
+                  bind a, size 1
+                  bind b, link row
+              save p[tmp187], link t
+              save tmp188
+                call add
+                  bind a, size 2
+                  bind b, link row
+              save p[tmp188], link t
+              save tmp189
+                call add
+                  bind a, size 3
+                  bind b, link row
+              save p[tmp189], link t
+              save tmp190
+                call add
+                  bind a, size 4
+                  bind b, link row
+              save p[tmp190], link t
+              save tmp191
+                call add
+                  bind a, size 5
+                  bind b, link row
+              save p[tmp191], link t
+              save tmp192
+                call add
+                  bind a, size 6
+                  bind b, link row
+              save p[tmp192], link t
+              save tmp193
+                call add
+                  bind a, size 7
+                  bind b, link row
+              save p[tmp193], link t
+              turn seed, link true
+          save tmp194
+            call add
+              bind a, size 0
+              bind b, link row
+          save tmp195
+            call multiply
+              bind a, link dct-sqrt2
+              bind b, link p[tmp194]
+          save tmp196
+            call add
+              bind a, link tmp195
+              bind b, size 128
+          save tmp197
+            call shift-right
+              bind a, link tmp196
+              bind b, size 8
+          save v0, link tmp197
+          save tmp198
+            call add
+              bind a, size 4
+              bind b, link row
+          save tmp199
+            call multiply
+              bind a, link dct-sqrt2
+              bind b, link p[tmp198]
+          save tmp200
+            call add
+              bind a, link tmp199
+              bind b, size 128
+          save tmp201
+            call shift-right
+              bind a, link tmp200
+              bind b, size 8
+          save v1, link tmp201
+          save tmp202
+            call add
+              bind a, size 2
+              bind b, link row
+          save v2, link p[tmp202]
+          save tmp203
+            call add
+              bind a, size 6
+              bind b, link row
+          save v3, link p[tmp203]
+          save tmp204
+            call add
+              bind a, size 1
+              bind b, link row
+          save tmp205
+            call add
+              bind a, size 7
+              bind b, link row
+          save tmp206
+            call subtract
+              bind a, link p[tmp204]
+              bind b, link p[tmp205]
+          save tmp207
+            call multiply
+              bind a, link dct-sqrt1d2
+              bind b, link tmp206
+          save tmp208
+            call add
+              bind a, link tmp207
+              bind b, size 128
+          save tmp209
+            call shift-right
+              bind a, link tmp208
+              bind b, size 8
+          save v4, link tmp209
+          save tmp210
+            call add
+              bind a, size 1
+              bind b, link row
+          save tmp211
+            call add
+              bind a, size 7
+              bind b, link row
+          save tmp212
+            call add
+              bind a, link p[tmp210]
+              bind b, link p[tmp211]
+          save tmp213
+            call multiply
+              bind a, link dct-sqrt1d2
+              bind b, link tmp212
+          save tmp214
+            call add
+              bind a, link tmp213
+              bind b, size 128
+          save tmp215
+            call shift-right
+              bind a, link tmp214
+              bind b, size 8
+          save v7, link tmp215
+          save tmp216
+            call add
+              bind a, size 3
+              bind b, link row
+          save tmp217
+            call shift-left
+              bind a, link p[tmp216]
+              bind b, size 4
+          save v5, link tmp217
+          save tmp218
+            call add
+              bind a, size 5
+              bind b, link row
+          save tmp219
+            call shift-left
+              bind a, link p[tmp218]
+              bind b, size 4
+          save v6, link tmp219
+          save tmp220
+            call subtract
+              bind a, link v0
+              bind b, link v1
+          save tmp221
+            call add
+              bind a, link tmp220
+              bind b, size 1
+          save tmp222
+            call shift-right
+              bind a, link tmp221
+              bind b, size 1
+          save t, link tmp222
+          save tmp223
+            call add
+              bind a, link v0
+              bind b, link v1
+          save tmp224
+            call add
+              bind a, link tmp223
+              bind b, size 1
+          save tmp225
+            call shift-right
+              bind a, link tmp224
+              bind b, size 1
+          save v0, link tmp225
+          save v1, link t
+          save tmp226
+            call multiply
+              bind a, link v2
+              bind b, link dct-sin6
+          save tmp227
+            call multiply
+              bind a, link v3
+              bind b, link dct-cos6
+          save tmp228
+            call add
+              bind a, link tmp226
+              bind b, link tmp227
+          save tmp229
+            call add
+              bind a, link tmp228
+              bind b, size 128
+          save tmp230
+            call shift-right
+              bind a, link tmp229
+              bind b, size 8
+          save t, link tmp230
+          save tmp231
+            call multiply
+              bind a, link v2
+              bind b, link dct-cos6
+          save tmp232
+            call multiply
+              bind a, link v3
+              bind b, link dct-sin6
+          save tmp233
+            call subtract
+              bind a, link tmp231
+              bind b, link tmp232
+          save tmp234
+            call add
+              bind a, link tmp233
+              bind b, size 128
+          save tmp235
+            call shift-right
+              bind a, link tmp234
+              bind b, size 8
+          save v2, link tmp235
+          save v3, link t
+          save tmp236
+            call subtract
+              bind a, link v4
+              bind b, link v6
+          save tmp237
+            call add
+              bind a, link tmp236
+              bind b, size 1
+          save tmp238
+            call shift-right
+              bind a, link tmp237
+              bind b, size 1
+          save t, link tmp238
+          save tmp239
+            call add
+              bind a, link v4
+              bind b, link v6
+          save tmp240
+            call add
+              bind a, link tmp239
+              bind b, size 1
+          save tmp241
+            call shift-right
+              bind a, link tmp240
+              bind b, size 1
+          save v4, link tmp241
+          save v6, link t
+          save tmp242
+            call add
+              bind a, link v7
+              bind b, link v5
+          save tmp243
+            call add
+              bind a, link tmp242
+              bind b, size 1
+          save tmp244
+            call shift-right
+              bind a, link tmp243
+              bind b, size 1
+          save t, link tmp244
+          save tmp245
+            call subtract
+              bind a, link v7
+              bind b, link v5
+          save tmp246
+            call add
+              bind a, link tmp245
+              bind b, size 1
+          save tmp247
+            call shift-right
+              bind a, link tmp246
+              bind b, size 1
+          save v5, link tmp247
+          save v7, link t
+          save tmp248
+            call subtract
+              bind a, link v0
+              bind b, link v3
+          save tmp249
+            call add
+              bind a, link tmp248
+              bind b, size 1
+          save tmp250
+            call shift-right
+              bind a, link tmp249
+              bind b, size 1
+          save t, link tmp250
+          save tmp251
+            call add
+              bind a, link v0
+              bind b, link v3
+          save tmp252
+            call add
+              bind a, link tmp251
+              bind b, size 1
+          save tmp253
+            call shift-right
+              bind a, link tmp252
+              bind b, size 1
+          save v0, link tmp253
+          save v3, link t
+          save tmp254
+            call subtract
+              bind a, link v1
+              bind b, link v2
+          save tmp255
+            call add
+              bind a, link tmp254
+              bind b, size 1
+          save tmp256
+            call shift-right
+              bind a, link tmp255
+              bind b, size 1
+          save t, link tmp256
+          save tmp257
+            call add
+              bind a, link v1
+              bind b, link v2
+          save tmp258
+            call add
+              bind a, link tmp257
+              bind b, size 1
+          save tmp259
+            call shift-right
+              bind a, link tmp258
+              bind b, size 1
+          save v1, link tmp259
+          save v2, link t
+          save tmp260
+            call multiply
+              bind a, link v4
+              bind b, link dct-sin3
+          save tmp261
+            call multiply
+              bind a, link v7
+              bind b, link dct-cos3
+          save tmp262
+            call add
+              bind a, link tmp260
+              bind b, link tmp261
+          save tmp263
+            call add
+              bind a, link tmp262
+              bind b, size 2048
+          save tmp264
+            call shift-right
+              bind a, link tmp263
+              bind b, size 12
+          save t, link tmp264
+          save tmp265
+            call multiply
+              bind a, link v4
+              bind b, link dct-cos3
+          save tmp266
+            call multiply
+              bind a, link v7
+              bind b, link dct-sin3
+          save tmp267
+            call subtract
+              bind a, link tmp265
+              bind b, link tmp266
+          save tmp268
+            call add
+              bind a, link tmp267
+              bind b, size 2048
+          save tmp269
+            call shift-right
+              bind a, link tmp268
+              bind b, size 12
+          save v4, link tmp269
+          save v7, link t
+          save tmp270
+            call multiply
+              bind a, link v5
+              bind b, link dct-sin1
+          save tmp271
+            call multiply
+              bind a, link v6
+              bind b, link dct-cos1
+          save tmp272
+            call add
+              bind a, link tmp270
+              bind b, link tmp271
+          save tmp273
+            call add
+              bind a, link tmp272
+              bind b, size 2048
+          save tmp274
+            call shift-right
+              bind a, link tmp273
+              bind b, size 12
+          save t, link tmp274
+          save tmp275
+            call multiply
+              bind a, link v5
+              bind b, link dct-cos1
+          save tmp276
+            call multiply
+              bind a, link v6
+              bind b, link dct-sin1
+          save tmp277
+            call subtract
+              bind a, link tmp275
+              bind b, link tmp276
+          save tmp278
+            call add
+              bind a, link tmp277
+              bind b, size 2048
+          save tmp279
+            call shift-right
+              bind a, link tmp278
+              bind b, size 12
+          save v5, link tmp279
+          save v6, link t
+          save tmp280
+            call add
+              bind a, size 0
+              bind b, link row
+          save tmp281
+            call add
+              bind a, link v0
+              bind b, link v7
+          save p[tmp280], link tmp281
+          save tmp282
+            call add
+              bind a, size 7
+              bind b, link row
+          save tmp283
+            call subtract
+              bind a, link v0
+              bind b, link v7
+          save p[tmp282], link tmp283
+          save tmp284
+            call add
+              bind a, size 1
+              bind b, link row
+          save tmp285
+            call add
+              bind a, link v1
+              bind b, link v6
+          save p[tmp284], link tmp285
+          save tmp286
+            call add
+              bind a, size 6
+              bind b, link row
+          save tmp287
+            call subtract
+              bind a, link v1
+              bind b, link v6
+          save p[tmp286], link tmp287
+          save tmp288
+            call add
+              bind a, size 2
+              bind b, link row
+          save tmp289
+            call add
+              bind a, link v2
+              bind b, link v5
+          save p[tmp288], link tmp289
+          save tmp290
+            call add
+              bind a, size 5
+              bind b, link row
+          save tmp291
+            call subtract
+              bind a, link v2
+              bind b, link v5
+          save p[tmp290], link tmp291
+          save tmp292
+            call add
+              bind a, size 3
+              bind b, link row
+          save tmp293
+            call add
+              bind a, link v3
+              bind b, link v4
+          save p[tmp292], link tmp293
+          save tmp294
+            call add
+              bind a, size 4
+              bind b, link row
+          save tmp295
+            call subtract
+              bind a, link v3
+              bind b, link v4
+          save p[tmp294], link tmp295
+          call increment
+            bind value, link i
+        hook fault
+          turn seed, link false
+      save i, size 0
+      call loop
+        hook test
+          save tmp296
+            call lt
+              bind a, link i
+              bind b, size 8
+          call check
+            bind test, link tmp296
+        hook match
+          save col, link i
+          save tmp297
+            call multiply
+              bind a, size 1
+              bind b, size 8
+          save tmp298
+            call add
+              bind a, link tmp297
+              bind b, link col
+          save tmp299
+            call equal
+              bind a, link p[tmp298]
+              bind b, size 0
+          save tmp300
+            call multiply
+              bind a, size 2
+              bind b, size 8
+          save tmp301
+            call add
+              bind a, link tmp300
+              bind b, link col
+          save tmp302
+            call equal
+              bind a, link p[tmp301]
+              bind b, size 0
+          save tmp303
+            call and
+              bind a, link tmp299
+              bind b, link tmp302
+          save tmp304
+            call multiply
+              bind a, size 3
+              bind b, size 8
+          save tmp305
+            call add
+              bind a, link tmp304
+              bind b, link col
+          save tmp306
+            call equal
+              bind a, link p[tmp305]
+              bind b, size 0
+          save tmp307
+            call and
+              bind a, link tmp303
+              bind b, link tmp306
+          save tmp308
+            call multiply
+              bind a, size 4
+              bind b, size 8
+          save tmp309
+            call add
+              bind a, link tmp308
+              bind b, link col
+          save tmp310
+            call equal
+              bind a, link p[tmp309]
+              bind b, size 0
+          save tmp311
+            call and
+              bind a, link tmp307
+              bind b, link tmp310
+          save tmp312
+            call multiply
+              bind a, size 5
+              bind b, size 8
+          save tmp313
+            call add
+              bind a, link tmp312
+              bind b, link col
+          save tmp314
+            call equal
+              bind a, link p[tmp313]
+              bind b, size 0
+          save tmp315
+            call and
+              bind a, link tmp311
+              bind b, link tmp314
+          save tmp316
+            call multiply
+              bind a, size 6
+              bind b, size 8
+          save tmp317
+            call add
+              bind a, link tmp316
+              bind b, link col
+          save tmp318
+            call equal
+              bind a, link p[tmp317]
+              bind b, size 0
+          save tmp319
+            call and
+              bind a, link tmp315
+              bind b, link tmp318
+          save tmp320
+            call multiply
+              bind a, size 7
+              bind b, size 8
+          save tmp321
+            call add
+              bind a, link tmp320
+              bind b, link col
+          save tmp322
+            call equal
+              bind a, link p[tmp321]
+              bind b, size 0
+          save tmp323
+            call and
+              bind a, link tmp319
+              bind b, link tmp322
+          call check
+            bind test, link tmp323
+            hook match
+              save tmp324
+                call add
+                  bind a, link i
+                  bind b, size 0
+              save tmp325
+                call multiply
+                  bind a, link dct-sqrt2
+                  bind b, link data-in[tmp324]
+              save tmp326
+                call add
+                  bind a, link tmp325
+                  bind b, size 8192
+              save tmp327
+                call shift-right
+                  bind a, link tmp326
+                  bind b, size 14
+              save t, link tmp327
+              save tmp328
+                call multiply
+                  bind a, size 0
+                  bind b, size 8
+              save tmp329
+                call add
+                  bind a, link tmp328
+                  bind b, link col
+              save p[tmp329], link t
+              save tmp330
+                call multiply
+                  bind a, size 1
+                  bind b, size 8
+              save tmp331
+                call add
+                  bind a, link tmp330
+                  bind b, link col
+              save p[tmp331], link t
+              save tmp332
+                call multiply
+                  bind a, size 2
+                  bind b, size 8
+              save tmp333
+                call add
+                  bind a, link tmp332
+                  bind b, link col
+              save p[tmp333], link t
+              save tmp334
+                call multiply
+                  bind a, size 3
+                  bind b, size 8
+              save tmp335
+                call add
+                  bind a, link tmp334
+                  bind b, link col
+              save p[tmp335], link t
+              save tmp336
+                call multiply
+                  bind a, size 4
+                  bind b, size 8
+              save tmp337
+                call add
+                  bind a, link tmp336
+                  bind b, link col
+              save p[tmp337], link t
+              save tmp338
+                call multiply
+                  bind a, size 5
+                  bind b, size 8
+              save tmp339
+                call add
+                  bind a, link tmp338
+                  bind b, link col
+              save p[tmp339], link t
+              save tmp340
+                call multiply
+                  bind a, size 6
+                  bind b, size 8
+              save tmp341
+                call add
+                  bind a, link tmp340
+                  bind b, link col
+              save p[tmp341], link t
+              save tmp342
+                call multiply
+                  bind a, size 7
+                  bind b, size 8
+              save tmp343
+                call add
+                  bind a, link tmp342
+                  bind b, link col
+              save p[tmp343], link t
+              turn seed, link true
+          save tmp344
+            call multiply
+              bind a, size 0
+              bind b, size 8
+          save tmp345
+            call add
+              bind a, link tmp344
+              bind b, link col
+          save tmp346
+            call multiply
+              bind a, link dct-sqrt2
+              bind b, link p[tmp345]
+          save tmp347
+            call add
+              bind a, link tmp346
+              bind b, size 2048
+          save tmp348
+            call shift-right
+              bind a, link tmp347
+              bind b, size 12
+          save v0, link tmp348
+          save tmp349
+            call multiply
+              bind a, size 4
+              bind b, size 8
+          save tmp350
+            call add
+              bind a, link tmp349
+              bind b, link col
+          save tmp351
+            call multiply
+              bind a, link dct-sqrt2
+              bind b, link p[tmp350]
+          save tmp352
+            call add
+              bind a, link tmp351
+              bind b, size 2048
+          save tmp353
+            call shift-right
+              bind a, link tmp352
+              bind b, size 12
+          save v1, link tmp353
+          save tmp354
+            call multiply
+              bind a, size 2
+              bind b, size 8
+          save tmp355
+            call add
+              bind a, link tmp354
+              bind b, link col
+          save v2, link p[tmp355]
+          save tmp356
+            call multiply
+              bind a, size 6
+              bind b, size 8
+          save tmp357
+            call add
+              bind a, link tmp356
+              bind b, link col
+          save v3, link p[tmp357]
+          save tmp358
+            call multiply
+              bind a, size 1
+              bind b, size 8
+          save tmp359
+            call add
+              bind a, link tmp358
+              bind b, link col
+          save tmp360
+            call multiply
+              bind a, size 7
+              bind b, size 8
+          save tmp361
+            call add
+              bind a, link tmp360
+              bind b, link col
+          save tmp362
+            call subtract
+              bind a, link p[tmp359]
+              bind b, link p[tmp361]
+          save tmp363
+            call multiply
+              bind a, link dct-sqrt1d2
+              bind b, link tmp362
+          save tmp364
+            call add
+              bind a, link tmp363
+              bind b, size 2048
+          save tmp365
+            call shift-right
+              bind a, link tmp364
+              bind b, size 12
+          save v4, link tmp365
+          save tmp366
+            call multiply
+              bind a, size 1
+              bind b, size 8
+          save tmp367
+            call add
+              bind a, link tmp366
+              bind b, link col
+          save tmp368
+            call multiply
+              bind a, size 7
+              bind b, size 8
+          save tmp369
+            call add
+              bind a, link tmp368
+              bind b, link col
+          save tmp370
+            call add
+              bind a, link p[tmp367]
+              bind b, link p[tmp369]
+          save tmp371
+            call multiply
+              bind a, link dct-sqrt1d2
+              bind b, link tmp370
+          save tmp372
+            call add
+              bind a, link tmp371
+              bind b, size 2048
+          save tmp373
+            call shift-right
+              bind a, link tmp372
+              bind b, size 12
+          save v7, link tmp373
+          save tmp374
+            call multiply
+              bind a, size 3
+              bind b, size 8
+          save tmp375
+            call add
+              bind a, link tmp374
+              bind b, link col
+          save v5, link p[tmp375]
+          save tmp376
+            call multiply
+              bind a, size 5
+              bind b, size 8
+          save tmp377
+            call add
+              bind a, link tmp376
+              bind b, link col
+          save v6, link p[tmp377]
+          save tmp378
+            call subtract
+              bind a, link v0
+              bind b, link v1
+          save tmp379
+            call add
+              bind a, link tmp378
+              bind b, size 1
+          save tmp380
+            call shift-right
+              bind a, link tmp379
+              bind b, size 1
+          save t, link tmp380
+          save tmp381
+            call add
+              bind a, link v0
+              bind b, link v1
+          save tmp382
+            call add
+              bind a, link tmp381
+              bind b, size 1
+          save tmp383
+            call shift-right
+              bind a, link tmp382
+              bind b, size 1
+          save v0, link tmp383
+          save v1, link t
+          save tmp384
+            call multiply
+              bind a, link v2
+              bind b, link dct-sin6
+          save tmp385
+            call multiply
+              bind a, link v3
+              bind b, link dct-cos6
+          save tmp386
+            call add
+              bind a, link tmp384
+              bind b, link tmp385
+          save tmp387
+            call add
+              bind a, link tmp386
+              bind b, size 2048
+          save tmp388
+            call shift-right
+              bind a, link tmp387
+              bind b, size 12
+          save t, link tmp388
+          save tmp389
+            call multiply
+              bind a, link v2
+              bind b, link dct-cos6
+          save tmp390
+            call multiply
+              bind a, link v3
+              bind b, link dct-sin6
+          save tmp391
+            call subtract
+              bind a, link tmp389
+              bind b, link tmp390
+          save tmp392
+            call add
+              bind a, link tmp391
+              bind b, size 2048
+          save tmp393
+            call shift-right
+              bind a, link tmp392
+              bind b, size 12
+          save v2, link tmp393
+          save v3, link t
+          save tmp394
+            call subtract
+              bind a, link v4
+              bind b, link v6
+          save tmp395
+            call add
+              bind a, link tmp394
+              bind b, size 1
+          save tmp396
+            call shift-right
+              bind a, link tmp395
+              bind b, size 1
+          save t, link tmp396
+          save tmp397
+            call add
+              bind a, link v4
+              bind b, link v6
+          save tmp398
+            call add
+              bind a, link tmp397
+              bind b, size 1
+          save tmp399
+            call shift-right
+              bind a, link tmp398
+              bind b, size 1
+          save v4, link tmp399
+          save v6, link t
+          save tmp400
+            call add
+              bind a, link v7
+              bind b, link v5
+          save tmp401
+            call add
+              bind a, link tmp400
+              bind b, size 1
+          save tmp402
+            call shift-right
+              bind a, link tmp401
+              bind b, size 1
+          save t, link tmp402
+          save tmp403
+            call subtract
+              bind a, link v7
+              bind b, link v5
+          save tmp404
+            call add
+              bind a, link tmp403
+              bind b, size 1
+          save tmp405
+            call shift-right
+              bind a, link tmp404
+              bind b, size 1
+          save v5, link tmp405
+          save v7, link t
+          save tmp406
+            call subtract
+              bind a, link v0
+              bind b, link v3
+          save tmp407
+            call add
+              bind a, link tmp406
+              bind b, size 1
+          save tmp408
+            call shift-right
+              bind a, link tmp407
+              bind b, size 1
+          save t, link tmp408
+          save tmp409
+            call add
+              bind a, link v0
+              bind b, link v3
+          save tmp410
+            call add
+              bind a, link tmp409
+              bind b, size 1
+          save tmp411
+            call shift-right
+              bind a, link tmp410
+              bind b, size 1
+          save v0, link tmp411
+          save v3, link t
+          save tmp412
+            call subtract
+              bind a, link v1
+              bind b, link v2
+          save tmp413
+            call add
+              bind a, link tmp412
+              bind b, size 1
+          save tmp414
+            call shift-right
+              bind a, link tmp413
+              bind b, size 1
+          save t, link tmp414
+          save tmp415
+            call add
+              bind a, link v1
+              bind b, link v2
+          save tmp416
+            call add
+              bind a, link tmp415
+              bind b, size 1
+          save tmp417
+            call shift-right
+              bind a, link tmp416
+              bind b, size 1
+          save v1, link tmp417
+          save v2, link t
+          save tmp418
+            call multiply
+              bind a, link v4
+              bind b, link dct-sin3
+          save tmp419
+            call multiply
+              bind a, link v7
+              bind b, link dct-cos3
+          save tmp420
+            call add
+              bind a, link tmp418
+              bind b, link tmp419
+          save tmp421
+            call add
+              bind a, link tmp420
+              bind b, size 2048
+          save tmp422
+            call shift-right
+              bind a, link tmp421
+              bind b, size 12
+          save t, link tmp422
+          save tmp423
+            call multiply
+              bind a, link v4
+              bind b, link dct-cos3
+          save tmp424
+            call multiply
+              bind a, link v7
+              bind b, link dct-sin3
+          save tmp425
+            call subtract
+              bind a, link tmp423
+              bind b, link tmp424
+          save tmp426
+            call add
+              bind a, link tmp425
+              bind b, size 2048
+          save tmp427
+            call shift-right
+              bind a, link tmp426
+              bind b, size 12
+          save v4, link tmp427
+          save v7, link t
+          save tmp428
+            call multiply
+              bind a, link v5
+              bind b, link dct-sin1
+          save tmp429
+            call multiply
+              bind a, link v6
+              bind b, link dct-cos1
+          save tmp430
+            call add
+              bind a, link tmp428
+              bind b, link tmp429
+          save tmp431
+            call add
+              bind a, link tmp430
+              bind b, size 2048
+          save tmp432
+            call shift-right
+              bind a, link tmp431
+              bind b, size 12
+          save t, link tmp432
+          save tmp433
+            call multiply
+              bind a, link v5
+              bind b, link dct-cos1
+          save tmp434
+            call multiply
+              bind a, link v6
+              bind b, link dct-sin1
+          save tmp435
+            call subtract
+              bind a, link tmp433
+              bind b, link tmp434
+          save tmp436
+            call add
+              bind a, link tmp435
+              bind b, size 2048
+          save tmp437
+            call shift-right
+              bind a, link tmp436
+              bind b, size 12
+          save v5, link tmp437
+          save v6, link t
+          save tmp438
+            call multiply
+              bind a, size 0
+              bind b, size 8
+          save tmp439
+            call add
+              bind a, link tmp438
+              bind b, link col
+          save tmp440
+            call add
+              bind a, link v0
+              bind b, link v7
+          save p[tmp439], link tmp440
+          save tmp441
+            call multiply
+              bind a, size 7
+              bind b, size 8
+          save tmp442
+            call add
+              bind a, link tmp441
+              bind b, link col
+          save tmp443
+            call subtract
+              bind a, link v0
+              bind b, link v7
+          save p[tmp442], link tmp443
+          save tmp444
+            call multiply
+              bind a, size 1
+              bind b, size 8
+          save tmp445
+            call add
+              bind a, link tmp444
+              bind b, link col
+          save tmp446
+            call add
+              bind a, link v1
+              bind b, link v6
+          save p[tmp445], link tmp446
+          save tmp447
+            call multiply
+              bind a, size 6
+              bind b, size 8
+          save tmp448
+            call add
+              bind a, link tmp447
+              bind b, link col
+          save tmp449
+            call subtract
+              bind a, link v1
+              bind b, link v6
+          save p[tmp448], link tmp449
+          save tmp450
+            call multiply
+              bind a, size 2
+              bind b, size 8
+          save tmp451
+            call add
+              bind a, link tmp450
+              bind b, link col
+          save tmp452
+            call add
+              bind a, link v2
+              bind b, link v5
+          save p[tmp451], link tmp452
+          save tmp453
+            call multiply
+              bind a, size 5
+              bind b, size 8
+          save tmp454
+            call add
+              bind a, link tmp453
+              bind b, link col
+          save tmp455
+            call subtract
+              bind a, link v2
+              bind b, link v5
+          save p[tmp454], link tmp455
+          save tmp456
+            call multiply
+              bind a, size 3
+              bind b, size 8
+          save tmp457
+            call add
+              bind a, link tmp456
+              bind b, link col
+          save tmp458
+            call add
+              bind a, link v3
+              bind b, link v4
+          save p[tmp457], link tmp458
+          save tmp459
+            call multiply
+              bind a, size 4
+              bind b, size 8
+          save tmp460
+            call add
+              bind a, link tmp459
+              bind b, link col
+          save tmp461
+            call subtract
+              bind a, link v3
+              bind b, link v4
+          save p[tmp460], link tmp461
+          call increment
+            bind value, link i
+        hook fault
+          turn seed, link false
+      save i, size 0
+      call loop
+        hook test
+          save tmp462
+            call lt
+              bind a, link i
+              bind b, size 64
+          call check
+            bind test, link tmp462
+        hook match
+          save tmp463
+            call add
+              bind a, link p[i]
+              bind b, size 8
+          save tmp464
+            call shift-right
+              bind a, link tmp463
+              bind b, size 4
+          save tmp465
+            call add
+              bind a, size 128
+              bind b, link tmp464
+          save sample, link tmp465
+          save tmp466
+            call lt
+              bind a, link sample
+              bind b, size 0
+          save tmp467
+            call gt
+              bind a, link sample
+              bind b, size 255
+          save tmp468
+          call check
+            bind test, link tmp467
+            hook match
+              save tmp468, size 255
+            hook fault
+              save tmp468, link sample
+          save tmp469
+          call check
+            bind test, link tmp466
+            hook match
+              save tmp469, size 0
+            hook fault
+              save tmp469, link tmp468
+          save data-out[i], link tmp469
+          call increment
+            bind value, link i
+        hook fault
+          turn seed, link false
+    save tmp470
+      call multiply
+        bind a, link samples-per-line
+        bind b, link blocks-per-column
+    save tmp471
+      call multiply
+        bind a, link tmp470
+        bind b, size 8
+    call request-memory-allocation
+      bind link tmp471
+    save i
+    save j
+    save block-row, size 0
+    call loop
+      hook test
+        save tmp472
+          call lt
+            bind a, link block-row
+            bind b, link blocks-per-column
+        call check
+          bind test, link tmp472
+      hook match
+        save tmp473
+          call shift-left
+            bind a, link block-row
+            bind b, size 3
+        save scan-line, link tmp473
+        save i, size 0
+        call loop
+          hook test
+            save tmp474
+              call lt
+                bind a, link i
+                bind b, size 8
+            call check
+              bind test, link tmp474
+          hook match
+            call lines/push
+              bind
+                make uint8-array
+                  bind link samples-per-line
+            call increment
+              bind value, link i
+          hook fault
+            turn seed, link false
+        save block-col, size 0
+        call loop
+          hook test
+            save tmp475
+              call lt
+                bind a, link block-col
+                bind b, link blocks-per-line
+            call check
+              bind test, link tmp475
+          hook match
+            call quantize-and-inverse
+              bind link component/blocks[block-row][block-col]
+              bind link r
+              bind link r
+            save tmp476
+              call shift-left
+                bind a, link block-col
+                bind b, size 3
+            save offset, size 0
+            save sample, link tmp476
+            save j, size 0
+            call loop
+              hook test
+                save tmp477
+                  call lt
+                    bind a, link j
+                    bind b, size 8
+                call check
+                  bind test, link tmp477
+              hook match
+                save tmp478
+                  call add
+                    bind a, link scan-line
+                    bind b, link j
+                save line, link lines[tmp478]
+                save i, size 0
+                call loop
+                  hook test
+                    save tmp479
+                      call lt
+                        bind a, link i
+                        bind b, size 8
+                    call check
+                      bind test, link tmp479
+                  hook match
+                    save line[tmp480], link r[tmp481]
+                    call increment
+                      bind value, link i
+                  hook fault
+                    turn seed, link false
+                call increment
+                  bind value, link j
+              hook fault
+                turn seed, link false
+            call increment
+              bind value, link block-col
+          hook fault
+            turn seed, link false
+        call increment
+          bind value, link block-row
+      hook fault
+        turn seed, link false
+    turn seed, link lines
+  task clamp-to8bit
+    base a
+    save tmp482
+      call lt
+        bind a, link a
+        bind b, size 0
+    save tmp483
+      call gt
+        bind a, link a
+        bind b, size 255
+    save tmp484
+    call check
+      bind test, link tmp483
+      hook match
+        save tmp484, size 255
+      hook fault
+        save tmp484, link a
+    save tmp485
+    call check
+      bind test, link tmp482
+      hook match
+        save tmp485, size 0
+      hook fault
+        save tmp485, link tmp484
+    turn seed, link tmp485
+  save tmp873
+    make object
+      bind load
+        task load
+          base path
+          save xhr, make x-m-l-http-request
+          call xhr/open
+            bind text <GET>
+            bind link path
+            bind link true
+          save xhr/response-type, text <arraybuffer>
+          save tmp487
+            call task tmp0
+  save tmp486
+    call or
+      bind a, link xhr/response
+      bind b, link xhr/moz-response-array-buffer
+  save data
+    make uint8-array
+      bind link tmp486
+  call this/parse
+    bind link data
+  call check
+    bind test, link this/onload
+    hook match
+      call this/onload/bind
+              bind link this
+          save xhr/onload, link tmp487
+          call xhr/send
+            bind link null
+      bind parse
+        task parse
+          base data
+          save tmp488
+            call multiply
+              bind a, link this/opts/max-resolution-in-m-p
+              bind b, size 1000
+          save tmp489
+            call multiply
+              bind a, link tmp488
+              bind b, size 1000
+          save max-resolution-in-pixels, link tmp489
+          save offset, size 0
+          save length, link data/length
+          task read-uint16
+            save tmp490
+              call shift-left
+                bind a, link data[offset]
+                bind b, size 8
+            save tmp491
+              call add
+                bind a, link offset
+                bind b, size 1
+            save tmp492
+              call bitwise-or
+                bind a, link tmp490
+                bind b, link data[tmp491]
+            save value, link tmp492
+            save offset, size 2
+            turn seed, link value
+          task read-data-block
+            save tmp493, call read-uint16
+            save length, link tmp493
+            save tmp494
+              call add
+                bind a, link offset
+                bind b, link length
+            save tmp495
+              call subtract
+                bind a, link tmp494
+                bind b, size 2
+            save tmp496
+              call data/subarray
+                bind link offset
+                bind link tmp495
+            save array, link tmp496
+            save offset, link array/length
+            turn seed, link array
+          task prepare-components
+            base frame
+            save max-h, size 0
+            save max-v, size 0
+            save component
+            save component-id
+            call walk-keys
+              bind object, link frame/components
+              hook link
+                base key
+                save tmp497
+                  call frame/components/has-own-property
+                    bind link component-id
+                call check
+                  bind test, link tmp497
+                  hook match
+                    save component, link frame/components[component-id]
+                    save tmp498
+                      call lt
+                        bind a, link max-h
+                        bind b, link component/h
+                    call check
+                      bind test, link tmp498
+                      hook match
+                        save max-h, link component/h
+                    save tmp499
+                      call lt
+                        bind a, link max-v
+                        bind b, link component/v
+                    call check
+                      bind test, link tmp499
+                      hook match
+                        save max-v, link component/v
+            save tmp500
+              call divide
+                bind a, link frame/samples-per-line
+                bind b, size 8
+            save tmp501
+              call divide
+                bind a, link tmp500
+                bind b, link max-h
+            save tmp502
+              call math/ceil
+                bind link tmp501
+            save mcus-per-line, link tmp502
+            save tmp503
+              call divide
+                bind a, link frame/scan-lines
+                bind b, size 8
+            save tmp504
+              call divide
+                bind a, link tmp503
+                bind b, link max-v
+            save tmp505
+              call math/ceil
+                bind link tmp504
+            save mcus-per-column, link tmp505
+            call walk-keys
+              bind object, link frame/components
+              hook link
+                base key
+                save tmp506
+                  call frame/components/has-own-property
+                    bind link component-id
+                call check
+                  bind test, link tmp506
+                  hook match
+                    save component, link frame/components[component-id]
+                    save tmp507
+                      call divide
+                        bind a, link frame/samples-per-line
+                        bind b, size 8
+                    save tmp508
+                      call math/ceil
+                        bind link tmp507
+                    save tmp509
+                      call multiply
+                        bind a, link tmp508
+                        bind b, link component/h
+                    save tmp510
+                      call divide
+                        bind a, link tmp509
+                        bind b, link max-h
+                    save tmp511
+                      call math/ceil
+                        bind link tmp510
+                    save blocks-per-line, link tmp511
+                    save tmp512
+                      call divide
+                        bind a, link frame/scan-lines
+                        bind b, size 8
+                    save tmp513
+                      call math/ceil
+                        bind link tmp512
+                    save tmp514
+                      call multiply
+                        bind a, link tmp513
+                        bind b, link component/v
+                    save tmp515
+                      call divide
+                        bind a, link tmp514
+                        bind b, link max-v
+                    save tmp516
+                      call math/ceil
+                        bind link tmp515
+                    save blocks-per-column, link tmp516
+                    save tmp517
+                      call multiply
+                        bind a, link mcus-per-line
+                        bind b, link component/h
+                    save blocks-per-line-for-mcu, link tmp517
+                    save tmp518
+                      call multiply
+                        bind a, link mcus-per-column
+                        bind b, link component/v
+                    save blocks-per-column-for-mcu, link tmp518
+                    save tmp519
+                      call multiply
+                        bind a, link blocks-per-column-for-mcu
+                        bind b, link blocks-per-line-for-mcu
+                    save blocks-to-allocate, link tmp519
+                    save tmp520, make list
+                    save blocks, link tmp520
+                    save tmp521
+                      call multiply
+                        bind a, link blocks-to-allocate
+                        bind b, size 256
+                    call request-memory-allocation
+                      bind link tmp521
+                    save i, size 0
+                    call loop
+                      hook test
+                        save tmp522
+                          call lt
+                            bind a, link i
+                            bind b, link blocks-per-column-for-mcu
+                        call check
+                          bind test, link tmp522
+                      hook match
+                        save tmp523, make list
+                        save row, link tmp523
+                        save j, size 0
+                        call loop
+                          hook test
+                            save tmp524
+                              call lt
+                                bind a, link j
+                                bind b, link blocks-per-line-for-mcu
+                            call check
+                              bind test, link tmp524
+                          hook match
+                            call row/push
+                              bind
+                                make int32-array
+                                  bind size 64
+                            call increment
+                              bind value, link j
+                          hook fault
+                            turn seed, link false
+                        call blocks/push
+                          bind link row
+                        call increment
+                          bind value, link i
+                      hook fault
+                        turn seed, link false
+                    save component/blocks-per-line, link blocks-per-line
+                    save component/blocks-per-column, link blocks-per-column
+                    save component/blocks, link blocks
+            save frame/max-h, link max-h
+            save frame/max-v, link max-v
+            save frame/mcus-per-line, link mcus-per-line
+            save frame/mcus-per-column, link mcus-per-column
+          save jfif
+          save adobe
+          save pixels
+          save frame
+          save reset-interval
+          save tmp525, make list
+          save tmp526, make list
+          save quantization-tables, link tmp525
+          save frames, link tmp526
+          save tmp527, make list
+          save tmp528, make list
+          save huffman-tables-a-c, link tmp527
+          save huffman-tables-d-c, link tmp528
+          save tmp529, call read-uint16
+          save file-marker, link tmp529
+          save tmp530
+            call negative
+              bind bits, size 1
+          save malformed-data-offset, link tmp530
+          save tmp531, make list
+          save this/comments, link tmp531
+          save tmp532
+            call not-equal
+              bind a, link file-marker
+              bind b, size 65496
+          call check
+            bind test, link tmp532
+            hook match
+              halt make error,  bind text <SOI not found>
+          save tmp533, call read-uint16
+          save file-marker, link tmp533
+          call loop
+            hook test
+              save tmp534
+                call not-equal
+                  bind a, link file-marker
+                  bind b, size 65497
+              call check
+                bind test, link tmp534
+            hook match
+              save i
+              save j
+              save l
+              save tmp535, call read-data-block
+              save tmp536
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 65534
+              save tmp538
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 65504
+              save tmp554
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 65505
+              save tmp565
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 65518
+              save tmp580, call read-uint16
+              save tmp581
+                call add
+                  bind a, link quantization-tables-length
+                  bind b, link offset
+              save tmp582
+                call subtract
+                  bind a, link tmp581
+                  bind b, size 2
+              save tmp595, make object
+              save tmp596
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 65473
+              save tmp597
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 65474
+              save tmp598
+                call increment
+                  bind value, link offset
+              save tmp599, call read-uint16
+              save tmp600, call read-uint16
+              save tmp601, make object
+              save tmp602, make list
+              save tmp603
+                call multiply
+                  bind a, link frame/scan-lines
+                  bind b, link frame/samples-per-line
+              save tmp604
+                call gt
+                  bind a, link pixels-in-frame
+                  bind b, link max-resolution-in-pixels
+              save tmp608
+                call increment
+                  bind value, link offset
+              save tmp616, call read-uint16
+              save tmp628, call read-uint16
+              save tmp629, call read-uint16
+              save tmp630
+                call increment
+                  bind value, link offset
+              save tmp631, make list
+              save tmp637
+                call increment
+                  bind value, link offset
+              save tmp638
+                call increment
+                  bind value, link offset
+              save tmp639
+                call increment
+                  bind value, link offset
+              save tmp640
+                call shift-right
+                  bind a, link successive-approximation
+                  bind b, size 4
+              save tmp641
+                call bitwise-and
+                  bind a, link successive-approximation
+                  bind b, size 15
+              save tmp642
+                call decode-scan
+                  bind link data
+                  bind link offset
+                  bind link frame
+                  bind link components
+                  bind link reset-interval
+                  bind link spectral-start
+                  bind link spectral-end
+                  bind link tmp640
+                  bind link tmp641
+                  bind link this/opts
+              save tmp643
+                call not-strictly-equal
+                  bind a, link data[offset]
+                  bind b, size 255
+              save tmp644
+                call subtract
+                  bind a, link offset
+                  bind b, size 3
+              save tmp645
+                call equal
+                  bind a, link data[tmp644]
+                  bind b, size 255
+              save tmp646
+                call subtract
+                  bind a, link offset
+                  bind b, size 2
+              save tmp647
+                call gte
+                  bind a, link data[tmp646]
+                  bind b, size 192
+              save tmp648
+                call and
+                  bind a, link tmp645
+                  bind b, link tmp647
+              save tmp649
+                call subtract
+                  bind a, link offset
+                  bind b, size 2
+              save tmp650
+                call lte
+                  bind a, link data[tmp649]
+                  bind b, size 254
+              save tmp651
+                call and
+                  bind a, link tmp648
+                  bind b, link tmp650
+              save tmp652
+                call strictly-equal
+                  bind a, link file-marker
+                  bind b, size 224
+              save tmp653
+                call equal
+                  bind a, link file-marker
+                  bind b, size 225
+              save tmp654
+                call or
+                  bind a, link tmp652
+                  bind b, link tmp653
+              save tmp667
+                call file-marker/to-string
+                  bind size 16
+              save tmp668
+                call add
+                  bind a, text <unknown JPEG marker >
+                  bind b, link tmp667
+              call match-first
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65280
+                hook match
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65504
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65505
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65506
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65507
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65508
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65509
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65510
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65511
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65512
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65513
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65514
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65515
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65516
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65517
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65518
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65519
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65534
+                hook match
+                  save app-data, link tmp535
+                  call check
+                    bind test, link tmp536
+                    hook match
+                      save tmp537
+                        call string/from-char-code/apply
+                          bind link null
+                          bind link app-data
+                      save comment, link tmp537
+                      call this/comments/push
+                        bind link comment
+                  call check
+                    bind test, link tmp538
+                    hook match
+                      save tmp539
+                        call strictly-equal
+                          bind a, link app-data[0]
+                          bind b, size 74
+                      save tmp540
+                        call strictly-equal
+                          bind a, link app-data[1]
+                          bind b, size 70
+                      save tmp541
+                        call and
+                          bind a, link tmp539
+                          bind b, link tmp540
+                      save tmp542
+                        call strictly-equal
+                          bind a, link app-data[2]
+                          bind b, size 73
+                      save tmp543
+                        call and
+                          bind a, link tmp541
+                          bind b, link tmp542
+                      save tmp544
+                        call strictly-equal
+                          bind a, link app-data[3]
+                          bind b, size 70
+                      save tmp545
+                        call and
+                          bind a, link tmp543
+                          bind b, link tmp544
+                      save tmp546
+                        call strictly-equal
+                          bind a, link app-data[4]
+                          bind b, size 0
+                      save tmp547
+                        call and
+                          bind a, link tmp545
+                          bind b, link tmp546
+                      call check
+                        bind test, link tmp547
+                        hook match
+                          save tmp548
+                            call shift-left
+                              bind a, link app-data[8]
+                              bind b, size 8
+                          save tmp549
+                            call shift-left
+                              bind a, link app-data[10]
+                              bind b, size 8
+                          save tmp550
+                            call multiply
+                              bind a, size 3
+                              bind b, link app-data[12]
+                          save tmp551
+                            call multiply
+                              bind a, link tmp550
+                              bind b, link app-data[13]
+                          save tmp552
+                            call add
+                              bind a, size 14
+                              bind b, link tmp551
+                          save tmp553
+                            make object
+                              bind version
+                                make object
+                                  bind major, link app-data[5]
+                                  bind minor, link app-data[6]
+                              bind density-units, link app-data[7]
+                              bind x-density
+                                call bitwise-or
+                                  bind a, link tmp548
+                                  bind b, link app-data[9]
+                              bind y-density
+                                call bitwise-or
+                                  bind a, link tmp549
+                                  bind b, link app-data[11]
+                              bind thumb-width, link app-data[12]
+                              bind thumb-height, link app-data[13]
+                              bind thumb-data
+                                call app-data/subarray
+                                  bind size 14
+                                  bind link tmp552
+                          save jfif, link tmp553
+                  call check
+                    bind test, link tmp554
+                    hook match
+                      save tmp555
+                        call strictly-equal
+                          bind a, link app-data[0]
+                          bind b, size 69
+                      save tmp556
+                        call strictly-equal
+                          bind a, link app-data[1]
+                          bind b, size 120
+                      save tmp557
+                        call and
+                          bind a, link tmp555
+                          bind b, link tmp556
+                      save tmp558
+                        call strictly-equal
+                          bind a, link app-data[2]
+                          bind b, size 105
+                      save tmp559
+                        call and
+                          bind a, link tmp557
+                          bind b, link tmp558
+                      save tmp560
+                        call strictly-equal
+                          bind a, link app-data[3]
+                          bind b, size 102
+                      save tmp561
+                        call and
+                          bind a, link tmp559
+                          bind b, link tmp560
+                      save tmp562
+                        call strictly-equal
+                          bind a, link app-data[4]
+                          bind b, size 0
+                      save tmp563
+                        call and
+                          bind a, link tmp561
+                          bind b, link tmp562
+                      call check
+                        bind test, link tmp563
+                        hook match
+                          save tmp564
+                            call app-data/subarray
+                              bind size 5
+                              bind link app-data/length
+                          save this/exif-buffer, link tmp564
+                  call check
+                    bind test, link tmp565
+                    hook match
+                      save tmp566
+                        call strictly-equal
+                          bind a, link app-data[0]
+                          bind b, size 65
+                      save tmp567
+                        call strictly-equal
+                          bind a, link app-data[1]
+                          bind b, size 100
+                      save tmp568
+                        call and
+                          bind a, link tmp566
+                          bind b, link tmp567
+                      save tmp569
+                        call strictly-equal
+                          bind a, link app-data[2]
+                          bind b, size 111
+                      save tmp570
+                        call and
+                          bind a, link tmp568
+                          bind b, link tmp569
+                      save tmp571
+                        call strictly-equal
+                          bind a, link app-data[3]
+                          bind b, size 98
+                      save tmp572
+                        call and
+                          bind a, link tmp570
+                          bind b, link tmp571
+                      save tmp573
+                        call strictly-equal
+                          bind a, link app-data[4]
+                          bind b, size 101
+                      save tmp574
+                        call and
+                          bind a, link tmp572
+                          bind b, link tmp573
+                      save tmp575
+                        call strictly-equal
+                          bind a, link app-data[5]
+                          bind b, size 0
+                      save tmp576
+                        call and
+                          bind a, link tmp574
+                          bind b, link tmp575
+                      call check
+                        bind test, link tmp576
+                        hook match
+                          save tmp577
+                            call shift-left
+                              bind a, link app-data[7]
+                              bind b, size 8
+                          save tmp578
+                            call shift-left
+                              bind a, link app-data[9]
+                              bind b, size 8
+                          save tmp579
+                            make object
+                              bind version, link app-data[6]
+                              bind flags0
+                                call bitwise-or
+                                  bind a, link tmp577
+                                  bind b, link app-data[8]
+                              bind flags1
+                                call bitwise-or
+                                  bind a, link tmp578
+                                  bind b, link app-data[10]
+                              bind transform-code, link app-data[11]
+                          save adobe, link tmp579
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65499
+                hook match
+                  save quantization-tables-length, link tmp580
+                  save quantization-tables-end, link tmp582
+                  call loop
+                    hook test
+                      save tmp583
+                        call lt
+                          bind a, link offset
+                          bind b, link quantization-tables-end
+                      call check
+                        bind test, link tmp583
+                    hook match
+                      save tmp584
+                        call increment
+                          bind value, link offset
+                      save quantization-table-spec, link data[tmp584]
+                      save tmp585
+                        call multiply
+                          bind a, size 64
+                          bind b, size 4
+                      call request-memory-allocation
+                        bind link tmp585
+                      save table-data
+                        make int32-array
+                          bind size 64
+                      save tmp586
+                        call shift-right
+                          bind a, link quantization-table-spec
+                          bind b, size 4
+                      save tmp587
+                        call strictly-equal
+                          bind a, link tmp586
+                          bind b, size 0
+                      save tmp590
+                        call shift-right
+                          bind a, link quantization-table-spec
+                          bind b, size 4
+                      save tmp591
+                        call strictly-equal
+                          bind a, link tmp590
+                          bind b, size 1
+                      call check
+                        bind test, link tmp587
+                        hook match
+                          save j, size 0
+                          call loop
+                            hook test
+                              save tmp588
+                                call lt
+                                  bind a, link j
+                                  bind b, size 64
+                              call check
+                                bind test, link tmp588
+                            hook match
+                              save z, link dct-zig-zag[j]
+                              save tmp589
+                                call increment
+                                  bind value, link offset
+                              save table-data[z], link data[tmp589]
+                              call increment
+                                bind value, link j
+                            hook fault
+                              turn seed, link false
+                        hook fault
+                          call check
+                            bind test, link tmp591
+                            hook match
+                              save j, size 0
+                              call loop
+                                hook test
+                                  save tmp592
+                                    call lt
+                                      bind a, link j
+                                      bind b, size 64
+                                  call check
+                                    bind test, link tmp592
+                                hook match
+                                  save z, link dct-zig-zag[j]
+                                  save tmp593, call read-uint16
+                                  save table-data[z], link tmp593
+                                  call increment
+                                    bind value, link j
+                                hook fault
+                                  turn seed, link false
+                            hook fault
+                              halt make error,  bind text <DQT: invalid table spec>
+                      save tmp594
+                        call bitwise-and
+                          bind a, link quantization-table-spec
+                          bind b, size 15
+                      save quantization-tables[tmp594], link table-data
+                    hook fault
+                      turn seed, link false
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65472
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65473
+                hook match
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65474
+                hook match
+                  call read-uint16
+                  save frame, link tmp595
+                  save frame/extended, link tmp596
+                  save frame/progressive, link tmp597
+                  save frame/precision, link data[tmp598]
+                  save frame/scan-lines, link tmp599
+                  save frame/samples-per-line, link tmp600
+                  save frame/components, link tmp601
+                  save frame/components-order, link tmp602
+                  save pixels-in-frame, link tmp603
+                  call check
+                    bind test, link tmp604
+                    hook match
+                      save tmp605
+                        call subtract
+                          bind a, link pixels-in-frame
+                          bind b, link max-resolution-in-pixels
+                      save tmp606
+                        call divide
+                          bind a, link tmp605
+                          bind b, size 1000000
+                      save tmp607
+                        call math/ceil
+                          bind link tmp606
+                      save exceeded-amount, link tmp607
+                      halt make error,  bind
+                  save components-count, link data[tmp608]
+                  save component-id
+                  save max-h, size 0
+                  save max-v, size 0
+                  save i, size 0
+                  call loop
+                    hook test
+                      save tmp609
+                        call lt
+                          bind a, link i
+                          bind b, link components-count
+                      call check
+                        bind test, link tmp609
+                    hook match
+                      save component-id, link data[offset]
+                      save tmp610
+                        call add
+                          bind a, link offset
+                          bind b, size 1
+                      save tmp611
+                        call shift-right
+                          bind a, link data[tmp610]
+                          bind b, size 4
+                      save h, link tmp611
+                      save tmp612
+                        call add
+                          bind a, link offset
+                          bind b, size 1
+                      save tmp613
+                        call bitwise-and
+                          bind a, link data[tmp612]
+                          bind b, size 15
+                      save v, link tmp613
+                      save tmp614
+                        call add
+                          bind a, link offset
+                          bind b, size 2
+                      save q-id, link data[tmp614]
+                      call frame/components-order/push
+                        bind link component-id
+                      save tmp615
+                        make object
+                          bind h, link h
+                          bind v, link v
+                          bind quantization-idx, link q-id
+                      save frame/components[component-id], link tmp615
+                      save offset, size 3
+                      call increment
+                        bind value, link i
+                    hook fault
+                      turn seed, link false
+                  call prepare-components
+                    bind link frame
+                  call frames/push
+                    bind link frame
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65476
+                hook match
+                  save huffman-length, link tmp616
+                  save i, size 2
+                  call loop
+                    hook test
+                      save tmp617
+                        call lt
+                          bind a, link i
+                          bind b, link huffman-length
+                      call check
+                        bind test, link tmp617
+                    hook match
+                      save tmp618
+                        call increment
+                          bind value, link offset
+                      save huffman-table-spec, link data[tmp618]
+                      save code-lengths
+                        make uint8-array
+                          bind size 16
+                      save code-length-sum, size 0
+                      save j, size 0
+                      call loop
+                        hook test
+                          save tmp619
+                            call lt
+                              bind a, link j
+                              bind b, size 16
+                          call check
+                            bind test, link tmp619
+                        hook match
+                          save code-lengths[j], link data[offset]
+                          save code-length-sum, link code-lengths[j]
+                          call increment
+                            bind value, link j
+                        hook fault
+                          turn seed, link false
+                      save tmp620
+                        call add
+                          bind a, size 16
+                          bind b, link code-length-sum
+                      call request-memory-allocation
+                        bind link tmp620
+                      save huffman-values
+                        make uint8-array
+                          bind link code-length-sum
+                      save j, size 0
+                      call loop
+                        hook test
+                          save tmp621
+                            call lt
+                              bind a, link j
+                              bind b, link code-length-sum
+                          call check
+                            bind test, link tmp621
+                        hook match
+                          save huffman-values[j], link data[offset]
+                          call increment
+                            bind value, link j
+                        hook fault
+                          turn seed, link false
+                      save tmp622
+                        call add
+                          bind a, size 17
+                          bind b, link code-length-sum
+                      save i, link tmp622
+                      save tmp623
+                        call shift-right
+                          bind a, link huffman-table-spec
+                          bind b, size 4
+                      save tmp624
+                        call strictly-equal
+                          bind a, link tmp623
+                          bind b, size 0
+                      save tmp625
+                      call check
+                        bind test, link tmp624
+                        hook match
+                          save tmp625, link huffman-tables-d-c
+                        hook fault
+                          save tmp625, link huffman-tables-a-c
+                      save tmp626
+                        call bitwise-and
+                          bind a, link huffman-table-spec
+                          bind b, size 15
+                      save tmp627
+                        call build-huffman-table
+                          bind link code-lengths
+                          bind link huffman-values
+                      save tmp625[tmp626], link tmp627
+                    hook fault
+                      turn seed, link false
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65501
+                hook match
+                  call read-uint16
+                  save reset-interval, link tmp628
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65500
+                hook match
+                  call read-uint16
+                  call read-uint16
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65498
+                hook match
+                  save scan-length, link tmp629
+                  save selectors-count, link data[tmp630]
+                  save components, link tmp631
+                  save component
+                  save i, size 0
+                  call loop
+                    hook test
+                      save tmp632
+                        call lt
+                          bind a, link i
+                          bind b, link selectors-count
+                      call check
+                        bind test, link tmp632
+                    hook match
+                      save tmp633
+                        call increment
+                          bind value, link offset
+                      save component, link frame/components[data[tmp633]]
+                      save tmp634
+                        call increment
+                          bind value, link offset
+                      save table-spec, link data[tmp634]
+                      save tmp635
+                        call shift-right
+                          bind a, link table-spec
+                          bind b, size 4
+                      save component/huffman-table-d-c, link huffman-tables-d-c[tmp635]
+                      save tmp636
+                        call bitwise-and
+                          bind a, link table-spec
+                          bind b, size 15
+                      save component/huffman-table-a-c, link huffman-tables-a-c[tmp636]
+                      call components/push
+                        bind link component
+                      call increment
+                        bind value, link i
+                    hook fault
+                      turn seed, link false
+                  save spectral-start, link data[tmp637]
+                  save spectral-end, link data[tmp638]
+                  save successive-approximation, link data[tmp639]
+                  save processed, link tmp642
+                  save offset, link processed
+                  turn seed, link false
+                hook test
+                  call check-equal
+                    bind link file-marker
+                    bind size 65535
+                hook match
+                  call check
+                    bind test, link tmp643
+                    hook match
+                      call decrement
+                        bind value, link offset
+                  turn seed, link false
+                hook fault
+                  call check
+                    bind test, link tmp651
+                    hook match
+                      save offset, size 3
+                      turn seed, link false
+                    hook fault
+                      call check
+                        bind test, link tmp654
+                        hook match
+                          save tmp655
+                            call negative
+                              bind bits, size 1
+                          save tmp656
+                            call not-strictly-equal
+                              bind a, link malformed-data-offset
+                              bind b, link tmp655
+                          call check
+                            bind test, link tmp656
+                            hook match
+                              save tmp657
+                                call malformed-data-offset/to-string
+                                  bind size 16
+                              save tmp658
+                                call file-marker/to-string
+                                  bind size 16
+                              save tmp659
+                                call subtract
+                                  bind a, link offset
+                                  bind b, size 1
+                              save tmp660
+                                call tmp659/to-string
+                                  bind size 16
+                              halt make error,  bind
+                          save tmp661
+                            call subtract
+                              bind a, link offset
+                              bind b, size 1
+                          save malformed-data-offset, link tmp661
+                          save tmp662, call read-uint16
+                          save next-offset, link tmp662
+                          save tmp663
+                            call add
+                              bind a, link offset
+                              bind b, link next-offset
+                          save tmp664
+                            call subtract
+                              bind a, link tmp663
+                              bind b, size 2
+                          save tmp665
+                            call strictly-equal
+                              bind a, link data[tmp664]
+                              bind b, size 255
+                          call check
+                            bind test, link tmp665
+                            hook match
+                              save tmp666
+                                call subtract
+                                  bind a, link next-offset
+                                  bind b, size 2
+                              save offset, link tmp666
+                              turn seed, link false
+                  halt make error,  bind link tmp668
+              save tmp669, call read-uint16
+              save file-marker, link tmp669
+            hook fault
+              turn seed, link false
+          save tmp670
+            call not-equal
+              bind a, link frames/length
+              bind b, size 1
+          call check
+            bind test, link tmp670
+            hook match
+              halt make error,  bind text <only single frame JPEGs supported>
+          save i, size 0
+          call loop
+            hook test
+              save tmp671
+                call lt
+                  bind a, link i
+                  bind b, link frames/length
+              call check
+                bind test, link tmp671
+            hook match
+              save cp, link frames[i]/components
+              call walk-keys
+                bind object, link cp
+                hook link
+                  base key
+                  save cp[j]/quantization-table, link quantization-tables[cp[j]/quantization-idx]
+                  call delete
+                    bind bits, link cp[j]/quantization-idx
+              call increment
+                bind value, link i
+            hook fault
+              turn seed, link false
+          save this/width, link frame/samples-per-line
+          save this/height, link frame/scan-lines
+          save this/jfif, link jfif
+          save this/adobe, link adobe
+          save tmp672, make list
+          save this/components, link tmp672
+          save i, size 0
+          call loop
+            hook test
+              save tmp673
+                call lt
+                  bind a, link i
+                  bind b, link frame/components-order/length
+              call check
+                bind test, link tmp673
+            hook match
+              save component, link frame/components[frame/components-order[i]]
+              save tmp674
+                make object
+                  bind lines
+                    call build-component-data
+                      bind link frame
+                      bind link component
+                  bind scale-x
+                    call divide
+                      bind a, link component/h
+                      bind b, link frame/max-h
+                  bind scale-y
+                    call divide
+                      bind a, link component/v
+                      bind b, link frame/max-v
+              call this/components/push
+                bind link tmp674
+              call increment
+                bind value, link i
+            hook fault
+              turn seed, link false
+      bind get-data
+        task get-data
+          base width
+          base height
+          save tmp675
+            call divide
+              bind a, link this/width
+              bind b, link width
+          save tmp676
+            call divide
+              bind a, link this/height
+              bind b, link height
+          save scale-x, link tmp675
+          save scale-y, link tmp676
+          save component1
+          save component2
+          save component3
+          save component4
+          save component1-line
+          save component2-line
+          save component3-line
+          save component4-line
+          save x
+          save y
+          save offset, size 0
+          save y
+          save cb
+          save cr
+          save k
+          save c
+          save m
+          save ye
+          save r
+          save g
+          save b
+          save color-transform
+          save tmp677
+            call multiply
+              bind a, link width
+              bind b, link height
+          save tmp678
+            call multiply
+              bind a, link tmp677
+              bind b, link this/components/length
+          save data-length, link tmp678
+          call request-memory-allocation
+            bind link data-length
+          save data
+            make uint8-array
+              bind link data-length
+          save tmp704
+            call and
+              bind a, link this/adobe
+              bind b, link this/adobe/transform-code
+          save tmp705
+            call get-type-of
+              bind bits, link this/opts/color-transform
+          save tmp706
+            call not-strictly-equal
+              bind a, link tmp705
+              bind b, text <undefined>
+          save tmp757
+            call not
+              bind bits, link this/adobe
+          save tmp758
+            call and
+              bind a, link this/adobe
+              bind b, link this/adobe/transform-code
+          save tmp759
+            call get-type-of
+              bind bits, link this/opts/color-transform
+          save tmp760
+            call not-strictly-equal
+              bind a, link tmp759
+              bind b, text <undefined>
+          call match-first
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 1
+            hook match
+              save component1, link this/components[0]
+              save y, size 0
+              call loop
+                hook test
+                  save tmp679
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp679
+                hook match
+                  save tmp680
+                    call multiply
+                      bind a, link y
+                      bind b, link component1/scale-y
+                  save tmp681
+                    call multiply
+                      bind a, link tmp680
+                      bind b, link scale-y
+                  save tmp682
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp681
+                  save component1-line, link component1/lines[tmp682]
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp683
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp683
+                    hook match
+                      save tmp684
+                        call multiply
+                          bind a, link x
+                          bind b, link component1/scale-x
+                      save tmp685
+                        call multiply
+                          bind a, link tmp684
+                          bind b, link scale-x
+                      save tmp686
+                        call bitwise-or
+                          bind a, size 0
+                          bind b, link tmp685
+                      save y, link component1-line[tmp686]
+                      save tmp687
+                        call increment
+                          bind value, link offset
+                      save data[tmp687], link y
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 2
+            hook match
+              save component1, link this/components[0]
+              save component2, link this/components[1]
+              save y, size 0
+              call loop
+                hook test
+                  save tmp688
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp688
+                hook match
+                  save tmp689
+                    call multiply
+                      bind a, link y
+                      bind b, link component1/scale-y
+                  save tmp690
+                    call multiply
+                      bind a, link tmp689
+                      bind b, link scale-y
+                  save tmp691
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp690
+                  save component1-line, link component1/lines[tmp691]
+                  save tmp692
+                    call multiply
+                      bind a, link y
+                      bind b, link component2/scale-y
+                  save tmp693
+                    call multiply
+                      bind a, link tmp692
+                      bind b, link scale-y
+                  save tmp694
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp693
+                  save component2-line, link component2/lines[tmp694]
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp695
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp695
+                    hook match
+                      save tmp696
+                        call multiply
+                          bind a, link x
+                          bind b, link component1/scale-x
+                      save tmp697
+                        call multiply
+                          bind a, link tmp696
+                          bind b, link scale-x
+                      save tmp698
+                        call bitwise-or
+                          bind a, size 0
+                          bind b, link tmp697
+                      save y, link component1-line[tmp698]
+                      save tmp699
+                        call increment
+                          bind value, link offset
+                      save data[tmp699], link y
+                      save tmp700
+                        call multiply
+                          bind a, link x
+                          bind b, link component2/scale-x
+                      save tmp701
+                        call multiply
+                          bind a, link tmp700
+                          bind b, link scale-x
+                      save tmp702
+                        call bitwise-or
+                          bind a, size 0
+                          bind b, link tmp701
+                      save y, link component2-line[tmp702]
+                      save tmp703
+                        call increment
+                          bind value, link offset
+                      save data[tmp703], link y
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 3
+            hook match
+              save color-transform, link true
+              call check
+                bind test, link tmp704
+                hook match
+                  save color-transform, link true
+                hook fault
+                  call check
+                    bind test, link tmp706
+                    hook match
+                      save color-transform, link tmp708
+              save component1, link this/components[0]
+              save component2, link this/components[1]
+              save component3, link this/components[2]
+              save y, size 0
+              call loop
+                hook test
+                  save tmp709
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp709
+                hook match
+                  save tmp710
+                    call multiply
+                      bind a, link y
+                      bind b, link component1/scale-y
+                  save tmp711
+                    call multiply
+                      bind a, link tmp710
+                      bind b, link scale-y
+                  save tmp712
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp711
+                  save component1-line, link component1/lines[tmp712]
+                  save tmp713
+                    call multiply
+                      bind a, link y
+                      bind b, link component2/scale-y
+                  save tmp714
+                    call multiply
+                      bind a, link tmp713
+                      bind b, link scale-y
+                  save tmp715
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp714
+                  save component2-line, link component2/lines[tmp715]
+                  save tmp716
+                    call multiply
+                      bind a, link y
+                      bind b, link component3/scale-y
+                  save tmp717
+                    call multiply
+                      bind a, link tmp716
+                      bind b, link scale-y
+                  save tmp718
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp717
+                  save component3-line, link component3/lines[tmp718]
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp719
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp719
+                    hook match
+                      save tmp720
+                        call not
+                          bind bits, link color-transform
+                      call check
+                        bind test, link tmp720
+                        hook match
+                          save tmp721
+                            call multiply
+                              bind a, link x
+                              bind b, link component1/scale-x
+                          save tmp722
+                            call multiply
+                              bind a, link tmp721
+                              bind b, link scale-x
+                          save tmp723
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp722
+                          save r, link component1-line[tmp723]
+                          save tmp724
+                            call multiply
+                              bind a, link x
+                              bind b, link component2/scale-x
+                          save tmp725
+                            call multiply
+                              bind a, link tmp724
+                              bind b, link scale-x
+                          save tmp726
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp725
+                          save g, link component2-line[tmp726]
+                          save tmp727
+                            call multiply
+                              bind a, link x
+                              bind b, link component3/scale-x
+                          save tmp728
+                            call multiply
+                              bind a, link tmp727
+                              bind b, link scale-x
+                          save tmp729
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp728
+                          save b, link component3-line[tmp729]
+                        hook fault
+                          save tmp730
+                            call multiply
+                              bind a, link x
+                              bind b, link component1/scale-x
+                          save tmp731
+                            call multiply
+                              bind a, link tmp730
+                              bind b, link scale-x
+                          save tmp732
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp731
+                          save y, link component1-line[tmp732]
+                          save tmp733
+                            call multiply
+                              bind a, link x
+                              bind b, link component2/scale-x
+                          save tmp734
+                            call multiply
+                              bind a, link tmp733
+                              bind b, link scale-x
+                          save tmp735
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp734
+                          save cb, link component2-line[tmp735]
+                          save tmp736
+                            call multiply
+                              bind a, link x
+                              bind b, link component3/scale-x
+                          save tmp737
+                            call multiply
+                              bind a, link tmp736
+                              bind b, link scale-x
+                          save tmp738
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp737
+                          save cr, link component3-line[tmp738]
+                          save tmp739
+                            call subtract
+                              bind a, link cr
+                              bind b, size 128
+                          save tmp740
+                            call multiply
+                              bind a, size 1.402
+                              bind b, link tmp739
+                          save tmp741
+                            call add
+                              bind a, link y
+                              bind b, link tmp740
+                          save tmp742
+                            call clamp-to8bit
+                              bind link tmp741
+                          save r, link tmp742
+                          save tmp743
+                            call subtract
+                              bind a, link cb
+                              bind b, size 128
+                          save tmp744
+                            call multiply
+                              bind a, size 0.3441363
+                              bind b, link tmp743
+                          save tmp745
+                            call subtract
+                              bind a, link y
+                              bind b, link tmp744
+                          save tmp746
+                            call subtract
+                              bind a, link cr
+                              bind b, size 128
+                          save tmp747
+                            call multiply
+                              bind a, size 0.71413636
+                              bind b, link tmp746
+                          save tmp748
+                            call subtract
+                              bind a, link tmp745
+                              bind b, link tmp747
+                          save tmp749
+                            call clamp-to8bit
+                              bind link tmp748
+                          save g, link tmp749
+                          save tmp750
+                            call subtract
+                              bind a, link cb
+                              bind b, size 128
+                          save tmp751
+                            call multiply
+                              bind a, size 1.772
+                              bind b, link tmp750
+                          save tmp752
+                            call add
+                              bind a, link y
+                              bind b, link tmp751
+                          save tmp753
+                            call clamp-to8bit
+                              bind link tmp752
+                          save b, link tmp753
+                      save tmp754
+                        call increment
+                          bind value, link offset
+                      save data[tmp754], link r
+                      save tmp755
+                        call increment
+                          bind value, link offset
+                      save data[tmp755], link g
+                      save tmp756
+                        call increment
+                          bind value, link offset
+                      save data[tmp756], link b
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 4
+            hook match
+              call check
+                bind test, link tmp757
+                hook match
+                  halt make error,  bind text <Unsupported color mode (4 components)>
+              save color-transform, link false
+              call check
+                bind test, link tmp758
+                hook match
+                  save color-transform, link true
+                hook fault
+                  call check
+                    bind test, link tmp760
+                    hook match
+                      save color-transform, link tmp762
+              save component1, link this/components[0]
+              save component2, link this/components[1]
+              save component3, link this/components[2]
+              save component4, link this/components[3]
+              save y, size 0
+              call loop
+                hook test
+                  save tmp763
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp763
+                hook match
+                  save tmp764
+                    call multiply
+                      bind a, link y
+                      bind b, link component1/scale-y
+                  save tmp765
+                    call multiply
+                      bind a, link tmp764
+                      bind b, link scale-y
+                  save tmp766
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp765
+                  save component1-line, link component1/lines[tmp766]
+                  save tmp767
+                    call multiply
+                      bind a, link y
+                      bind b, link component2/scale-y
+                  save tmp768
+                    call multiply
+                      bind a, link tmp767
+                      bind b, link scale-y
+                  save tmp769
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp768
+                  save component2-line, link component2/lines[tmp769]
+                  save tmp770
+                    call multiply
+                      bind a, link y
+                      bind b, link component3/scale-y
+                  save tmp771
+                    call multiply
+                      bind a, link tmp770
+                      bind b, link scale-y
+                  save tmp772
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp771
+                  save component3-line, link component3/lines[tmp772]
+                  save tmp773
+                    call multiply
+                      bind a, link y
+                      bind b, link component4/scale-y
+                  save tmp774
+                    call multiply
+                      bind a, link tmp773
+                      bind b, link scale-y
+                  save tmp775
+                    call bitwise-or
+                      bind a, size 0
+                      bind b, link tmp774
+                  save component4-line, link component4/lines[tmp775]
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp776
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp776
+                    hook match
+                      save tmp777
+                        call not
+                          bind bits, link color-transform
+                      call check
+                        bind test, link tmp777
+                        hook match
+                          save tmp778
+                            call multiply
+                              bind a, link x
+                              bind b, link component1/scale-x
+                          save tmp779
+                            call multiply
+                              bind a, link tmp778
+                              bind b, link scale-x
+                          save tmp780
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp779
+                          save c, link component1-line[tmp780]
+                          save tmp781
+                            call multiply
+                              bind a, link x
+                              bind b, link component2/scale-x
+                          save tmp782
+                            call multiply
+                              bind a, link tmp781
+                              bind b, link scale-x
+                          save tmp783
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp782
+                          save m, link component2-line[tmp783]
+                          save tmp784
+                            call multiply
+                              bind a, link x
+                              bind b, link component3/scale-x
+                          save tmp785
+                            call multiply
+                              bind a, link tmp784
+                              bind b, link scale-x
+                          save tmp786
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp785
+                          save ye, link component3-line[tmp786]
+                          save tmp787
+                            call multiply
+                              bind a, link x
+                              bind b, link component4/scale-x
+                          save tmp788
+                            call multiply
+                              bind a, link tmp787
+                              bind b, link scale-x
+                          save tmp789
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp788
+                          save k, link component4-line[tmp789]
+                        hook fault
+                          save tmp790
+                            call multiply
+                              bind a, link x
+                              bind b, link component1/scale-x
+                          save tmp791
+                            call multiply
+                              bind a, link tmp790
+                              bind b, link scale-x
+                          save tmp792
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp791
+                          save y, link component1-line[tmp792]
+                          save tmp793
+                            call multiply
+                              bind a, link x
+                              bind b, link component2/scale-x
+                          save tmp794
+                            call multiply
+                              bind a, link tmp793
+                              bind b, link scale-x
+                          save tmp795
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp794
+                          save cb, link component2-line[tmp795]
+                          save tmp796
+                            call multiply
+                              bind a, link x
+                              bind b, link component3/scale-x
+                          save tmp797
+                            call multiply
+                              bind a, link tmp796
+                              bind b, link scale-x
+                          save tmp798
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp797
+                          save cr, link component3-line[tmp798]
+                          save tmp799
+                            call multiply
+                              bind a, link x
+                              bind b, link component4/scale-x
+                          save tmp800
+                            call multiply
+                              bind a, link tmp799
+                              bind b, link scale-x
+                          save tmp801
+                            call bitwise-or
+                              bind a, size 0
+                              bind b, link tmp800
+                          save k, link component4-line[tmp801]
+                          save tmp802
+                            call subtract
+                              bind a, link cr
+                              bind b, size 128
+                          save tmp803
+                            call multiply
+                              bind a, size 1.402
+                              bind b, link tmp802
+                          save tmp804
+                            call add
+                              bind a, link y
+                              bind b, link tmp803
+                          save tmp805
+                            call clamp-to8bit
+                              bind link tmp804
+                          save tmp806
+                            call subtract
+                              bind a, size 255
+                              bind b, link tmp805
+                          save c, link tmp806
+                          save tmp807
+                            call subtract
+                              bind a, link cb
+                              bind b, size 128
+                          save tmp808
+                            call multiply
+                              bind a, size 0.3441363
+                              bind b, link tmp807
+                          save tmp809
+                            call subtract
+                              bind a, link y
+                              bind b, link tmp808
+                          save tmp810
+                            call subtract
+                              bind a, link cr
+                              bind b, size 128
+                          save tmp811
+                            call multiply
+                              bind a, size 0.71413636
+                              bind b, link tmp810
+                          save tmp812
+                            call subtract
+                              bind a, link tmp809
+                              bind b, link tmp811
+                          save tmp813
+                            call clamp-to8bit
+                              bind link tmp812
+                          save tmp814
+                            call subtract
+                              bind a, size 255
+                              bind b, link tmp813
+                          save m, link tmp814
+                          save tmp815
+                            call subtract
+                              bind a, link cb
+                              bind b, size 128
+                          save tmp816
+                            call multiply
+                              bind a, size 1.772
+                              bind b, link tmp815
+                          save tmp817
+                            call add
+                              bind a, link y
+                              bind b, link tmp816
+                          save tmp818
+                            call clamp-to8bit
+                              bind link tmp817
+                          save tmp819
+                            call subtract
+                              bind a, size 255
+                              bind b, link tmp818
+                          save ye, link tmp819
+                      save tmp820
+                        call increment
+                          bind value, link offset
+                      save tmp821
+                        call subtract
+                          bind a, size 255
+                          bind b, link c
+                      save data[tmp820], link tmp821
+                      save tmp822
+                        call increment
+                          bind value, link offset
+                      save tmp823
+                        call subtract
+                          bind a, size 255
+                          bind b, link m
+                      save data[tmp822], link tmp823
+                      save tmp824
+                        call increment
+                          bind value, link offset
+                      save tmp825
+                        call subtract
+                          bind a, size 255
+                          bind b, link ye
+                      save data[tmp824], link tmp825
+                      save tmp826
+                        call increment
+                          bind value, link offset
+                      save tmp827
+                        call subtract
+                          bind a, size 255
+                          bind b, link k
+                      save data[tmp826], link tmp827
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook fault
+              halt make error,  bind text <Unsupported color mode>
+          turn seed, link data
+      bind copy-to-image-data
+        task copy-to-image-data
+          base image-data
+          base format-as-r-g-b-a
+          save width, link image-data/width
+          save height, link image-data/height
+          save image-data-array, link image-data/data
+          save tmp828
+            call this/get-data
+              bind link width
+              bind link height
+          save data, link tmp828
+          save i, size 0
+          save j, size 0
+          save x
+          save y
+          save y
+          save k
+          save c
+          save m
+          save r
+          save g
+          save b
+          call match-first
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 1
+            hook match
+              save y, size 0
+              call loop
+                hook test
+                  save tmp829
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp829
+                hook match
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp830
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp830
+                    hook match
+                      save tmp831
+                        call increment
+                          bind value, link i
+                      save y, link data[tmp831]
+                      save tmp832
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp832], link y
+                      save tmp833
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp833], link y
+                      save tmp834
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp834], link y
+                      call check
+                        bind test, link format-as-r-g-b-a
+                        hook match
+                          save tmp835
+                            call increment
+                              bind value, link j
+                          save image-data-array[tmp835], size 255
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 3
+            hook match
+              save y, size 0
+              call loop
+                hook test
+                  save tmp836
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp836
+                hook match
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp837
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp837
+                    hook match
+                      save tmp838
+                        call increment
+                          bind value, link i
+                      save r, link data[tmp838]
+                      save tmp839
+                        call increment
+                          bind value, link i
+                      save g, link data[tmp839]
+                      save tmp840
+                        call increment
+                          bind value, link i
+                      save b, link data[tmp840]
+                      save tmp841
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp841], link r
+                      save tmp842
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp842], link g
+                      save tmp843
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp843], link b
+                      call check
+                        bind test, link format-as-r-g-b-a
+                        hook match
+                          save tmp844
+                            call increment
+                              bind value, link j
+                          save image-data-array[tmp844], size 255
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook test
+              call check-equal
+                bind link this/components/length
+                bind size 4
+            hook match
+              save y, size 0
+              call loop
+                hook test
+                  save tmp845
+                    call lt
+                      bind a, link y
+                      bind b, link height
+                  call check
+                    bind test, link tmp845
+                hook match
+                  save x, size 0
+                  call loop
+                    hook test
+                      save tmp846
+                        call lt
+                          bind a, link x
+                          bind b, link width
+                      call check
+                        bind test, link tmp846
+                    hook match
+                      save tmp847
+                        call increment
+                          bind value, link i
+                      save c, link data[tmp847]
+                      save tmp848
+                        call increment
+                          bind value, link i
+                      save m, link data[tmp848]
+                      save tmp849
+                        call increment
+                          bind value, link i
+                      save y, link data[tmp849]
+                      save tmp850
+                        call increment
+                          bind value, link i
+                      save k, link data[tmp850]
+                      save tmp851
+                        call divide
+                          bind a, link k
+                          bind b, size 255
+                      save tmp852
+                        call subtract
+                          bind a, size 1
+                          bind b, link tmp851
+                      save tmp853
+                        call multiply
+                          bind a, link c
+                          bind b, link tmp852
+                      save tmp854
+                        call add
+                          bind a, link tmp853
+                          bind b, link k
+                      save tmp855
+                        call clamp-to8bit
+                          bind link tmp854
+                      save tmp856
+                        call subtract
+                          bind a, size 255
+                          bind b, link tmp855
+                      save r, link tmp856
+                      save tmp857
+                        call divide
+                          bind a, link k
+                          bind b, size 255
+                      save tmp858
+                        call subtract
+                          bind a, size 1
+                          bind b, link tmp857
+                      save tmp859
+                        call multiply
+                          bind a, link m
+                          bind b, link tmp858
+                      save tmp860
+                        call add
+                          bind a, link tmp859
+                          bind b, link k
+                      save tmp861
+                        call clamp-to8bit
+                          bind link tmp860
+                      save tmp862
+                        call subtract
+                          bind a, size 255
+                          bind b, link tmp861
+                      save g, link tmp862
+                      save tmp863
+                        call divide
+                          bind a, link k
+                          bind b, size 255
+                      save tmp864
+                        call subtract
+                          bind a, size 1
+                          bind b, link tmp863
+                      save tmp865
+                        call multiply
+                          bind a, link y
+                          bind b, link tmp864
+                      save tmp866
+                        call add
+                          bind a, link tmp865
+                          bind b, link k
+                      save tmp867
+                        call clamp-to8bit
+                          bind link tmp866
+                      save tmp868
+                        call subtract
+                          bind a, size 255
+                          bind b, link tmp867
+                      save b, link tmp868
+                      save tmp869
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp869], link r
+                      save tmp870
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp870], link g
+                      save tmp871
+                        call increment
+                          bind value, link j
+                      save image-data-array[tmp871], link b
+                      call check
+                        bind test, link format-as-r-g-b-a
+                        hook match
+                          save tmp872
+                            call increment
+                              bind value, link j
+                          save image-data-array[tmp872], size 255
+                      call increment
+                        bind value, link x
+                    hook fault
+                      turn seed, link false
+                  call increment
+                    bind value, link y
+                hook fault
+                  turn seed, link false
+              turn seed, link false
+            hook fault
+              halt make error,  bind text <Unsupported color mode>
+  save constructor/prototype, link tmp873
+  save total-bytes-allocated, size 0
+  save max-memory-usage-bytes, size 0
+  task request-memory-allocation
+    base increase-amount
+    save tmp874
+      call add
+        bind a, link total-bytes-allocated
+        bind b, link increase-amount
+    save total-memory-impact-bytes, link tmp874
+    save tmp875
+      call gt
+        bind a, link total-memory-impact-bytes
+        bind b, link max-memory-usage-bytes
+    call check
+      bind test, link tmp875
+      hook match
+        save tmp876
+          call subtract
+            bind a, link total-memory-impact-bytes
+            bind b, link max-memory-usage-bytes
+        save tmp877
+          call divide
+            bind a, link tmp876
+            bind b, size 1024
+        save tmp878
+          call divide
+            bind a, link tmp877
+            bind b, size 1024
+        save tmp879
+          call math/ceil
+            bind link tmp878
+        save exceeded-amount, link tmp879
+        halt make error,  bind
+    save total-bytes-allocated, link total-memory-impact-bytes
+  save constructor/reset-max-memory-usage
+    task tmp1
+      base maxmemoryusagebytes
+      save total-bytes-allocated, size 0
+      save max-memory-usage-bytes, link maxmemoryusagebytes
+  save constructor/get-bytes-allocated
+    task tmp2
+      turn seed, link total-bytes-allocated
+  save constructor/request-memory-allocation, link request-memory-allocation
+  turn seed, link constructor
+save jpeg-image, link tmp880
+save tmp881
+  call get-type-of
+    bind bits, link module
+save tmp882
+  call not-strictly-equal
+    bind a, link tmp881
+    bind b, text <undefined>
+save tmp883
+  call get-type-of
+    bind bits, link window
+save tmp884
+  call not-strictly-equal
+    bind a, link tmp883
+    bind b, text <undefined>
+call check
+  bind test, link tmp882
+  hook match
+    save module/exports, link decode
+  hook fault
+    call check
+      bind test, link tmp884
+      hook match
+        save tmp885, make object
+        save tmp886
+          call or
+            bind a, link window[<jpeg-js>]
+            bind b, link tmp885
+        save window[<jpeg-js>], link tmp886
+        save window[<jpeg-js>]/decode, link decode
+save tmp887, make object
+task decode
+  base jpeg-data
+  base user-opts
+  save tmp888
+    make object
+      bind color-transform, link void
+      bind use-t-array, link false
+      bind format-as-r-g-b-a, link true
+      bind tolerant-decoding, link true
+      bind max-resolution-in-m-p, size 100
+      bind max-memory-usage-in-m-b, size 512
+  save default-opts, link tmp888
+  save tmp889
+    make object
+      bind
+      bind
+  save opts, link tmp889
+  save arr
+    make uint8-array
+      bind link jpeg-data
+  save decoder, make jpeg-image
+  save decoder/opts, link opts
+  save tmp890
+    call multiply
+      bind a, link opts/max-memory-usage-in-m-b
+      bind b, size 1024
+  save tmp891
+    call multiply
+      bind a, link tmp890
+      bind b, size 1024
+  call jpeg-image/reset-max-memory-usage
+    bind link tmp891
+  call decoder/parse
+    bind link arr
+  save tmp892
+  call check
+    bind test, link opts/format-as-r-g-b-a
+    hook match
+      save tmp892, size 4
+    hook fault
+      save tmp892, size 3
+  save channels, link tmp892
+  save tmp893
+    call multiply
+      bind a, link decoder/width
+      bind b, link decoder/height
+  save tmp894
+    call multiply
+      bind a, link tmp893
+      bind b, link channels
+  save bytes-needed, link tmp894
+  call try
+    hook block
+      call jpeg-image/request-memory-allocation
+        bind link bytes-needed
+      save tmp895
+        call buffer/alloc
+          bind link bytes-needed
+      save tmp896
+      call check
+        bind test, link opts/use-t-array
+        hook match
+          save tmp896
+            make uint8-array
+              bind link bytes-needed
+        hook fault
+          save tmp896, link tmp895
+      save tmp897
+        make object
+          bind width, link decoder/width
+          bind height, link decoder/height
+          bind exif-buffer, link decoder/exif-buffer
+          bind data, link tmp896
+      save image, link tmp897
+      save tmp898
+        call gt
+          bind a, link decoder/comments/length
+          bind b, size 0
+      call check
+        bind test, link tmp898
+        hook match
+          save image[<comments>], link decoder/comments
+    hook fault
+      base err
+      save tmp899
+        call get-instance-of
+          bind a, link err
+          bind b, link range-error
+      call check
+        bind test, link tmp899
+        hook match
+          save tmp900
+            call add
+              bind a, text <Could not allocate enough memory for the image. >
+              bind b, text <Required: >
+          save tmp901
+            call add
+              bind a, link tmp900
+              bind b, link bytes-needed
+          halt make error,  bind link tmp901
+      save tmp902
+        call get-instance-of
+          bind a, link err
+          bind b, link reference-error
+      call check
+        bind test, link tmp902
+        hook match
+          save tmp903
+            call strictly-equal
+              bind a, link err/message
+              bind b, text <Buffer is not defined>
+          call check
+            bind test, link tmp903
+            hook match
+              save tmp904
+                call add
+                  bind a, text <Buffer is not globally defined in this environment. >
+                  bind b, text <Consider setting useTArray to true>
+              halt make error,  bind link tmp904
+      halt err
+  call decoder/copy-to-image-data
+    bind link image
+    bind link opts/format-as-r-g-b-a
+  turn seed, link image

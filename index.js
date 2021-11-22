@@ -30,6 +30,7 @@ const transforms = {
   BlockStatement: transformBlockStatement,
   WhileStatement: transformWhileStatement,
   BreakStatement: transformBreakStatement,
+  ContinueStatement: transformContinueStatement,
   LogicalExpression: transformLogicalExpression,
   ObjectExpression: transformObjectExpression,
   Property: transformProperty,
@@ -44,6 +45,12 @@ const transforms = {
   ThisExpression: transformThisExpression,
   ForInStatement: transformForInStatement,
   SwitchStatement: transformSwitchStatement,
+  TemplateLiteral: transformTemplateLiteral,
+  TemplateElement: transformTemplateElement,
+  TryStatement: transformTryStatement,
+  CatchClause: transformCatchClause,
+  AssignmentPattern: transformAssignmentPattern,
+  SwitchCase: transformSwitchCase,
 }
 
 const binaries = {
@@ -92,6 +99,7 @@ const unaries = {
   '+': 'numeralize',
   '++': 'increment',
   '--': 'decrement',
+  'delete': 'delete'
 }
 
 module.exports = transform
@@ -112,25 +120,133 @@ function transform(source) {
   return nodes
 }
 
+function transformSwitchCase(node, scope) {
+  const test = node.test && call(transforms, node.test.type, node.test, scope)
+  const consequent = []
+  node.consequent.forEach(csq => {
+    const cons = call(transforms, csq.type, csq, scope)
+    if (Array.isArray(cons)) {
+      consequent.push(...cons)
+    } else {
+      consequent.push(cons)
+    }
+  })
+  return [test, consequent]
+}
+
+function transformTryStatement(node, scope) {
+  const block = call(transforms, node.block.type, node.block, scope)
+  const handler = call(transforms, node.handler.type, node.handler, scope)
+  const finalizer = node.finalizer && call(transforms, node.finalizer.type, node.finalizer, scope)
+  const hook = [
+    {
+      name: 'block',
+      base: [],
+      zone: block
+    },
+    handler
+  ]
+  if (finalizer) {
+    hook.push({
+      name: 'after',
+      base: [],
+      zone: finalizer
+    })
+  }
+  return createCall(toTerm('try'), [], hook)
+}
+
+function transformCatchClause(node, scope) {
+  const param = node.param && call(transforms, node.param.type, node.param, scope)
+  const body = call(transforms, node.body.type, node.body, scope)
+  const hook = {
+    form: 'hook',
+    name: 'fault',
+    base: [],
+    zone: body
+  }
+  if (param) {
+    hook.base.push(createBase(param))
+  }
+  return hook
+}
+
+function transformAssignmentPattern(node, scope) {
+  const left = call(transforms, node.left.type, node.left, scope)
+  const right = call(transforms, node.right.type, node.right, scope)
+  return [left, right]
+}
+
+function transformTemplateLiteral(node, scope) {
+  const expressions = []
+  node.expressions.forEach(exp => {
+    const expression = call(transforms, exp.type, exp, scope)
+    expressions.push(expression)
+  })
+  const quasis = []
+  node.quasis.forEach(qua => {
+    const quasi = call(transforms, qua.type, qua, scope)
+    quasis.push(quasi)
+  })
+}
+
+function transformTemplateElement(node, scope) {
+  return node.value.raw
+}
+
 function transformForInStatement(node, scope) {
   const name = toTerm('walk-keys')
-  const key = node.left.declarations[0].id.name
-  const object = node.right.name
+  const key = node.left.name ?? node.left.declarations[0].id.name
+  const object = transformOptionallyToLink(call(transforms, node.right.type, node.right, scope))
   const body = call(transforms, node.body.type, node.body, scope)
   const bind = [
-    createBind(toTerm('object'), { form: 'link', site: toTerm(object) })
+    createBind(toTerm('object'), object)
   ]
-  const hook = {
-    link: {
+  const hook = [
+    {
+      name: 'link',
       base: [createBase(toTerm('key'))],
       zone: body
     }
-  }
+  ]
   return createCall(name, bind, hook)
 }
 
 function transformSwitchStatement(node, scope) {
-  return { form: 'rando'}
+  const discriminant = call(transforms, node.discriminant.type, node.discriminant, scope)
+  const cases = []
+  node.cases.forEach(cse => {
+    const c = call(transforms, cse.type, cse, scope)
+    cases.push(c)
+  })
+  const hook = []
+  cases.forEach(([test, consequent]) => {
+    console.log(consequent)
+    if (test) {
+      hook.push({
+        name: 'test',
+        base: [],
+        zone: [
+          createCall(toTerm('check-equal'), [
+            createBind(transformOptionallyToLink(discriminant)),
+            createBind(test)
+          ])
+        ]
+      })
+      hook.push({
+        name: 'match',
+        base: [],
+        zone: consequent
+      })
+    } else {
+      hook.push({
+        name: 'fault',
+        base: [],
+        zone: consequent
+      })
+    }
+  })
+  return createCall(toTerm('match-first'), [], hook)
 }
 
 function walk(node, scope) {
@@ -179,7 +295,7 @@ function transformNewExpression(node, scope) {
 }
 
 function transformEmptyStatement(node, scope) {
-  console.log('HERE')
+
 }
 
 function transformUpdateExpression(node, scope) {
@@ -211,7 +327,13 @@ function transformFunctionDeclaration(node, scope) {
   const id = node.id && call(transforms, node.id.type, node.id, scope)
   const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
-    base.push(createBase(toTerm(param.name)))
+    const p = call(transforms, param.type, param, scope)
+    console.log(p)
+    if (Array.isArray(p)) {
+      base.push(createBase(toTerm(p[0].term)))
+    } else {
+      base.push(createBase(p))
+    }
   })
   const zone = []
   node.body.body.forEach(bd => {
@@ -250,6 +372,16 @@ function transformArrayExpression(node, scope) {
     form: 'make',
     name: toTerm('list'),
     bind: properties
+  }
+}
+
+function transformContinueStatement(node, scope) {
+  return {
+    form: 'turn',
+    site: {
+      form: 'term',
+      term: 'true'
+    }
   }
 }
 
@@ -301,15 +433,16 @@ function transformWhileStatement(node, scope) {
   const lastCall = body[body.length - 1]
   const lastHook = lastCall.hook
   // TODO: fix this
-  lastCall.hook = {}
-  const hook = {
-    test: {
+  lastCall.hook = []
+  const hook = [
+    {
+      name: 'test',
       form: 'hook',
       base: [],
       zone: body
     },
     ...lastHook
-  }
+  ]
   const name = toTerm('loop')
   const c = createCall(name, bind, hook)
   return c
@@ -343,18 +476,20 @@ function transformIfStatement(node, scope) {
   const bind = [
     createBind(toTerm('test'), { form: 'link', site: test })
   ]
-  const hook = {}
-  hook.match = {
+  const hook = []
+  hook.push({
+    name: 'match',
     form: 'hook',
     base: [],
     zone: consequent
-  }
+  })
   if (alternate) {
-    hook.fault = {
+    hook.push({
+      name: 'fault',
       form: 'hook',
       base: [],
       zone: Array.isArray(alternate) ? alternate : [alternate]
-    }
+    })
   }
   const name = toTerm('check')
   return createCall(name, bind, hook)
@@ -403,12 +538,13 @@ function transformCallExpression(node, scope) {
     form: 'call',
     name,
     bind,
-    hook: {},
+    hook: [],
     zone: []
   }
 }
 
 function toTerm(term) {
+  if (!term) throw new Error('Missing term')
   const obj = {
     form: 'term',
     term
@@ -469,7 +605,12 @@ function transformFunctionExpression(node, scope) {
   const id = node.id && call(transforms, node.id.type, node.id, scope)
   const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
-    base.push(createBase(toTerm(param.name)))
+    const p = call(transforms, param.type, param, scope)
+    if (Array.isArray(p)) {
+      base.push(createBase(toTerm(p[0].term)))
+    } else {
+      base.push(createBase(p))
+    }
   })
   const zone = []
   node.body.body.forEach(bd => {
