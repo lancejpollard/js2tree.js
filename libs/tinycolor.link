@@ -1,0 +1,4155 @@
+save trim-left
+save trim-right
+save math-round, link math/round
+save math-min, link math/min
+save math-max, link math/max
+save math-random, link math/random
+task tinycolor
+  base color
+  base opts
+  save tmp0
+  call check
+    bind test, link color
+    hook match
+      save tmp0, link color
+    hook fault
+      save tmp0, text <>
+  save color, link tmp0
+  save tmp1, make object
+  save tmp2
+    call or
+      bind a, link opts
+      bind b, link tmp1
+  save opts, link tmp2
+  save tmp3
+    call get-instance-of
+      bind a, link color
+      bind b, link tinycolor
+  call check
+    bind test, link tmp3
+    hook match
+      turn seed, link color
+  save tmp4
+    call get-instance-of
+      bind a, link this
+      bind b, link tinycolor
+  save tmp5
+    call not
+      bind bits, link tmp4
+  call check
+    bind test, link tmp5
+    hook match
+      turn seed
+        make tinycolor
+          bind link color
+          bind link opts
+  save tmp6
+    call input-to-r-g-b
+      bind link color
+  save rgb, link tmp6
+  save this/originalinput, link color
+  save this/gradienttype, link opts/gradient-type
+  save tmp11
+    call lt
+      bind a, link this/r
+      bind b, size 1
+  call check
+    bind test, link tmp11
+    hook match
+      save tmp12
+        call math-round
+          bind link this/r
+      save this/r, link tmp12
+  save tmp13
+    call lt
+      bind a, link this/g
+      bind b, size 1
+  call check
+    bind test, link tmp13
+    hook match
+      save tmp14
+        call math-round
+          bind link this/g
+      save this/g, link tmp14
+  save tmp15
+    call lt
+      bind a, link this/b
+      bind b, size 1
+  call check
+    bind test, link tmp15
+    hook match
+      save tmp16
+        call math-round
+          bind link this/b
+      save this/b, link tmp16
+  save this/ok, link rgb/ok
+save tmp267
+  make object
+    bind is-dark
+      task tmp0
+        save tmp17, call this/get-brightness
+        save tmp18
+          call lt
+            bind a, link tmp17
+            bind b, size 128
+        turn seed, link tmp18
+    bind is-light
+      task tmp1
+        save tmp19, call this/is-dark
+        save tmp20
+          call not
+            bind bits, link tmp19
+        turn seed, link tmp20
+    bind is-valid
+      task tmp2
+        turn seed, link this/ok
+    bind get-original-input
+      task tmp3
+        turn seed, link this/originalinput
+    bind get-format
+      task tmp4
+        turn seed, link this/format
+    bind get-alpha
+      task tmp5
+        turn seed, link this/a
+    bind get-brightness
+      task tmp6
+        save tmp21, call this/to-rgb
+        save rgb, link tmp21
+        save tmp22
+          call multiply
+            bind a, link rgb/r
+            bind b, size 299
+        save tmp23
+          call multiply
+            bind a, link rgb/g
+            bind b, size 587
+        save tmp24
+          call add
+            bind a, link tmp22
+            bind b, link tmp23
+        save tmp25
+          call multiply
+            bind a, link rgb/b
+            bind b, size 114
+        save tmp26
+          call add
+            bind a, link tmp24
+            bind b, link tmp25
+        save tmp27
+          call divide
+            bind a, link tmp26
+            bind b, size 1000
+        turn seed, link tmp27
+    bind get-luminance
+      task tmp7
+        save tmp28, call this/to-rgb
+        save rgb, link tmp28
+        save rs-r-g-b
+        save gs-r-g-b
+        save bs-r-g-b
+        save r
+        save g
+        save b
+        save tmp29
+          call divide
+            bind a, link rgb/r
+            bind b, size 255
+        save rs-r-g-b, link tmp29
+        save tmp30
+          call divide
+            bind a, link rgb/g
+            bind b, size 255
+        save gs-r-g-b, link tmp30
+        save tmp31
+          call divide
+            bind a, link rgb/b
+            bind b, size 255
+        save bs-r-g-b, link tmp31
+        save tmp32
+          call lte
+            bind a, link rs-r-g-b
+            bind b, size 0.03928
+        call check
+          bind test, link tmp32
+          hook match
+            save tmp33
+              call divide
+                bind a, link rs-r-g-b
+                bind b, size 12.92
+            save r, link tmp33
+          hook fault
+            save tmp34
+              call add
+                bind a, link rs-r-g-b
+                bind b, size 0.055
+            save tmp35
+              call divide
+                bind a, link tmp34
+                bind b, size 1.055
+            save tmp36
+              call math/pow
+                bind link tmp35
+                bind size 2.4
+            save r, link tmp36
+        save tmp37
+          call lte
+            bind a, link gs-r-g-b
+            bind b, size 0.03928
+        call check
+          bind test, link tmp37
+          hook match
+            save tmp38
+              call divide
+                bind a, link gs-r-g-b
+                bind b, size 12.92
+            save g, link tmp38
+          hook fault
+            save tmp39
+              call add
+                bind a, link gs-r-g-b
+                bind b, size 0.055
+            save tmp40
+              call divide
+                bind a, link tmp39
+                bind b, size 1.055
+            save tmp41
+              call math/pow
+                bind link tmp40
+                bind size 2.4
+            save g, link tmp41
+        save tmp42
+          call lte
+            bind a, link bs-r-g-b
+            bind b, size 0.03928
+        call check
+          bind test, link tmp42
+          hook match
+            save tmp43
+              call divide
+                bind a, link bs-r-g-b
+                bind b, size 12.92
+            save b, link tmp43
+          hook fault
+            save tmp44
+              call add
+                bind a, link bs-r-g-b
+                bind b, size 0.055
+            save tmp45
+              call divide
+                bind a, link tmp44
+                bind b, size 1.055
+            save tmp46
+              call math/pow
+                bind link tmp45
+                bind size 2.4
+            save b, link tmp46
+        save tmp47
+          call multiply
+            bind a, size 0.2126
+            bind b, link r
+        save tmp48
+          call multiply
+            bind a, size 0.7152
+            bind b, link g
+        save tmp49
+          call add
+            bind a, link tmp47
+            bind b, link tmp48
+        save tmp50
+          call multiply
+            bind a, size 0.0722
+            bind b, link b
+        save tmp51
+          call add
+            bind a, link tmp49
+            bind b, link tmp50
+        turn seed, link tmp51
+    bind set-alpha
+      task tmp8
+        base value
+        save tmp52
+          call bound-alpha
+            bind link value
+        save this/a, link tmp52
+        save tmp53
+          call multiply
+            bind a, size 100
+            bind b, link this/a
+        save tmp54
+          call math-round
+            bind link tmp53
+        save tmp55
+          call divide
+            bind a, link tmp54
+            bind b, size 100
+        save this/rounda, link tmp55
+        turn seed, link this
+    bind to-hsv
+      task tmp9
+        save tmp56
+          call rgb-to-hsv
+            bind link this/r
+            bind link this/g
+            bind link this/b
+        save hsv, link tmp56
+        save tmp57
+          make object
+            bind h
+              call multiply
+                bind a, link hsv/h
+                bind b, size 360
+            bind s, link hsv/s
+            bind v, link hsv/v
+            bind a, link this/a
+        turn seed, link tmp57
+    bind to-hsv-string
+      task tmp10
+        save tmp58
+          call rgb-to-hsv
+            bind link this/r
+            bind link this/g
+            bind link this/b
+        save hsv, link tmp58
+        save tmp59
+          call multiply
+            bind a, link hsv/h
+            bind b, size 360
+        save tmp60
+          call math-round
+            bind link tmp59
+        save tmp61
+          call multiply
+            bind a, link hsv/s
+            bind b, size 100
+        save tmp62
+          call math-round
+            bind link tmp61
+        save tmp63
+          call multiply
+            bind a, link hsv/v
+            bind b, size 100
+        save tmp64
+          call math-round
+            bind link tmp63
+        save h, link tmp60
+        save s, link tmp62
+        save v, link tmp64
+        save tmp65
+          call equal
+            bind a, link this/a
+            bind b, size 1
+        save tmp66
+          call add
+            bind a, text <hsv(>
+            bind b, link h
+        save tmp67
+          call add
+            bind a, link tmp66
+            bind b, text <, >
+        save tmp68
+          call add
+            bind a, link tmp67
+            bind b, link s
+        save tmp69
+          call add
+            bind a, link tmp68
+            bind b, text <%, >
+        save tmp70
+          call add
+            bind a, link tmp69
+            bind b, link v
+        save tmp71
+          call add
+            bind a, link tmp70
+            bind b, text <%)>
+        save tmp72
+          call add
+            bind a, text <hsva(>
+            bind b, link h
+        save tmp73
+          call add
+            bind a, link tmp72
+            bind b, text <, >
+        save tmp74
+          call add
+            bind a, link tmp73
+            bind b, link s
+        save tmp75
+          call add
+            bind a, link tmp74
+            bind b, text <%, >
+        save tmp76
+          call add
+            bind a, link tmp75
+            bind b, link v
+        save tmp77
+          call add
+            bind a, link tmp76
+            bind b, text <%, >
+        save tmp78
+          call add
+            bind a, link tmp77
+            bind b, link this/rounda
+        save tmp79
+          call add
+            bind a, link tmp78
+            bind b, text <)>
+        save tmp80
+        call check
+          bind test, link tmp65
+          hook match
+            save tmp80, link tmp71
+          hook fault
+            save tmp80, link tmp79
+        turn seed, link tmp80
+    bind to-hsl
+      task tmp11
+        save tmp81
+          call rgb-to-hsl
+            bind link this/r
+            bind link this/g
+            bind link this/b
+        save hsl, link tmp81
+        save tmp82
+          make object
+            bind h
+              call multiply
+                bind a, link hsl/h
+                bind b, size 360
+            bind s, link hsl/s
+            bind l, link hsl/l
+            bind a, link this/a
+        turn seed, link tmp82
+    bind to-hsl-string
+      task tmp12
+        save tmp83
+          call rgb-to-hsl
+            bind link this/r
+            bind link this/g
+            bind link this/b
+        save hsl, link tmp83
+        save tmp84
+          call multiply
+            bind a, link hsl/h
+            bind b, size 360
+        save tmp85
+          call math-round
+            bind link tmp84
+        save tmp86
+          call multiply
+            bind a, link hsl/s
+            bind b, size 100
+        save tmp87
+          call math-round
+            bind link tmp86
+        save tmp88
+          call multiply
+            bind a, link hsl/l
+            bind b, size 100
+        save tmp89
+          call math-round
+            bind link tmp88
+        save h, link tmp85
+        save s, link tmp87
+        save l, link tmp89
+        save tmp90
+          call equal
+            bind a, link this/a
+            bind b, size 1
+        save tmp91
+          call add
+            bind a, text <hsl(>
+            bind b, link h
+        save tmp92
+          call add
+            bind a, link tmp91
+            bind b, text <, >
+        save tmp93
+          call add
+            bind a, link tmp92
+            bind b, link s
+        save tmp94
+          call add
+            bind a, link tmp93
+            bind b, text <%, >
+        save tmp95
+          call add
+            bind a, link tmp94
+            bind b, link l
+        save tmp96
+          call add
+            bind a, link tmp95
+            bind b, text <%)>
+        save tmp97
+          call add
+            bind a, text <hsla(>
+            bind b, link h
+        save tmp98
+          call add
+            bind a, link tmp97
+            bind b, text <, >
+        save tmp99
+          call add
+            bind a, link tmp98
+            bind b, link s
+        save tmp100
+          call add
+            bind a, link tmp99
+            bind b, text <%, >
+        save tmp101
+          call add
+            bind a, link tmp100
+            bind b, link l
+        save tmp102
+          call add
+            bind a, link tmp101
+            bind b, text <%, >
+        save tmp103
+          call add
+            bind a, link tmp102
+            bind b, link this/rounda
+        save tmp104
+          call add
+            bind a, link tmp103
+            bind b, text <)>
+        save tmp105
+        call check
+          bind test, link tmp90
+          hook match
+            save tmp105, link tmp96
+          hook fault
+            save tmp105, link tmp104
+        turn seed, link tmp105
+    bind to-hex
+      task tmp13
+        base allow3-char
+        save tmp106
+          call rgb-to-hex
+            bind link this/r
+            bind link this/g
+            bind link this/b
+            bind link allow3-char
+        turn seed, link tmp106
+    bind to-hex-string
+      task tmp14
+        base allow3-char
+        save tmp107
+          call this/to-hex
+            bind link allow3-char
+        save tmp108
+          call add
+            bind a, text <#>
+            bind b, link tmp107
+        turn seed, link tmp108
+    bind to-hex8
+      task tmp15
+        base allow4-char
+        save tmp109
+          call rgba-to-hex
+            bind link this/r
+            bind link this/g
+            bind link this/b
+            bind link this/a
+            bind link allow4-char
+        turn seed, link tmp109
+    bind to-hex8-string
+      task tmp16
+        base allow4-char
+        save tmp110
+          call this/to-hex8
+            bind link allow4-char
+        save tmp111
+          call add
+            bind a, text <#>
+            bind b, link tmp110
+        turn seed, link tmp111
+    bind to-rgb
+      task tmp17
+        save tmp112
+          make object
+            bind r
+              call math-round
+                bind link this/r
+            bind g
+              call math-round
+                bind link this/g
+            bind b
+              call math-round
+                bind link this/b
+            bind a, link this/a
+        turn seed, link tmp112
+    bind to-rgb-string
+      task tmp18
+        save tmp113
+          call equal
+            bind a, link this/a
+            bind b, size 1
+        save tmp114
+          call math-round
+            bind link this/r
+        save tmp115
+          call add
+            bind a, text <rgb(>
+            bind b, link tmp114
+        save tmp116
+          call add
+            bind a, link tmp115
+            bind b, text <, >
+        save tmp117
+          call math-round
+            bind link this/g
+        save tmp118
+          call add
+            bind a, link tmp116
+            bind b, link tmp117
+        save tmp119
+          call add
+            bind a, link tmp118
+            bind b, text <, >
+        save tmp120
+          call math-round
+            bind link this/b
+        save tmp121
+          call add
+            bind a, link tmp119
+            bind b, link tmp120
+        save tmp122
+          call add
+            bind a, link tmp121
+            bind b, text <)>
+        save tmp123
+          call math-round
+            bind link this/r
+        save tmp124
+          call add
+            bind a, text <rgba(>
+            bind b, link tmp123
+        save tmp125
+          call add
+            bind a, link tmp124
+            bind b, text <, >
+        save tmp126
+          call math-round
+            bind link this/g
+        save tmp127
+          call add
+            bind a, link tmp125
+            bind b, link tmp126
+        save tmp128
+          call add
+            bind a, link tmp127
+            bind b, text <, >
+        save tmp129
+          call math-round
+            bind link this/b
+        save tmp130
+          call add
+            bind a, link tmp128
+            bind b, link tmp129
+        save tmp131
+          call add
+            bind a, link tmp130
+            bind b, text <, >
+        save tmp132
+          call add
+            bind a, link tmp131
+            bind b, link this/rounda
+        save tmp133
+          call add
+            bind a, link tmp132
+            bind b, text <)>
+        save tmp134
+        call check
+          bind test, link tmp113
+          hook match
+            save tmp134, link tmp122
+          hook fault
+            save tmp134, link tmp133
+        turn seed, link tmp134
+    bind to-percentage-rgb
+      task tmp19
+        save tmp135
+          call bound01
+            bind link this/r
+            bind size 255
+        save tmp136
+          call multiply
+            bind a, link tmp135
+            bind b, size 100
+        save tmp137
+          call math-round
+            bind link tmp136
+        save tmp138
+          call bound01
+            bind link this/g
+            bind size 255
+        save tmp139
+          call multiply
+            bind a, link tmp138
+            bind b, size 100
+        save tmp140
+          call math-round
+            bind link tmp139
+        save tmp141
+          call bound01
+            bind link this/b
+            bind size 255
+        save tmp142
+          call multiply
+            bind a, link tmp141
+            bind b, size 100
+        save tmp143
+          call math-round
+            bind link tmp142
+        save tmp144
+          make object
+            bind r
+              call add
+                bind a, link tmp137
+                bind b, text <%>
+            bind g
+              call add
+                bind a, link tmp140
+                bind b, text <%>
+            bind b
+              call add
+                bind a, link tmp143
+                bind b, text <%>
+            bind a, link this/a
+        turn seed, link tmp144
+    bind to-percentage-rgb-string
+      task tmp20
+        save tmp145
+          call equal
+            bind a, link this/a
+            bind b, size 1
+        save tmp146
+          call bound01
+            bind link this/r
+            bind size 255
+        save tmp147
+          call multiply
+            bind a, link tmp146
+            bind b, size 100
+        save tmp148
+          call math-round
+            bind link tmp147
+        save tmp149
+          call add
+            bind a, text <rgb(>
+            bind b, link tmp148
+        save tmp150
+          call add
+            bind a, link tmp149
+            bind b, text <%, >
+        save tmp151
+          call bound01
+            bind link this/g
+            bind size 255
+        save tmp152
+          call multiply
+            bind a, link tmp151
+            bind b, size 100
+        save tmp153
+          call math-round
+            bind link tmp152
+        save tmp154
+          call add
+            bind a, link tmp150
+            bind b, link tmp153
+        save tmp155
+          call add
+            bind a, link tmp154
+            bind b, text <%, >
+        save tmp156
+          call bound01
+            bind link this/b
+            bind size 255
+        save tmp157
+          call multiply
+            bind a, link tmp156
+            bind b, size 100
+        save tmp158
+          call math-round
+            bind link tmp157
+        save tmp159
+          call add
+            bind a, link tmp155
+            bind b, link tmp158
+        save tmp160
+          call add
+            bind a, link tmp159
+            bind b, text <%)>
+        save tmp161
+          call bound01
+            bind link this/r
+            bind size 255
+        save tmp162
+          call multiply
+            bind a, link tmp161
+            bind b, size 100
+        save tmp163
+          call math-round
+            bind link tmp162
+        save tmp164
+          call add
+            bind a, text <rgba(>
+            bind b, link tmp163
+        save tmp165
+          call add
+            bind a, link tmp164
+            bind b, text <%, >
+        save tmp166
+          call bound01
+            bind link this/g
+            bind size 255
+        save tmp167
+          call multiply
+            bind a, link tmp166
+            bind b, size 100
+        save tmp168
+          call math-round
+            bind link tmp167
+        save tmp169
+          call add
+            bind a, link tmp165
+            bind b, link tmp168
+        save tmp170
+          call add
+            bind a, link tmp169
+            bind b, text <%, >
+        save tmp171
+          call bound01
+            bind link this/b
+            bind size 255
+        save tmp172
+          call multiply
+            bind a, link tmp171
+            bind b, size 100
+        save tmp173
+          call math-round
+            bind link tmp172
+        save tmp174
+          call add
+            bind a, link tmp170
+            bind b, link tmp173
+        save tmp175
+          call add
+            bind a, link tmp174
+            bind b, text <%, >
+        save tmp176
+          call add
+            bind a, link tmp175
+            bind b, link this/rounda
+        save tmp177
+          call add
+            bind a, link tmp176
+            bind b, text <)>
+        save tmp178
+        call check
+          bind test, link tmp145
+          hook match
+            save tmp178, link tmp160
+          hook fault
+            save tmp178, link tmp177
+        turn seed, link tmp178
+    bind to-name
+      task tmp21
+        save tmp179
+          call strictly-equal
+            bind a, link this/a
+            bind b, size 0
+        call check
+          bind test, link tmp179
+          hook match
+            turn seed, link <transparent>
+        save tmp180
+          call lt
+            bind a, link this/a
+            bind b, size 1
+        call check
+          bind test, link tmp180
+          hook match
+            turn seed, link false
+        save tmp181
+          call rgb-to-hex
+            bind link this/r
+            bind link this/g
+            bind link this/b
+            bind link true
+        save tmp182
+          call or
+            bind a, link hex-names[tmp181]
+            bind b, link false
+        turn seed, link tmp182
+    bind to-filter
+      task tmp22
+        base second-color
+        save tmp183
+          call rgba-to-argb-hex
+            bind link this/r
+            bind link this/g
+            bind link this/b
+            bind link this/a
+        save tmp184
+          call add
+            bind a, text <#>
+            bind b, link tmp183
+        save hex8-string, link tmp184
+        save second-hex8-string, link hex8-string
+        save tmp185
+        call check
+          bind test, link this/gradienttype
+          hook match
+            save tmp185, text <GradientType = 1, >
+          hook fault
+            save tmp185, text <>
+        save gradient-type, link tmp185
+        call check
+          bind test, link second-color
+          hook match
+            save tmp186
+              call tinycolor
+                bind link second-color
+            save s, link tmp186
+            save tmp187
+              call rgba-to-argb-hex
+                bind link s/r
+                bind link s/g
+                bind link s/b
+                bind link s/a
+            save tmp188
+              call add
+                bind a, text <#>
+                bind b, link tmp187
+            save second-hex8-string, link tmp188
+        save tmp189
+          call add
+            bind a, text <progid:DXImageTransform.Microsoft.gradient(>
+            bind b, link gradient-type
+        save tmp190
+          call add
+            bind a, link tmp189
+            bind b, text <startColorstr=>
+        save tmp191
+          call add
+            bind a, link tmp190
+            bind b, link hex8-string
+        save tmp192
+          call add
+            bind a, link tmp191
+            bind b, text <,endColorstr=>
+        save tmp193
+          call add
+            bind a, link tmp192
+            bind b, link second-hex8-string
+        save tmp194
+          call add
+            bind a, link tmp193
+            bind b, text <)>
+        turn seed, link tmp194
+    bind to-string
+      task tmp23
+        base format
+        save tmp195
+          call not
+            bind bits, link format
+        save tmp196
+          call not
+            bind bits, link tmp195
+        save format-set, link tmp196
+        save tmp197
+          call or
+            bind a, link format
+            bind b, link this/format
+        save format, link tmp197
+        save formatted-string, link false
+        save tmp198
+          call lt
+            bind a, link this/a
+            bind b, size 1
+        save tmp199
+          call gte
+            bind a, link this/a
+            bind b, size 0
+        save tmp200
+          call and
+            bind a, link tmp198
+            bind b, link tmp199
+        save has-alpha, link tmp200
+        save tmp201
+          call not
+            bind bits, link format-set
+        save tmp202
+          call and
+            bind a, link tmp201
+            bind b, link has-alpha
+        save tmp203
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex>
+        save tmp204
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex6>
+        save tmp205
+          call or
+            bind a, link tmp203
+            bind b, link tmp204
+        save tmp206
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex3>
+        save tmp207
+          call or
+            bind a, link tmp205
+            bind b, link tmp206
+        save tmp208
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex4>
+        save tmp209
+          call or
+            bind a, link tmp207
+            bind b, link tmp208
+        save tmp210
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex8>
+        save tmp211
+          call or
+            bind a, link tmp209
+            bind b, link tmp210
+        save tmp212
+          call strictly-equal
+            bind a, link format
+            bind b, text <name>
+        save tmp213
+          call or
+            bind a, link tmp211
+            bind b, link tmp212
+        save tmp214
+          call and
+            bind a, link tmp202
+            bind b, link tmp213
+        save needs-alpha-format, link tmp214
+        call check
+          bind test, link needs-alpha-format
+          hook match
+            save tmp215
+              call strictly-equal
+                bind a, link format
+                bind b, text <name>
+            save tmp216
+              call strictly-equal
+                bind a, link this/a
+                bind b, size 0
+            save tmp217
+              call and
+                bind a, link tmp215
+                bind b, link tmp216
+            call check
+              bind test, link tmp217
+              hook match
+                save tmp218, call this/to-name
+                turn seed, link tmp218
+            save tmp219, call this/to-rgb-string
+            turn seed, link tmp219
+        save tmp220
+          call strictly-equal
+            bind a, link format
+            bind b, text <rgb>
+        call check
+          bind test, link tmp220
+          hook match
+            save tmp221, call this/to-rgb-string
+            save formatted-string, link tmp221
+        save tmp222
+          call strictly-equal
+            bind a, link format
+            bind b, text <prgb>
+        call check
+          bind test, link tmp222
+          hook match
+            save tmp223, call this/to-percentage-rgb-string
+            save formatted-string, link tmp223
+        save tmp224
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex>
+        save tmp225
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex6>
+        save tmp226
+          call or
+            bind a, link tmp224
+            bind b, link tmp225
+        call check
+          bind test, link tmp226
+          hook match
+            save tmp227, call this/to-hex-string
+            save formatted-string, link tmp227
+        save tmp228
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex3>
+        call check
+          bind test, link tmp228
+          hook match
+            save tmp229
+              call this/to-hex-string
+                bind link true
+            save formatted-string, link tmp229
+        save tmp230
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex4>
+        call check
+          bind test, link tmp230
+          hook match
+            save tmp231
+              call this/to-hex8-string
+                bind link true
+            save formatted-string, link tmp231
+        save tmp232
+          call strictly-equal
+            bind a, link format
+            bind b, text <hex8>
+        call check
+          bind test, link tmp232
+          hook match
+            save tmp233, call this/to-hex8-string
+            save formatted-string, link tmp233
+        save tmp234
+          call strictly-equal
+            bind a, link format
+            bind b, text <name>
+        call check
+          bind test, link tmp234
+          hook match
+            save tmp235, call this/to-name
+            save formatted-string, link tmp235
+        save tmp236
+          call strictly-equal
+            bind a, link format
+            bind b, text <hsl>
+        call check
+          bind test, link tmp236
+          hook match
+            save tmp237, call this/to-hsl-string
+            save formatted-string, link tmp237
+        save tmp238
+          call strictly-equal
+            bind a, link format
+            bind b, text <hsv>
+        call check
+          bind test, link tmp238
+          hook match
+            save tmp239, call this/to-hsv-string
+            save formatted-string, link tmp239
+        save tmp240, call this/to-hex-string
+        save tmp241
+          call or
+            bind a, link formatted-string
+            bind b, link tmp240
+        turn seed, link tmp241
+    bind clone
+      task tmp24
+        save tmp242, call this/to-string
+        save tmp243
+          call tinycolor
+            bind link tmp242
+        turn seed, link tmp243
+    bind applymodification
+      task tmp25
+        base fn
+        base args
+        save tmp245, make list
+        save tmp246
+          call tmp245/slice/call
+            bind link args
+        save tmp244
+          make list
+            bind link this
+        save tmp247
+          call tmp244/concat
+            bind link tmp246
+        save tmp248
+          call fn/apply
+            bind link null
+            bind link tmp247
+        save color, link tmp248
+        save this/r, link color/r
+        save this/g, link color/g
+        save this/b, link color/b
+        call this/set-alpha
+          bind link color/a
+        turn seed, link this
+    bind lighten
+      task tmp26
+        save tmp249
+          call this/applymodification
+            bind link lighten
+            bind link arguments
+        turn seed, link tmp249
+    bind brighten
+      task tmp27
+        save tmp250
+          call this/applymodification
+            bind link brighten
+            bind link arguments
+        turn seed, link tmp250
+    bind darken
+      task tmp28
+        save tmp251
+          call this/applymodification
+            bind link darken
+            bind link arguments
+        turn seed, link tmp251
+    bind desaturate
+      task tmp29
+        save tmp252
+          call this/applymodification
+            bind link desaturate
+            bind link arguments
+        turn seed, link tmp252
+    bind saturate
+      task tmp30
+        save tmp253
+          call this/applymodification
+            bind link saturate
+            bind link arguments
+        turn seed, link tmp253
+    bind greyscale
+      task tmp31
+        save tmp254
+          call this/applymodification
+            bind link greyscale
+            bind link arguments
+        turn seed, link tmp254
+    bind spin
+      task tmp32
+        save tmp255
+          call this/applymodification
+            bind link spin
+            bind link arguments
+        turn seed, link tmp255
+    bind applycombination
+      task tmp33
+        base fn
+        base args
+        save tmp257, make list
+        save tmp258
+          call tmp257/slice/call
+            bind link args
+        save tmp256
+          make list
+            bind link this
+        save tmp259
+          call tmp256/concat
+            bind link tmp258
+        save tmp260
+          call fn/apply
+            bind link null
+            bind link tmp259
+        turn seed, link tmp260
+    bind analogous
+      task tmp34
+        save tmp261
+          call this/applycombination
+            bind link analogous
+            bind link arguments
+        turn seed, link tmp261
+    bind complement
+      task tmp35
+        save tmp262
+          call this/applycombination
+            bind link complement
+            bind link arguments
+        turn seed, link tmp262
+    bind monochromatic
+      task tmp36
+        save tmp263
+          call this/applycombination
+            bind link monochromatic
+            bind link arguments
+        turn seed, link tmp263
+    bind splitcomplement
+      task tmp37
+        save tmp264
+          call this/applycombination
+            bind link splitcomplement
+            bind link arguments
+        turn seed, link tmp264
+    bind triad
+      task tmp38
+        save tmp265
+          call this/applycombination
+            bind link triad
+            bind link arguments
+        turn seed, link tmp265
+    bind tetrad
+      task tmp39
+        save tmp266
+          call this/applycombination
+            bind link tetrad
+            bind link arguments
+        turn seed, link tmp266
+save tinycolor/prototype, link tmp267
+save tinycolor/from-ratio
+  task tmp40
+    base color
+    base opts
+    save tmp268
+      call get-type-of
+        bind bits, link color
+    save tmp269
+      call equal
+        bind a, link tmp268
+        bind b, text <object>
+    call check
+      bind test, link tmp269
+      hook match
+        save tmp270, make object
+        save new-color, link tmp270
+        call walk-keys
+          bind object, link color
+          hook link
+            base key
+            save tmp271
+              call color/has-own-property
+                bind link i
+            call check
+              bind test, link tmp271
+              hook match
+                save tmp272
+                  call strictly-equal
+                    bind a, link i
+                    bind b, text <a>
+                call check
+                  bind test, link tmp272
+                  hook match
+                    save new-color[i], link color[i]
+                  hook fault
+                    save tmp273
+                      call convert-to-percentage
+                        bind link color[i]
+                    save new-color[i], link tmp273
+        save color, link new-color
+    save tmp274
+      call tinycolor
+        bind link color
+        bind link opts
+    turn seed, link tmp274
+task input-to-r-g-b
+  base color
+  save tmp275
+    make object
+      bind r, size 0
+      bind g, size 0
+      bind b, size 0
+  save rgb, link tmp275
+  save a, size 1
+  save s
+  save v
+  save l
+  save ok, link false
+  save format, link false
+  save tmp276
+    call get-type-of
+      bind bits, link color
+  save tmp277
+    call equal
+      bind a, link tmp276
+      bind b, text <string>
+  call check
+    bind test, link tmp277
+    hook match
+      save tmp278
+        call string-input-to-object
+          bind link color
+      save color, link tmp278
+  save tmp279
+    call get-type-of
+      bind bits, link color
+  save tmp280
+    call equal
+      bind a, link tmp279
+      bind b, text <object>
+  call check
+    bind test, link tmp280
+    hook match
+      save tmp281
+        call is-valid-c-s-s-unit
+          bind link color/r
+      save tmp282
+        call is-valid-c-s-s-unit
+          bind link color/g
+      save tmp283
+        call and
+          bind a, link tmp281
+          bind b, link tmp282
+      save tmp284
+        call is-valid-c-s-s-unit
+          bind link color/b
+      save tmp285
+        call and
+          bind a, link tmp283
+          bind b, link tmp284
+      save tmp292
+        call is-valid-c-s-s-unit
+          bind link color/h
+      save tmp293
+        call is-valid-c-s-s-unit
+          bind link color/s
+      save tmp294
+        call and
+          bind a, link tmp292
+          bind b, link tmp293
+      save tmp295
+        call is-valid-c-s-s-unit
+          bind link color/v
+      save tmp296
+        call and
+          bind a, link tmp294
+          bind b, link tmp295
+      save tmp300
+        call is-valid-c-s-s-unit
+          bind link color/h
+      save tmp301
+        call is-valid-c-s-s-unit
+          bind link color/s
+      save tmp302
+        call and
+          bind a, link tmp300
+          bind b, link tmp301
+      save tmp303
+        call is-valid-c-s-s-unit
+          bind link color/l
+      save tmp304
+        call and
+          bind a, link tmp302
+          bind b, link tmp303
+      call check
+        bind test, link tmp285
+        hook match
+          save tmp286
+            call rgb-to-rgb
+              bind link color/r
+              bind link color/g
+              bind link color/b
+          save rgb, link tmp286
+          save ok, link true
+          save tmp288
+            call negative
+              bind bits, size 1
+          save tmp287
+            call string
+              bind link color/r
+          save tmp289
+            call tmp287/substr
+              bind link tmp288
+          save tmp290
+            call strictly-equal
+              bind a, link tmp289
+              bind b, text <%>
+          save tmp291
+          call check
+            bind test, link tmp290
+            hook match
+              save tmp291, text <prgb>
+            hook fault
+              save tmp291, text <rgb>
+          save format, link tmp291
+        hook fault
+          call check
+            bind test, link tmp296
+            hook match
+              save tmp297
+                call convert-to-percentage
+                  bind link color/s
+              save s, link tmp297
+              save tmp298
+                call convert-to-percentage
+                  bind link color/v
+              save v, link tmp298
+              save tmp299
+                call hsv-to-rgb
+                  bind link color/h
+                  bind link s
+                  bind link v
+              save rgb, link tmp299
+              save ok, link true
+              save format, text <hsv>
+            hook fault
+              call check
+                bind test, link tmp304
+                hook match
+                  save tmp305
+                    call convert-to-percentage
+                      bind link color/s
+                  save s, link tmp305
+                  save tmp306
+                    call convert-to-percentage
+                      bind link color/l
+                  save l, link tmp306
+                  save tmp307
+                    call hsl-to-rgb
+                      bind link color/h
+                      bind link s
+                      bind link l
+                  save rgb, link tmp307
+                  save ok, link true
+                  save format, text <hsl>
+      save tmp308
+        call color/has-own-property
+          bind text <a>
+      call check
+        bind test, link tmp308
+        hook match
+          save a, link color/a
+  save tmp309
+    call bound-alpha
+      bind link a
+  save a, link tmp309
+  save tmp310
+    call math-max
+      bind link rgb/r
+      bind size 0
+  save tmp311
+    call math-max
+      bind link rgb/g
+      bind size 0
+  save tmp312
+    call math-max
+      bind link rgb/b
+      bind size 0
+  save tmp313
+    make object
+      bind ok, link ok
+      bind format
+        call or
+          bind a, link color/format
+          bind b, link format
+      bind r
+        call math-min
+          bind size 255
+          bind link tmp310
+      bind g
+        call math-min
+          bind size 255
+          bind link tmp311
+      bind b
+        call math-min
+          bind size 255
+          bind link tmp312
+      bind a, link a
+  turn seed, link tmp313
+task rgb-to-rgb
+  base r
+  base g
+  base b
+  save tmp314
+    call bound01
+      bind link r
+      bind size 255
+  save tmp315
+    call bound01
+      bind link g
+      bind size 255
+  save tmp316
+    call bound01
+      bind link b
+      bind size 255
+  save tmp317
+    make object
+      bind r
+        call multiply
+          bind a, link tmp314
+          bind b, size 255
+      bind g
+        call multiply
+          bind a, link tmp315
+          bind b, size 255
+      bind b
+        call multiply
+          bind a, link tmp316
+          bind b, size 255
+  turn seed, link tmp317
+task rgb-to-hsl
+  base r
+  base g
+  base b
+  save tmp318
+    call bound01
+      bind link r
+      bind size 255
+  save r, link tmp318
+  save tmp319
+    call bound01
+      bind link g
+      bind size 255
+  save g, link tmp319
+  save tmp320
+    call bound01
+      bind link b
+      bind size 255
+  save b, link tmp320
+  save tmp321
+    call math-max
+      bind link r
+      bind link g
+      bind link b
+  save tmp322
+    call math-min
+      bind link r
+      bind link g
+      bind link b
+  save max, link tmp321
+  save min, link tmp322
+  save tmp323
+    call add
+      bind a, link max
+      bind b, link min
+  save tmp324
+    call divide
+      bind a, link tmp323
+      bind b, size 2
+  save h
+  save s
+  save l, link tmp324
+  save tmp325
+    call equal
+      bind a, link max
+      bind b, link min
+  call check
+    bind test, link tmp325
+    hook match
+      save s, size 0
+      save h, link s
+    hook fault
+      save tmp326
+        call subtract
+          bind a, link max
+          bind b, link min
+      save d, link tmp326
+      save tmp327
+        call gt
+          bind a, link l
+          bind b, size 0.5
+      save tmp328
+        call subtract
+          bind a, size 2
+          bind b, link max
+      save tmp329
+        call subtract
+          bind a, link tmp328
+          bind b, link min
+      save tmp330
+        call divide
+          bind a, link d
+          bind b, link tmp329
+      save tmp331
+        call add
+          bind a, link max
+          bind b, link min
+      save tmp332
+        call divide
+          bind a, link d
+          bind b, link tmp331
+      save tmp333
+      call check
+        bind test, link tmp327
+        hook match
+          save tmp333, link tmp330
+        hook fault
+          save tmp333, link tmp332
+      save s, link tmp333
+      save h, size 6
+  save tmp334
+    make object
+      bind h, link h
+      bind s, link s
+      bind l, link l
+  turn seed, link tmp334
+task hsl-to-rgb
+  base h
+  base s
+  base l
+  save r
+  save g
+  save b
+  save tmp335
+    call bound01
+      bind link h
+      bind size 360
+  save h, link tmp335
+  save tmp336
+    call bound01
+      bind link s
+      bind size 100
+  save s, link tmp336
+  save tmp337
+    call bound01
+      bind link l
+      bind size 100
+  save l, link tmp337
+  task hue2rgb
+    base p
+    base q
+    base t
+    save tmp338
+      call lt
+        bind a, link t
+        bind b, size 0
+    call check
+      bind test, link tmp338
+      hook match
+        save t, size 1
+    save tmp339
+      call gt
+        bind a, link t
+        bind b, size 1
+    call check
+      bind test, link tmp339
+      hook match
+        save t, size 1
+    save tmp340
+      call divide
+        bind a, size 1
+        bind b, size 6
+    save tmp341
+      call lt
+        bind a, link t
+        bind b, link tmp340
+    call check
+      bind test, link tmp341
+      hook match
+        turn seed, link tmp345
+    save tmp346
+      call divide
+        bind a, size 1
+        bind b, size 2
+    save tmp347
+      call lt
+        bind a, link t
+        bind b, link tmp346
+    call check
+      bind test, link tmp347
+      hook match
+        turn seed, link q
+    save tmp348
+      call divide
+        bind a, size 2
+        bind b, size 3
+    save tmp349
+      call lt
+        bind a, link t
+        bind b, link tmp348
+    call check
+      bind test, link tmp349
+      hook match
+        turn seed, link tmp355
+    turn seed, link p
+  save tmp356
+    call strictly-equal
+      bind a, link s
+      bind b, size 0
+  call check
+    bind test, link tmp356
+    hook match
+      save b, link l
+      save g, link b
+      save r, link g
+    hook fault
+      save tmp357
+        call lt
+          bind a, link l
+          bind b, size 0.5
+      save tmp358
+        call add
+          bind a, size 1
+          bind b, link s
+      save tmp359
+        call multiply
+          bind a, link l
+          bind b, link tmp358
+      save tmp360
+        call add
+          bind a, link l
+          bind b, link s
+      save tmp361
+        call multiply
+          bind a, link l
+          bind b, link s
+      save tmp362
+        call subtract
+          bind a, link tmp360
+          bind b, link tmp361
+      save tmp363
+      call check
+        bind test, link tmp357
+        hook match
+          save tmp363, link tmp359
+        hook fault
+          save tmp363, link tmp362
+      save q, link tmp363
+      save tmp364
+        call multiply
+          bind a, size 2
+          bind b, link l
+      save tmp365
+        call subtract
+          bind a, link tmp364
+          bind b, link q
+      save p, link tmp365
+      save tmp366
+        call divide
+          bind a, size 1
+          bind b, size 3
+      save tmp367
+        call add
+          bind a, link h
+          bind b, link tmp366
+      save tmp368
+        call hue2rgb
+          bind link p
+          bind link q
+          bind link tmp367
+      save r, link tmp368
+      save tmp369
+        call hue2rgb
+          bind link p
+          bind link q
+          bind link h
+      save g, link tmp369
+      save tmp370
+        call divide
+          bind a, size 1
+          bind b, size 3
+      save tmp371
+        call subtract
+          bind a, link h
+          bind b, link tmp370
+      save tmp372
+        call hue2rgb
+          bind link p
+          bind link q
+          bind link tmp371
+      save b, link tmp372
+  save tmp373
+    make object
+      bind r
+        call multiply
+          bind a, link r
+          bind b, size 255
+      bind g
+        call multiply
+          bind a, link g
+          bind b, size 255
+      bind b
+        call multiply
+          bind a, link b
+          bind b, size 255
+  turn seed, link tmp373
+task rgb-to-hsv
+  base r
+  base g
+  base b
+  save tmp374
+    call bound01
+      bind link r
+      bind size 255
+  save r, link tmp374
+  save tmp375
+    call bound01
+      bind link g
+      bind size 255
+  save g, link tmp375
+  save tmp376
+    call bound01
+      bind link b
+      bind size 255
+  save b, link tmp376
+  save tmp377
+    call math-max
+      bind link r
+      bind link g
+      bind link b
+  save tmp378
+    call math-min
+      bind link r
+      bind link g
+      bind link b
+  save max, link tmp377
+  save min, link tmp378
+  save h
+  save s
+  save v, link max
+  save tmp379
+    call subtract
+      bind a, link max
+      bind b, link min
+  save d, link tmp379
+  save tmp380
+    call strictly-equal
+      bind a, link max
+      bind b, size 0
+  save tmp381
+    call divide
+      bind a, link d
+      bind b, link max
+  save tmp382
+  call check
+    bind test, link tmp380
+    hook match
+      save tmp382, size 0
+    hook fault
+      save tmp382, link tmp381
+  save s, link tmp382
+  save tmp383
+    call equal
+      bind a, link max
+      bind b, link min
+  call check
+    bind test, link tmp383
+    hook match
+      save h, size 0
+    hook fault
+      save h, size 6
+  save tmp384
+    make object
+      bind h, link h
+      bind s, link s
+      bind v, link v
+  turn seed, link tmp384
+task hsv-to-rgb
+  base h
+  base s
+  base v
+  save tmp385
+    call bound01
+      bind link h
+      bind size 360
+  save tmp386
+    call multiply
+      bind a, link tmp385
+      bind b, size 6
+  save h, link tmp386
+  save tmp387
+    call bound01
+      bind link s
+      bind size 100
+  save s, link tmp387
+  save tmp388
+    call bound01
+      bind link v
+      bind size 100
+  save v, link tmp388
+  save tmp389
+    call math/floor
+      bind link h
+  save tmp390
+    call subtract
+      bind a, link h
+      bind b, link i
+  save tmp391
+    call subtract
+      bind a, size 1
+      bind b, link s
+  save tmp392
+    call multiply
+      bind a, link v
+      bind b, link tmp391
+  save tmp393
+    call multiply
+      bind a, link f
+      bind b, link s
+  save tmp394
+    call subtract
+      bind a, size 1
+      bind b, link tmp393
+  save tmp395
+    call multiply
+      bind a, link v
+      bind b, link tmp394
+  save tmp396
+    call subtract
+      bind a, size 1
+      bind b, link f
+  save tmp397
+    call multiply
+      bind a, link tmp396
+      bind b, link s
+  save tmp398
+    call subtract
+      bind a, size 1
+      bind b, link tmp397
+  save tmp399
+    call multiply
+      bind a, link v
+      bind b, link tmp398
+  save tmp400
+    call modulo
+      bind a, link i
+      bind b, size 6
+  save tmp401
+    make list
+      bind link v
+      bind link q
+      bind link p
+      bind link p
+      bind link t
+      bind link v
+  save tmp402
+    make list
+      bind link t
+      bind link v
+      bind link v
+      bind link q
+      bind link p
+      bind link p
+  save tmp403
+    make list
+      bind link p
+      bind link p
+      bind link t
+      bind link v
+      bind link v
+      bind link q
+  save i, link tmp389
+  save f, link tmp390
+  save p, link tmp392
+  save q, link tmp395
+  save t, link tmp399
+  save mod, link tmp400
+  save r, link tmp401[mod]
+  save g, link tmp402[mod]
+  save b, link tmp403[mod]
+  save tmp404
+    make object
+      bind r
+        call multiply
+          bind a, link r
+          bind b, size 255
+      bind g
+        call multiply
+          bind a, link g
+          bind b, size 255
+      bind b
+        call multiply
+          bind a, link b
+          bind b, size 255
+  turn seed, link tmp404
+task rgb-to-hex
+  base r
+  base g
+  base b
+  base allow3-char
+  save tmp405
+    call math-round
+      bind link r
+  save tmp406
+    call tmp405/to-string
+      bind size 16
+  save tmp407
+    call pad2
+      bind link tmp406
+  save tmp408
+    call math-round
+      bind link g
+  save tmp409
+    call tmp408/to-string
+      bind size 16
+  save tmp410
+    call pad2
+      bind link tmp409
+  save tmp411
+    call math-round
+      bind link b
+  save tmp412
+    call tmp411/to-string
+      bind size 16
+  save tmp413
+    call pad2
+      bind link tmp412
+  save tmp414
+    make list
+      bind link tmp407
+      bind link tmp410
+      bind link tmp413
+  save hex, link tmp414
+  save tmp415
+    call hex[0]/char-at
+      bind size 0
+  save tmp416
+    call hex[0]/char-at
+      bind size 1
+  save tmp417
+    call equal
+      bind a, link tmp415
+      bind b, link tmp416
+  save tmp418
+    call and
+      bind a, link allow3-char
+      bind b, link tmp417
+  save tmp419
+    call hex[1]/char-at
+      bind size 0
+  save tmp420
+    call hex[1]/char-at
+      bind size 1
+  save tmp421
+    call equal
+      bind a, link tmp419
+      bind b, link tmp420
+  save tmp422
+    call and
+      bind a, link tmp418
+      bind b, link tmp421
+  save tmp423
+    call hex[2]/char-at
+      bind size 0
+  save tmp424
+    call hex[2]/char-at
+      bind size 1
+  save tmp425
+    call equal
+      bind a, link tmp423
+      bind b, link tmp424
+  save tmp426
+    call and
+      bind a, link tmp422
+      bind b, link tmp425
+  call check
+    bind test, link tmp426
+    hook match
+      save tmp427
+        call hex[0]/char-at
+          bind size 0
+      save tmp428
+        call hex[1]/char-at
+          bind size 0
+      save tmp429
+        call add
+          bind a, link tmp427
+          bind b, link tmp428
+      save tmp430
+        call hex[2]/char-at
+          bind size 0
+      save tmp431
+        call add
+          bind a, link tmp429
+          bind b, link tmp430
+      turn seed, link tmp431
+  save tmp432
+    call hex/join
+      bind text <>
+  turn seed, link tmp432
+task rgba-to-hex
+  base r
+  base g
+  base b
+  base a
+  base allow4-char
+  save tmp433
+    call math-round
+      bind link r
+  save tmp434
+    call tmp433/to-string
+      bind size 16
+  save tmp435
+    call pad2
+      bind link tmp434
+  save tmp436
+    call math-round
+      bind link g
+  save tmp437
+    call tmp436/to-string
+      bind size 16
+  save tmp438
+    call pad2
+      bind link tmp437
+  save tmp439
+    call math-round
+      bind link b
+  save tmp440
+    call tmp439/to-string
+      bind size 16
+  save tmp441
+    call pad2
+      bind link tmp440
+  save tmp442
+    call convert-decimal-to-hex
+      bind link a
+  save tmp443
+    call pad2
+      bind link tmp442
+  save tmp444
+    make list
+      bind link tmp435
+      bind link tmp438
+      bind link tmp441
+      bind link tmp443
+  save hex, link tmp444
+  save tmp445
+    call hex[0]/char-at
+      bind size 0
+  save tmp446
+    call hex[0]/char-at
+      bind size 1
+  save tmp447
+    call equal
+      bind a, link tmp445
+      bind b, link tmp446
+  save tmp448
+    call and
+      bind a, link allow4-char
+      bind b, link tmp447
+  save tmp449
+    call hex[1]/char-at
+      bind size 0
+  save tmp450
+    call hex[1]/char-at
+      bind size 1
+  save tmp451
+    call equal
+      bind a, link tmp449
+      bind b, link tmp450
+  save tmp452
+    call and
+      bind a, link tmp448
+      bind b, link tmp451
+  save tmp453
+    call hex[2]/char-at
+      bind size 0
+  save tmp454
+    call hex[2]/char-at
+      bind size 1
+  save tmp455
+    call equal
+      bind a, link tmp453
+      bind b, link tmp454
+  save tmp456
+    call and
+      bind a, link tmp452
+      bind b, link tmp455
+  save tmp457
+    call hex[3]/char-at
+      bind size 0
+  save tmp458
+    call hex[3]/char-at
+      bind size 1
+  save tmp459
+    call equal
+      bind a, link tmp457
+      bind b, link tmp458
+  save tmp460
+    call and
+      bind a, link tmp456
+      bind b, link tmp459
+  call check
+    bind test, link tmp460
+    hook match
+      save tmp461
+        call hex[0]/char-at
+          bind size 0
+      save tmp462
+        call hex[1]/char-at
+          bind size 0
+      save tmp463
+        call add
+          bind a, link tmp461
+          bind b, link tmp462
+      save tmp464
+        call hex[2]/char-at
+          bind size 0
+      save tmp465
+        call add
+          bind a, link tmp463
+          bind b, link tmp464
+      save tmp466
+        call hex[3]/char-at
+          bind size 0
+      save tmp467
+        call add
+          bind a, link tmp465
+          bind b, link tmp466
+      turn seed, link tmp467
+  save tmp468
+    call hex/join
+      bind text <>
+  turn seed, link tmp468
+task rgba-to-argb-hex
+  base r
+  base g
+  base b
+  base a
+  save tmp469
+    call convert-decimal-to-hex
+      bind link a
+  save tmp470
+    call pad2
+      bind link tmp469
+  save tmp471
+    call math-round
+      bind link r
+  save tmp472
+    call tmp471/to-string
+      bind size 16
+  save tmp473
+    call pad2
+      bind link tmp472
+  save tmp474
+    call math-round
+      bind link g
+  save tmp475
+    call tmp474/to-string
+      bind size 16
+  save tmp476
+    call pad2
+      bind link tmp475
+  save tmp477
+    call math-round
+      bind link b
+  save tmp478
+    call tmp477/to-string
+      bind size 16
+  save tmp479
+    call pad2
+      bind link tmp478
+  save tmp480
+    make list
+      bind link tmp470
+      bind link tmp473
+      bind link tmp476
+      bind link tmp479
+  save hex, link tmp480
+  save tmp481
+    call hex/join
+      bind text <>
+  turn seed, link tmp481
+save tinycolor/equals
+  task tmp41
+    base color1
+    base color2
+    save tmp482
+      call not
+        bind bits, link color1
+    save tmp483
+      call not
+        bind bits, link color2
+    save tmp484
+      call or
+        bind a, link tmp482
+        bind b, link tmp483
+    call check
+      bind test, link tmp484
+      hook match
+        turn seed, link false
+    save tmp485
+      call tinycolor
+        bind link color1
+    save tmp486, call tmp485/to-rgb-string
+    save tmp487
+      call tinycolor
+        bind link color2
+    save tmp488, call tmp487/to-rgb-string
+    save tmp489
+      call equal
+        bind a, link tmp486
+        bind b, link tmp488
+    turn seed, link tmp489
+save tinycolor/random
+  task tmp42
+    save tmp490
+      make object
+        bind r, call math-random
+        bind g, call math-random
+        bind b, call math-random
+    save tmp491
+      call tinycolor/from-ratio
+        bind link tmp490
+    turn seed, link tmp491
+task desaturate
+  base color
+  base amount
+  save tmp492
+    call strictly-equal
+      bind a, link amount
+      bind b, size 0
+  save tmp493
+    call or
+      bind a, link amount
+      bind b, size 10
+  save tmp494
+  call check
+    bind test, link tmp492
+    hook match
+      save tmp494, size 0
+    hook fault
+      save tmp494, link tmp493
+  save amount, link tmp494
+  save tmp495
+    call tinycolor
+      bind link color
+  save tmp496, call tmp495/to-hsl
+  save hsl, link tmp496
+  save tmp497
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save hsl/s, link tmp497
+  save tmp498
+    call clamp01
+      bind link hsl/s
+  save hsl/s, link tmp498
+  save tmp499
+    call tinycolor
+      bind link hsl
+  turn seed, link tmp499
+task saturate
+  base color
+  base amount
+  save tmp500
+    call strictly-equal
+      bind a, link amount
+      bind b, size 0
+  save tmp501
+    call or
+      bind a, link amount
+      bind b, size 10
+  save tmp502
+  call check
+    bind test, link tmp500
+    hook match
+      save tmp502, size 0
+    hook fault
+      save tmp502, link tmp501
+  save amount, link tmp502
+  save tmp503
+    call tinycolor
+      bind link color
+  save tmp504, call tmp503/to-hsl
+  save hsl, link tmp504
+  save tmp505
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save hsl/s, link tmp505
+  save tmp506
+    call clamp01
+      bind link hsl/s
+  save hsl/s, link tmp506
+  save tmp507
+    call tinycolor
+      bind link hsl
+  turn seed, link tmp507
+task greyscale
+  base color
+  save tmp508
+    call tinycolor
+      bind link color
+  save tmp509
+    call tmp508/desaturate
+      bind size 100
+  turn seed, link tmp509
+task lighten
+  base color
+  base amount
+  save tmp510
+    call strictly-equal
+      bind a, link amount
+      bind b, size 0
+  save tmp511
+    call or
+      bind a, link amount
+      bind b, size 10
+  save tmp512
+  call check
+    bind test, link tmp510
+    hook match
+      save tmp512, size 0
+    hook fault
+      save tmp512, link tmp511
+  save amount, link tmp512
+  save tmp513
+    call tinycolor
+      bind link color
+  save tmp514, call tmp513/to-hsl
+  save hsl, link tmp514
+  save tmp515
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save hsl/l, link tmp515
+  save tmp516
+    call clamp01
+      bind link hsl/l
+  save hsl/l, link tmp516
+  save tmp517
+    call tinycolor
+      bind link hsl
+  turn seed, link tmp517
+task brighten
+  base color
+  base amount
+  save tmp518
+    call strictly-equal
+      bind a, link amount
+      bind b, size 0
+  save tmp519
+    call or
+      bind a, link amount
+      bind b, size 10
+  save tmp520
+  call check
+    bind test, link tmp518
+    hook match
+      save tmp520, size 0
+    hook fault
+      save tmp520, link tmp519
+  save amount, link tmp520
+  save tmp521
+    call tinycolor
+      bind link color
+  save tmp522, call tmp521/to-rgb
+  save rgb, link tmp522
+  save tmp523
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save tmp524
+    call negative
+      bind bits, link tmp523
+  save tmp525
+    call multiply
+      bind a, size 255
+      bind b, link tmp524
+  save tmp526
+    call math-round
+      bind link tmp525
+  save tmp527
+    call subtract
+      bind a, link rgb/r
+      bind b, link tmp526
+  save tmp528
+    call math-min
+      bind size 255
+      bind link tmp527
+  save tmp529
+    call math-max
+      bind size 0
+      bind link tmp528
+  save rgb/r, link tmp529
+  save tmp530
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save tmp531
+    call negative
+      bind bits, link tmp530
+  save tmp532
+    call multiply
+      bind a, size 255
+      bind b, link tmp531
+  save tmp533
+    call math-round
+      bind link tmp532
+  save tmp534
+    call subtract
+      bind a, link rgb/g
+      bind b, link tmp533
+  save tmp535
+    call math-min
+      bind size 255
+      bind link tmp534
+  save tmp536
+    call math-max
+      bind size 0
+      bind link tmp535
+  save rgb/g, link tmp536
+  save tmp537
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save tmp538
+    call negative
+      bind bits, link tmp537
+  save tmp539
+    call multiply
+      bind a, size 255
+      bind b, link tmp538
+  save tmp540
+    call math-round
+      bind link tmp539
+  save tmp541
+    call subtract
+      bind a, link rgb/b
+      bind b, link tmp540
+  save tmp542
+    call math-min
+      bind size 255
+      bind link tmp541
+  save tmp543
+    call math-max
+      bind size 0
+      bind link tmp542
+  save rgb/b, link tmp543
+  save tmp544
+    call tinycolor
+      bind link rgb
+  turn seed, link tmp544
+task darken
+  base color
+  base amount
+  save tmp545
+    call strictly-equal
+      bind a, link amount
+      bind b, size 0
+  save tmp546
+    call or
+      bind a, link amount
+      bind b, size 10
+  save tmp547
+  call check
+    bind test, link tmp545
+    hook match
+      save tmp547, size 0
+    hook fault
+      save tmp547, link tmp546
+  save amount, link tmp547
+  save tmp548
+    call tinycolor
+      bind link color
+  save tmp549, call tmp548/to-hsl
+  save hsl, link tmp549
+  save tmp550
+    call divide
+      bind a, link amount
+      bind b, size 100
+  save hsl/l, link tmp550
+  save tmp551
+    call clamp01
+      bind link hsl/l
+  save hsl/l, link tmp551
+  save tmp552
+    call tinycolor
+      bind link hsl
+  turn seed, link tmp552
+task spin
+  base color
+  base amount
+  save tmp553
+    call tinycolor
+      bind link color
+  save tmp554, call tmp553/to-hsl
+  save hsl, link tmp554
+  save tmp555
+    call add
+      bind a, link hsl/h
+      bind b, link amount
+  save tmp556
+    call modulo
+      bind a, link tmp555
+      bind b, size 360
+  save hue, link tmp556
+  save tmp557
+    call lt
+      bind a, link hue
+      bind b, size 0
+  save tmp558
+    call add
+      bind a, size 360
+      bind b, link hue
+  save tmp559
+  call check
+    bind test, link tmp557
+    hook match
+      save tmp559, link tmp558
+    hook fault
+      save tmp559, link hue
+  save hsl/h, link tmp559
+  save tmp560
+    call tinycolor
+      bind link hsl
+  turn seed, link tmp560
+task complement
+  base color
+  save tmp561
+    call tinycolor
+      bind link color
+  save tmp562, call tmp561/to-hsl
+  save hsl, link tmp562
+  save tmp563
+    call add
+      bind a, link hsl/h
+      bind b, size 180
+  save tmp564
+    call modulo
+      bind a, link tmp563
+      bind b, size 360
+  save hsl/h, link tmp564
+  save tmp565
+    call tinycolor
+      bind link hsl
+  turn seed, link tmp565
+task triad
+  base color
+  save tmp566
+    call tinycolor
+      bind link color
+  save tmp567, call tmp566/to-hsl
+  save hsl, link tmp567
+  save h, link hsl/h
+  save tmp568
+    call tinycolor
+      bind link color
+  save tmp569
+    call add
+      bind a, link h
+      bind b, size 120
+  save tmp570
+    make object
+      bind h
+        call modulo
+          bind a, link tmp569
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp571
+    call tinycolor
+      bind link tmp570
+  save tmp572
+    call add
+      bind a, link h
+      bind b, size 240
+  save tmp573
+    make object
+      bind h
+        call modulo
+          bind a, link tmp572
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp574
+    call tinycolor
+      bind link tmp573
+  save tmp575
+    make list
+      bind link tmp568
+      bind link tmp571
+      bind link tmp574
+  turn seed, link tmp575
+task tetrad
+  base color
+  save tmp576
+    call tinycolor
+      bind link color
+  save tmp577, call tmp576/to-hsl
+  save hsl, link tmp577
+  save h, link hsl/h
+  save tmp578
+    call tinycolor
+      bind link color
+  save tmp579
+    call add
+      bind a, link h
+      bind b, size 90
+  save tmp580
+    make object
+      bind h
+        call modulo
+          bind a, link tmp579
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp581
+    call tinycolor
+      bind link tmp580
+  save tmp582
+    call add
+      bind a, link h
+      bind b, size 180
+  save tmp583
+    make object
+      bind h
+        call modulo
+          bind a, link tmp582
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp584
+    call tinycolor
+      bind link tmp583
+  save tmp585
+    call add
+      bind a, link h
+      bind b, size 270
+  save tmp586
+    make object
+      bind h
+        call modulo
+          bind a, link tmp585
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp587
+    call tinycolor
+      bind link tmp586
+  save tmp588
+    make list
+      bind link tmp578
+      bind link tmp581
+      bind link tmp584
+      bind link tmp587
+  turn seed, link tmp588
+task splitcomplement
+  base color
+  save tmp589
+    call tinycolor
+      bind link color
+  save tmp590, call tmp589/to-hsl
+  save hsl, link tmp590
+  save h, link hsl/h
+  save tmp591
+    call tinycolor
+      bind link color
+  save tmp592
+    call add
+      bind a, link h
+      bind b, size 72
+  save tmp593
+    make object
+      bind h
+        call modulo
+          bind a, link tmp592
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp594
+    call tinycolor
+      bind link tmp593
+  save tmp595
+    call add
+      bind a, link h
+      bind b, size 216
+  save tmp596
+    make object
+      bind h
+        call modulo
+          bind a, link tmp595
+          bind b, size 360
+      bind s, link hsl/s
+      bind l, link hsl/l
+  save tmp597
+    call tinycolor
+      bind link tmp596
+  save tmp598
+    make list
+      bind link tmp591
+      bind link tmp594
+      bind link tmp597
+  turn seed, link tmp598
+task analogous
+  base color
+  base results
+  base slices
+  save tmp599
+    call or
+      bind a, link results
+      bind b, size 6
+  save results, link tmp599
+  save tmp600
+    call or
+      bind a, link slices
+      bind b, size 30
+  save slices, link tmp600
+  save tmp601
+    call tinycolor
+      bind link color
+  save tmp602, call tmp601/to-hsl
+  save hsl, link tmp602
+  save tmp603
+    call divide
+      bind a, size 360
+      bind b, link slices
+  save part, link tmp603
+  save tmp604
+    call tinycolor
+      bind link color
+  save tmp605
+    make list
+      bind link tmp604
+  save ret, link tmp605
+  save tmp606
+    call multiply
+      bind a, link part
+      bind b, link results
+  save tmp607
+    call shift-right
+      bind a, link tmp606
+      bind b, size 1
+  save tmp608
+    call subtract
+      bind a, link hsl/h
+      bind b, link tmp607
+  save tmp609
+    call add
+      bind a, link tmp608
+      bind b, size 720
+  save tmp610
+    call modulo
+      bind a, link tmp609
+      bind b, size 360
+  save hsl/h, link tmp610
+  call loop
+    hook test
+      call check
+        bind test, link call decrement
+  bind value, link results
+    hook match
+      save tmp611
+        call add
+          bind a, link hsl/h
+          bind b, link part
+      save tmp612
+        call modulo
+          bind a, link tmp611
+          bind b, size 360
+      save hsl/h, link tmp612
+      save tmp613
+        call tinycolor
+          bind link hsl
+      call ret/push
+        bind link tmp613
+    hook fault
+      turn seed, link false
+  turn seed, link ret
+task monochromatic
+  base color
+  base results
+  save tmp614
+    call or
+      bind a, link results
+      bind b, size 6
+  save results, link tmp614
+  save tmp615
+    call tinycolor
+      bind link color
+  save tmp616, call tmp615/to-hsv
+  save hsv, link tmp616
+  save h, link hsv/h
+  save s, link hsv/s
+  save v, link hsv/v
+  save tmp617, make list
+  save ret, link tmp617
+  save tmp618
+    call divide
+      bind a, size 1
+      bind b, link results
+  save modification, link tmp618
+  call loop
+    hook test
+      call check
+        bind test, link call decrement
+  bind value, link results
+    hook match
+      save tmp619
+        make object
+          bind h, link h
+          bind s, link s
+          bind v, link v
+      save tmp620
+        call tinycolor
+          bind link tmp619
+      call ret/push
+        bind link tmp620
+      save tmp621
+        call add
+          bind a, link v
+          bind b, link modification
+      save tmp622
+        call modulo
+          bind a, link tmp621
+          bind b, size 1
+      save v, link tmp622
+    hook fault
+      turn seed, link false
+  turn seed, link ret
+save tinycolor/mix
+  task tmp43
+    base color1
+    base color2
+    base amount
+    save tmp623
+      call strictly-equal
+        bind a, link amount
+        bind b, size 0
+    save tmp624
+      call or
+        bind a, link amount
+        bind b, size 50
+    save tmp625
+    call check
+      bind test, link tmp623
+      hook match
+        save tmp625, size 0
+      hook fault
+        save tmp625, link tmp624
+    save amount, link tmp625
+    save tmp626
+      call tinycolor
+        bind link color1
+    save tmp627, call tmp626/to-rgb
+    save rgb1, link tmp627
+    save tmp628
+      call tinycolor
+        bind link color2
+    save tmp629, call tmp628/to-rgb
+    save rgb2, link tmp629
+    save tmp630
+      call divide
+        bind a, link amount
+        bind b, size 100
+    save p, link tmp630
+    save tmp631
+      call subtract
+        bind a, link rgb2/r
+        bind b, link rgb1/r
+    save tmp632
+      call multiply
+        bind a, link tmp631
+        bind b, link p
+    save tmp633
+      call subtract
+        bind a, link rgb2/g
+        bind b, link rgb1/g
+    save tmp634
+      call multiply
+        bind a, link tmp633
+        bind b, link p
+    save tmp635
+      call subtract
+        bind a, link rgb2/b
+        bind b, link rgb1/b
+    save tmp636
+      call multiply
+        bind a, link tmp635
+        bind b, link p
+    save tmp637
+      call subtract
+        bind a, link rgb2/a
+        bind b, link rgb1/a
+    save tmp638
+      call multiply
+        bind a, link tmp637
+        bind b, link p
+    save tmp639
+      make object
+        bind r
+          call add
+            bind a, link tmp632
+            bind b, link rgb1/r
+        bind g
+          call add
+            bind a, link tmp634
+            bind b, link rgb1/g
+        bind b
+          call add
+            bind a, link tmp636
+            bind b, link rgb1/b
+        bind a
+          call add
+            bind a, link tmp638
+            bind b, link rgb1/a
+    save rgba, link tmp639
+    save tmp640
+      call tinycolor
+        bind link rgba
+    turn seed, link tmp640
+save tinycolor/readability
+  task tmp44
+    base color1
+    base color2
+    save tmp641
+      call tinycolor
+        bind link color1
+    save c1, link tmp641
+    save tmp642
+      call tinycolor
+        bind link color2
+    save c2, link tmp642
+    save tmp643, call c1/get-luminance
+    save tmp644, call c2/get-luminance
+    save tmp645
+      call math/max
+        bind link tmp643
+        bind link tmp644
+    save tmp646
+      call add
+        bind a, link tmp645
+        bind b, size 0.05
+    save tmp647, call c1/get-luminance
+    save tmp648, call c2/get-luminance
+    save tmp649
+      call math/min
+        bind link tmp647
+        bind link tmp648
+    save tmp650
+      call add
+        bind a, link tmp649
+        bind b, size 0.05
+    save tmp651
+      call divide
+        bind a, link tmp646
+        bind b, link tmp650
+    turn seed, link tmp651
+save tinycolor/is-readable
+  task tmp45
+    base color1
+    base color2
+    base wcag2
+    save tmp652
+      call tinycolor/readability
+        bind link color1
+        bind link color2
+    save readability, link tmp652
+    save wcag2-parms
+    save out
+    save out, link false
+    save tmp653
+      call validate-w-c-a-g2-parms
+        bind link wcag2
+    save wcag2-parms, link tmp653
+    turn seed, link out
+save tinycolor/most-readable
+  task tmp46
+    base base-color
+    base color-list
+    base args
+    save best-color
+    save best-score, size 0
+    save readability
+    save include-fallback-colors
+    save level
+    save size
+    save tmp654, make object
+    save tmp655
+      call or
+        bind a, link args
+        bind b, link tmp654
+    save args, link tmp655
+    save include-fallback-colors, link args/include-fallback-colors
+    save level, link args/level
+    save size, link args/size
+    save i, size 0
+    call loop
+      hook test
+        save tmp656
+          call lt
+            bind a, link i
+            bind b, link color-list/length
+        call check
+          bind test, link tmp656
+      hook match
+        save tmp657
+          call tinycolor/readability
+            bind link base-color
+            bind link color-list[i]
+        save readability, link tmp657
+        save tmp658
+          call gt
+            bind a, link readability
+            bind b, link best-score
+        call check
+          bind test, link tmp658
+          hook match
+            save best-score, link readability
+            save tmp659
+              call tinycolor
+                bind link color-list[i]
+            save best-color, link tmp659
+        call increment
+          bind value, link i
+      hook fault
+        turn seed, link false
+    save tmp660
+      make object
+        bind <level>, link level
+        bind <size>, link size
+    save tmp661
+      call tinycolor/is-readable
+        bind link base-color
+        bind link best-color
+        bind link tmp660
+    save tmp662
+      call not
+        bind bits, link include-fallback-colors
+    save tmp663
+      call or
+        bind a, link tmp661
+        bind b, link tmp662
+    call check
+      bind test, link tmp663
+      hook match
+        turn seed, link best-color
+      hook fault
+        save args/include-fallback-colors, link false
+        save tmp664
+          make list
+            bind text <#fff>
+            bind text <#000>
+        save tmp665
+          call tinycolor/most-readable
+            bind link base-color
+            bind link tmp664
+            bind link args
+        turn seed, link tmp665
+save tmp666
+  make object
+    bind aliceblue, text <f0f8ff>
+    bind antiquewhite, text <faebd7>
+    bind aqua, text <0ff>
+    bind aquamarine, text <7fffd4>
+    bind azure, text <f0ffff>
+    bind beige, text <f5f5dc>
+    bind bisque, text <ffe4c4>
+    bind black, text <000>
+    bind blanchedalmond, text <ffebcd>
+    bind blue, text <00f>
+    bind blueviolet, text <8a2be2>
+    bind brown, text <a52a2a>
+    bind burlywood, text <deb887>
+    bind burntsienna, text <ea7e5d>
+    bind cadetblue, text <5f9ea0>
+    bind chartreuse, text <7fff00>
+    bind chocolate, text <d2691e>
+    bind coral, text <ff7f50>
+    bind cornflowerblue, text <6495ed>
+    bind cornsilk, text <fff8dc>
+    bind crimson, text <dc143c>
+    bind cyan, text <0ff>
+    bind darkblue, text <00008b>
+    bind darkcyan, text <008b8b>
+    bind darkgoldenrod, text <b8860b>
+    bind darkgray, text <a9a9a9>
+    bind darkgreen, text <006400>
+    bind darkgrey, text <a9a9a9>
+    bind darkkhaki, text <bdb76b>
+    bind darkmagenta, text <8b008b>
+    bind darkolivegreen, text <556b2f>
+    bind darkorange, text <ff8c00>
+    bind darkorchid, text <9932cc>
+    bind darkred, text <8b0000>
+    bind darksalmon, text <e9967a>
+    bind darkseagreen, text <8fbc8f>
+    bind darkslateblue, text <483d8b>
+    bind darkslategray, text <2f4f4f>
+    bind darkslategrey, text <2f4f4f>
+    bind darkturquoise, text <00ced1>
+    bind darkviolet, text <9400d3>
+    bind deeppink, text <ff1493>
+    bind deepskyblue, text <00bfff>
+    bind dimgray, text <696969>
+    bind dimgrey, text <696969>
+    bind dodgerblue, text <1e90ff>
+    bind firebrick, text <b22222>
+    bind floralwhite, text <fffaf0>
+    bind forestgreen, text <228b22>
+    bind fuchsia, text <f0f>
+    bind gainsboro, text <dcdcdc>
+    bind ghostwhite, text <f8f8ff>
+    bind gold, text <ffd700>
+    bind goldenrod, text <daa520>
+    bind gray, text <808080>
+    bind green, text <008000>
+    bind greenyellow, text <adff2f>
+    bind grey, text <808080>
+    bind honeydew, text <f0fff0>
+    bind hotpink, text <ff69b4>
+    bind indianred, text <cd5c5c>
+    bind indigo, text <4b0082>
+    bind ivory, text <fffff0>
+    bind khaki, text <f0e68c>
+    bind lavender, text <e6e6fa>
+    bind lavenderblush, text <fff0f5>
+    bind lawngreen, text <7cfc00>
+    bind lemonchiffon, text <fffacd>
+    bind lightblue, text <add8e6>
+    bind lightcoral, text <f08080>
+    bind lightcyan, text <e0ffff>
+    bind lightgoldenrodyellow, text <fafad2>
+    bind lightgray, text <d3d3d3>
+    bind lightgreen, text <90ee90>
+    bind lightgrey, text <d3d3d3>
+    bind lightpink, text <ffb6c1>
+    bind lightsalmon, text <ffa07a>
+    bind lightseagreen, text <20b2aa>
+    bind lightskyblue, text <87cefa>
+    bind lightslategray, text <789>
+    bind lightslategrey, text <789>
+    bind lightsteelblue, text <b0c4de>
+    bind lightyellow, text <ffffe0>
+    bind lime, text <0f0>
+    bind limegreen, text <32cd32>
+    bind linen, text <faf0e6>
+    bind magenta, text <f0f>
+    bind maroon, text <800000>
+    bind mediumaquamarine, text <66cdaa>
+    bind mediumblue, text <0000cd>
+    bind mediumorchid, text <ba55d3>
+    bind mediumpurple, text <9370db>
+    bind mediumseagreen, text <3cb371>
+    bind mediumslateblue, text <7b68ee>
+    bind mediumspringgreen, text <00fa9a>
+    bind mediumturquoise, text <48d1cc>
+    bind mediumvioletred, text <c71585>
+    bind midnightblue, text <191970>
+    bind mintcream, text <f5fffa>
+    bind mistyrose, text <ffe4e1>
+    bind moccasin, text <ffe4b5>
+    bind navajowhite, text <ffdead>
+    bind navy, text <000080>
+    bind oldlace, text <fdf5e6>
+    bind olive, text <808000>
+    bind olivedrab, text <6b8e23>
+    bind orange, text <ffa500>
+    bind orangered, text <ff4500>
+    bind orchid, text <da70d6>
+    bind palegoldenrod, text <eee8aa>
+    bind palegreen, text <98fb98>
+    bind paleturquoise, text <afeeee>
+    bind palevioletred, text <db7093>
+    bind papayawhip, text <ffefd5>
+    bind peachpuff, text <ffdab9>
+    bind peru, text <cd853f>
+    bind pink, text <ffc0cb>
+    bind plum, text <dda0dd>
+    bind powderblue, text <b0e0e6>
+    bind purple, text <800080>
+    bind rebeccapurple, text <663399>
+    bind red, text <f00>
+    bind rosybrown, text <bc8f8f>
+    bind royalblue, text <4169e1>
+    bind saddlebrown, text <8b4513>
+    bind salmon, text <fa8072>
+    bind sandybrown, text <f4a460>
+    bind seagreen, text <2e8b57>
+    bind seashell, text <fff5ee>
+    bind sienna, text <a0522d>
+    bind silver, text <c0c0c0>
+    bind skyblue, text <87ceeb>
+    bind slateblue, text <6a5acd>
+    bind slategray, text <708090>
+    bind slategrey, text <708090>
+    bind snow, text <fffafa>
+    bind springgreen, text <00ff7f>
+    bind steelblue, text <4682b4>
+    bind tan, text <d2b48c>
+    bind teal, text <008080>
+    bind thistle, text <d8bfd8>
+    bind tomato, text <ff6347>
+    bind turquoise, text <40e0d0>
+    bind violet, text <ee82ee>
+    bind wheat, text <f5deb3>
+    bind white, text <fff>
+    bind whitesmoke, text <f5f5f5>
+    bind yellow, text <ff0>
+    bind yellowgreen, text <9acd32>
+save tinycolor/names, link tmp666
+save names, link tinycolor/names
+save tmp667
+  call flip
+    bind link names
+save tinycolor/hex-names, link tmp667
+save hex-names, link tinycolor/hex-names
+task flip
+  base o
+  save tmp668, make object
+  save flipped, link tmp668
+  call walk-keys
+    bind object, link o
+    hook link
+      base key
+      save tmp669
+        call o/has-own-property
+          bind link i
+      call check
+        bind test, link tmp669
+        hook match
+          save flipped[o[i]], link i
+  turn seed, link flipped
+task bound-alpha
+  base a
+  save tmp670
+    call parse-float
+      bind link a
+  save a, link tmp670
+  save tmp671
+    call is-na-n
+      bind link a
+  save tmp672
+    call lt
+      bind a, link a
+      bind b, size 0
+  save tmp673
+    call or
+      bind a, link tmp671
+      bind b, link tmp672
+  save tmp674
+    call gt
+      bind a, link a
+      bind b, size 1
+  save tmp675
+    call or
+      bind a, link tmp673
+      bind b, link tmp674
+  call check
+    bind test, link tmp675
+    hook match
+      save a, size 1
+  turn seed, link a
+task bound01
+  base n
+  base max
+  save tmp676
+    call is-one-point-zero
+      bind link n
+  call check
+    bind test, link tmp676
+    hook match
+      save n, text <100%>
+  save tmp677
+    call is-percentage
+      bind link n
+  save process-percent, link tmp677
+  save tmp678
+    call parse-float
+      bind link n
+  save tmp679
+    call math-max
+      bind size 0
+      bind link tmp678
+  save tmp680
+    call math-min
+      bind link max
+      bind link tmp679
+  save n, link tmp680
+  call check
+    bind test, link process-percent
+    hook match
+      save tmp681
+        call multiply
+          bind a, link n
+          bind b, link max
+      save tmp682
+        call parse-int
+          bind link tmp681
+          bind size 10
+      save tmp683
+        call divide
+          bind a, link tmp682
+          bind b, size 100
+      save n, link tmp683
+  save tmp684
+    call subtract
+      bind a, link n
+      bind b, link max
+  save tmp685
+    call math/abs
+      bind link tmp684
+  save tmp686
+    call lt
+      bind a, link tmp685
+      bind b, size 0.000001
+  call check
+    bind test, link tmp686
+    hook match
+      turn seed, link 1
+  save tmp687
+    call modulo
+      bind a, link n
+      bind b, link max
+  save tmp688
+    call parse-float
+      bind link max
+  save tmp689
+    call divide
+      bind a, link tmp687
+      bind b, link tmp688
+  turn seed, link tmp689
+task clamp01
+  base val
+  save tmp690
+    call math-max
+      bind size 0
+      bind link val
+  save tmp691
+    call math-min
+      bind size 1
+      bind link tmp690
+  turn seed, link tmp691
+task parse-int-from-hex
+  base val
+  save tmp692
+    call parse-int
+      bind link val
+      bind size 16
+  turn seed, link tmp692
+task is-one-point-zero
+  base n
+  save tmp693
+    call get-type-of
+      bind bits, link n
+  save tmp694
+    call equal
+      bind a, link tmp693
+      bind b, text <string>
+  save tmp695
+    call n/index-of
+      bind text <.>
+  save tmp696
+    call negative
+      bind bits, size 1
+  save tmp697
+    call not-equal
+      bind a, link tmp695
+      bind b, link tmp696
+  save tmp698
+    call and
+      bind a, link tmp694
+      bind b, link tmp697
+  save tmp699
+    call parse-float
+      bind link n
+  save tmp700
+    call strictly-equal
+      bind a, link tmp699
+      bind b, size 1
+  save tmp701
+    call and
+      bind a, link tmp698
+      bind b, link tmp700
+  turn seed, link tmp701
+task is-percentage
+  base n
+  save tmp702
+    call get-type-of
+      bind bits, link n
+  save tmp703
+    call strictly-equal
+      bind a, link tmp702
+      bind b, text <string>
+  save tmp704
+    call n/index-of
+      bind text <%>
+  save tmp705
+    call negative
+      bind bits, size 1
+  save tmp706
+    call not-equal
+      bind a, link tmp704
+      bind b, link tmp705
+  save tmp707
+    call and
+      bind a, link tmp703
+      bind b, link tmp706
+  turn seed, link tmp707
+task pad2
+  base c
+  save tmp708
+    call equal
+      bind a, link c/length
+      bind b, size 1
+  save tmp709
+    call add
+      bind a, text <0>
+      bind b, link c
+  save tmp710
+    call add
+      bind a, text <>
+      bind b, link c
+  save tmp711
+  call check
+    bind test, link tmp708
+    hook match
+      save tmp711, link tmp709
+    hook fault
+      save tmp711, link tmp710
+  turn seed, link tmp711
+task convert-to-percentage
+  base n
+  save tmp712
+    call lte
+      bind a, link n
+      bind b, size 1
+  call check
+    bind test, link tmp712
+    hook match
+      save tmp713
+        call multiply
+          bind a, link n
+          bind b, size 100
+      save tmp714
+        call add
+          bind a, link tmp713
+          bind b, text <%>
+      save n, link tmp714
+  turn seed, link n
+task convert-decimal-to-hex
+  base d
+  save tmp715
+    call parse-float
+      bind link d
+  save tmp716
+    call multiply
+      bind a, link tmp715
+      bind b, size 255
+  save tmp717
+    call math/round
+      bind link tmp716
+  save tmp718
+    call tmp717/to-string
+      bind size 16
+  turn seed, link tmp718
+task convert-hex-to-decimal
+  base h
+  save tmp719
+    call parse-int-from-hex
+      bind link h
+  save tmp720
+    call divide
+      bind a, link tmp719
+      bind b, size 255
+  turn seed, link tmp720
+save tmp746, call task tmp47
+  save css-integer, text <[-\+]?\d+%?>
+  save css-number, text <[-\+]?\d*\.\d+%?>
+  save tmp721
+    call add
+      bind a, text <(?:>
+      bind b, link css-number
+  save tmp722
+    call add
+      bind a, link tmp721
+      bind b, text <)|(?:>
+  save tmp723
+    call add
+      bind a, link tmp722
+      bind b, link css-integer
+  save tmp724
+    call add
+      bind a, link tmp723
+      bind b, text <)>
+  save css-unit, link tmp724
+  save tmp725
+    call add
+      bind a, text <[\s|\(]+(>
+      bind b, link css-unit
+  save tmp726
+    call add
+      bind a, link tmp725
+      bind b, text <)[,|\s]+(>
+  save tmp727
+    call add
+      bind a, link tmp726
+      bind b, link css-unit
+  save tmp728
+    call add
+      bind a, link tmp727
+      bind b, text <)[,|\s]+(>
+  save tmp729
+    call add
+      bind a, link tmp728
+      bind b, link css-unit
+  save tmp730
+    call add
+      bind a, link tmp729
+      bind b, text <)\s*\)?>
+  save permissive-match3, link tmp730
+  save tmp731
+    call add
+      bind a, text <[\s|\(]+(>
+      bind b, link css-unit
+  save tmp732
+    call add
+      bind a, link tmp731
+      bind b, text <)[,|\s]+(>
+  save tmp733
+    call add
+      bind a, link tmp732
+      bind b, link css-unit
+  save tmp734
+    call add
+      bind a, link tmp733
+      bind b, text <)[,|\s]+(>
+  save tmp735
+    call add
+      bind a, link tmp734
+      bind b, link css-unit
+  save tmp736
+    call add
+      bind a, link tmp735
+      bind b, text <)[,|\s]+(>
+  save tmp737
+    call add
+      bind a, link tmp736
+      bind b, link css-unit
+  save tmp738
+    call add
+      bind a, link tmp737
+      bind b, text <)\s*\)?>
+  save permissive-match4, link tmp738
+  save tmp739
+    call add
+      bind a, text <rgb>
+      bind b, link permissive-match3
+  save tmp740
+    call add
+      bind a, text <rgba>
+      bind b, link permissive-match4
+  save tmp741
+    call add
+      bind a, text <hsl>
+      bind b, link permissive-match3
+  save tmp742
+    call add
+      bind a, text <hsla>
+      bind b, link permissive-match4
+  save tmp743
+    call add
+      bind a, text <hsv>
+      bind b, link permissive-match3
+  save tmp744
+    call add
+      bind a, text <hsva>
+      bind b, link permissive-match4
+  save tmp745
+    make object
+      bind css-unit
+        make reg-exp
+          bind link css-unit
+      bind rgb
+        make reg-exp
+          bind link tmp739
+      bind rgba
+        make reg-exp
+          bind link tmp740
+      bind hsl
+        make reg-exp
+          bind link tmp741
+      bind hsla
+        make reg-exp
+          bind link tmp742
+      bind hsv
+        make reg-exp
+          bind link tmp743
+      bind hsva
+        make reg-exp
+          bind link tmp744
+      bind hex3
+      bind hex6
+      bind hex4
+      bind hex8
+  turn seed, link tmp745
+save matchers, link tmp746
+task is-valid-c-s-s-unit
+  base color
+  save tmp747
+    call matchers/css-unit/exec
+      bind link color
+  save tmp748
+    call not
+      bind bits, link tmp747
+  save tmp749
+    call not
+      bind bits, link tmp748
+  turn seed, link tmp749
+task string-input-to-object
+  base color
+  save tmp750
+    call color/replace
+      bind link trim-left
+      bind text <>
+  save tmp751
+    call tmp750/replace
+      bind link trim-right
+      bind text <>
+  save tmp752, call tmp751/to-lower-case
+  save color, link tmp752
+  save named, link false
+  save tmp753
+    call equal
+      bind a, link color
+      bind b, text <transparent>
+  call check
+    bind test, link names[color]
+    hook match
+      save color, link names[color]
+      save named, link true
+    hook fault
+      call check
+        bind test, link tmp753
+        hook match
+          save tmp754
+            make object
+              bind r, size 0
+              bind g, size 0
+              bind b, size 0
+              bind a, size 0
+              bind format, text <name>
+          turn seed, link tmp754
+  save match
+  save tmp755
+    call matchers/rgb/exec
+      bind link color
+  save match, link tmp755
+  call check
+    bind test, link match
+    hook match
+      save tmp756
+        make object
+          bind r, link match[1]
+          bind g, link match[2]
+          bind b, link match[3]
+      turn seed, link tmp756
+  save tmp757
+    call matchers/rgba/exec
+      bind link color
+  save match, link tmp757
+  call check
+    bind test, link match
+    hook match
+      save tmp758
+        make object
+          bind r, link match[1]
+          bind g, link match[2]
+          bind b, link match[3]
+          bind a, link match[4]
+      turn seed, link tmp758
+  save tmp759
+    call matchers/hsl/exec
+      bind link color
+  save match, link tmp759
+  call check
+    bind test, link match
+    hook match
+      save tmp760
+        make object
+          bind h, link match[1]
+          bind s, link match[2]
+          bind l, link match[3]
+      turn seed, link tmp760
+  save tmp761
+    call matchers/hsla/exec
+      bind link color
+  save match, link tmp761
+  call check
+    bind test, link match
+    hook match
+      save tmp762
+        make object
+          bind h, link match[1]
+          bind s, link match[2]
+          bind l, link match[3]
+          bind a, link match[4]
+      turn seed, link tmp762
+  save tmp763
+    call matchers/hsv/exec
+      bind link color
+  save match, link tmp763
+  call check
+    bind test, link match
+    hook match
+      save tmp764
+        make object
+          bind h, link match[1]
+          bind s, link match[2]
+          bind v, link match[3]
+      turn seed, link tmp764
+  save tmp765
+    call matchers/hsva/exec
+      bind link color
+  save match, link tmp765
+  call check
+    bind test, link match
+    hook match
+      save tmp766
+        make object
+          bind h, link match[1]
+          bind s, link match[2]
+          bind v, link match[3]
+          bind a, link match[4]
+      turn seed, link tmp766
+  save tmp767
+    call matchers/hex8/exec
+      bind link color
+  save match, link tmp767
+  call check
+    bind test, link match
+    hook match
+      save tmp768
+      call check
+        bind test, link named
+        hook match
+          save tmp768, text <name>
+        hook fault
+          save tmp768, text <hex8>
+      save tmp769
+        make object
+          bind r
+            call parse-int-from-hex
+              bind link match[1]
+          bind g
+            call parse-int-from-hex
+              bind link match[2]
+          bind b
+            call parse-int-from-hex
+              bind link match[3]
+          bind a
+            call convert-hex-to-decimal
+              bind link match[4]
+          bind format, link tmp768
+      turn seed, link tmp769
+  save tmp770
+    call matchers/hex6/exec
+      bind link color
+  save match, link tmp770
+  call check
+    bind test, link match
+    hook match
+      save tmp771
+      call check
+        bind test, link named
+        hook match
+          save tmp771, text <name>
+        hook fault
+          save tmp771, text <hex>
+      save tmp772
+        make object
+          bind r
+            call parse-int-from-hex
+              bind link match[1]
+          bind g
+            call parse-int-from-hex
+              bind link match[2]
+          bind b
+            call parse-int-from-hex
+              bind link match[3]
+          bind format, link tmp771
+      turn seed, link tmp772
+  save tmp773
+    call matchers/hex4/exec
+      bind link color
+  save match, link tmp773
+  call check
+    bind test, link match
+    hook match
+      save tmp774
+        call add
+          bind a, link match[1]
+          bind b, text <>
+      save tmp775
+        call add
+          bind a, link tmp774
+          bind b, link match[1]
+      save tmp776
+        call add
+          bind a, link match[2]
+          bind b, text <>
+      save tmp777
+        call add
+          bind a, link tmp776
+          bind b, link match[2]
+      save tmp778
+        call add
+          bind a, link match[3]
+          bind b, text <>
+      save tmp779
+        call add
+          bind a, link tmp778
+          bind b, link match[3]
+      save tmp780
+        call add
+          bind a, link match[4]
+          bind b, text <>
+      save tmp781
+        call add
+          bind a, link tmp780
+          bind b, link match[4]
+      save tmp782
+      call check
+        bind test, link named
+        hook match
+          save tmp782, text <name>
+        hook fault
+          save tmp782, text <hex8>
+      save tmp783
+        make object
+          bind r
+            call parse-int-from-hex
+              bind link tmp775
+          bind g
+            call parse-int-from-hex
+              bind link tmp777
+          bind b
+            call parse-int-from-hex
+              bind link tmp779
+          bind a
+            call convert-hex-to-decimal
+              bind link tmp781
+          bind format, link tmp782
+      turn seed, link tmp783
+  save tmp784
+    call matchers/hex3/exec
+      bind link color
+  save match, link tmp784
+  call check
+    bind test, link match
+    hook match
+      save tmp785
+        call add
+          bind a, link match[1]
+          bind b, text <>
+      save tmp786
+        call add
+          bind a, link tmp785
+          bind b, link match[1]
+      save tmp787
+        call add
+          bind a, link match[2]
+          bind b, text <>
+      save tmp788
+        call add
+          bind a, link tmp787
+          bind b, link match[2]
+      save tmp789
+        call add
+          bind a, link match[3]
+          bind b, text <>
+      save tmp790
+        call add
+          bind a, link tmp789
+          bind b, link match[3]
+      save tmp791
+      call check
+        bind test, link named
+        hook match
+          save tmp791, text <name>
+        hook fault
+          save tmp791, text <hex>
+      save tmp792
+        make object
+          bind r
+            call parse-int-from-hex
+              bind link tmp786
+          bind g
+            call parse-int-from-hex
+              bind link tmp788
+          bind b
+            call parse-int-from-hex
+              bind link tmp790
+          bind format, link tmp791
+      turn seed, link tmp792
+  turn seed, link false
+task validate-w-c-a-g2-parms
+  base parms
+  save level
+  save size
+  save tmp793
+    make object
+      bind <level>, text <AA>
+      bind <size>, text <small>
+  save tmp794
+    call or
+      bind a, link parms
+      bind b, link tmp793
+  save parms, link tmp794
+  save tmp795
+    call or
+      bind a, link parms/level
+      bind b, text <AA>
+  save tmp796, call tmp795/to-upper-case
+  save level, link tmp796
+  save tmp797
+    call or
+      bind a, link parms/size
+      bind b, text <small>
+  save tmp798, call tmp797/to-lower-case
+  save size, link tmp798
+  save tmp799
+    call not-strictly-equal
+      bind a, link level
+      bind b, text <AA>
+  save tmp800
+    call not-strictly-equal
+      bind a, link level
+      bind b, text <AAA>
+  save tmp801
+    call and
+      bind a, link tmp799
+      bind b, link tmp800
+  call check
+    bind test, link tmp801
+    hook match
+      save level, text <AA>
+  save tmp802
+    call not-strictly-equal
+      bind a, link size
+      bind b, text <small>
+  save tmp803
+    call not-strictly-equal
+      bind a, link size
+      bind b, text <large>
+  save tmp804
+    call and
+      bind a, link tmp802
+      bind b, link tmp803
+  call check
+    bind test, link tmp804
+    hook match
+      save size, text <small>
+  save tmp805
+    make object
+      bind <level>, link level
+      bind <size>, link size
+  turn seed, link tmp805
+save tmp806
+  call get-type-of
+    bind bits, link module
+save tmp807
+  call not-strictly-equal
+    bind a, link tmp806
+    bind b, text <undefined>
+save tmp808
+  call and
+    bind a, link tmp807
+    bind b, link module/exports
+save tmp809
+  call get-type-of
+    bind bits, link define
+save tmp810
+  call strictly-equal
+    bind a, link tmp809
+    bind b, text <function>
+save tmp811
+  call and
+    bind a, link tmp810
+    bind b, link define/amd
+call check
+  bind test, link tmp808
+  hook match
+    save module/exports, link tinycolor
+  hook fault
+    call check
+      bind test, link tmp811
+      hook match
+        call define
+          bind
+            task tmp48
+              turn seed, link tinycolor
+      hook fault
+        save window/tinycolor, link tinycolor

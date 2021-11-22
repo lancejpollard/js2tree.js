@@ -36,6 +36,11 @@ const fs = require('fs')
 // const y13 = [...a]
 // const y14 = { ...a }
 // const y15 = { a: {b} }
+// switch (x) {
+//   case y:
+//     console.log(z)
+//     break
+// }
 // `
 
 function log(x) {
@@ -45,4 +50,4 @@ function log(x) {
   fs.writeFileSync('libs/md5.link', text)
 }
 
-fs.writeFileSync('libs/bignumber.link', print(t(fs.readFileSync('libs/bignumber.js', 'utf-8'))))
+fs.writeFileSync('libs/tinycolor.link', print(t(fs.readFileSync('libs/tinycolor.js', 'utf-8'))))

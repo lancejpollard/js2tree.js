@@ -7,7 +7,7 @@ save parse-integer
     base to
     base radix
     save i
-      call negative
+      call subtract
         bind a, link from
         bind b, size 1
     save n, size 0
@@ -41,7 +41,7 @@ save parse-integer
           call undefined/char-code-at
             bind size 0
         save v
-          call negative
+          call subtract
             bind a, link code
             bind b, link tmp3
         save tmp4
@@ -54,8 +54,8 @@ save parse-integer
             bind b, link v
         save tmp6
           call or
-            bind a, tmp4
-            bind b, tmp5
+            bind a, link tmp4
+            bind b, link tmp5
         call check
           bind test, link tmp6
           hook match
@@ -63,7 +63,7 @@ save parse-integer
               call undefined/char-code-at
                 bind size 0
             save tmp8
-              call negative
+              call subtract
                 bind a, size 10
                 bind b, link tmp7
             save v
@@ -80,8 +80,8 @@ save parse-integer
                 bind b, link v
             save tmp11
               call or
-                bind a, tmp9
-                bind b, tmp10
+                bind a, link tmp9
+                bind b, link tmp10
             call check
               bind test, link tmp11
               hook match
@@ -89,7 +89,7 @@ save parse-integer
                   call undefined/char-code-at
                     bind size 0
                 save tmp13
-                  call negative
+                  call subtract
                     bind a, size 10
                     bind b, link tmp12
                 save v
@@ -106,8 +106,8 @@ save parse-integer
                     bind b, link v
                 save tmp16
                   call or
-                    bind a, tmp14
-                    bind b, tmp15
+                    bind a, link tmp14
+                    bind b, link tmp15
                 call check
                   bind test, link tmp16
                   hook match
@@ -229,15 +229,15 @@ save fma
         bind a, link split
         bind b, link a
     save tmp29
-      call negative
+      call subtract
         bind a, link at
         bind b, link a
     save ahi
-      call negative
+      call subtract
         bind a, link at
         bind b, link tmp29
     save alo
-      call negative
+      call subtract
         bind a, link a
         bind b, link ahi
     save bt
@@ -245,15 +245,15 @@ save fma
         bind a, link split
         bind b, link b
     save tmp30
-      call negative
+      call subtract
         bind a, link bt
         bind b, link b
     save bhi
-      call negative
+      call subtract
         bind a, link bt
         bind b, link tmp30
     save blo
-      call negative
+      call subtract
         bind a, link b
         bind b, link bhi
     save tmp31
@@ -294,7 +294,7 @@ save fast-trunc
   task tmp3
     base x
     save tmp38
-      call negative
+      call subtract
         bind a, link x
         bind b, link base
     save v
@@ -306,7 +306,7 @@ save fast-trunc
         bind a, link v
         bind b, link x
     save tmp40
-      call negative
+      call subtract
         bind a, link v
         bind b, size 1
     save tmp41
@@ -340,7 +340,7 @@ save perform-multiplication
         bind a, link product
         bind b, link base
     save tmp44
-      call negative
+      call subtract
         bind a, link tmp43
         bind b, link base
     save hi
@@ -352,7 +352,7 @@ save perform-multiplication
         bind a, link hi
         bind b, link base
     save tmp46
-      call negative
+      call subtract
         bind a, link product
         bind b, link tmp45
     save lo
@@ -417,7 +417,7 @@ save perform-division
         bind link divisor
         bind link tmp52
     save r
-      call negative
+      call subtract
         bind a, size 0
         bind b, link tmp53
     save tmp54
@@ -430,7 +430,7 @@ save perform-division
         save q, size 1
         save r, link divisor
     save r
-      call negative
+      call subtract
         bind a, link b
         bind b, link divisor
     save tmp55
@@ -496,7 +496,7 @@ save from-huge-number
         bind a, link n
         bind b, size 0
     save tmp61
-      call negative
+      call subtract
         bind a, size 0
         bind b, link n
     save tmp62
@@ -563,7 +563,7 @@ save from-huge-number
         bind a, link hi
         bind b, link base
     save lo
-      call negative
+      call subtract
         bind a, link a
         bind b, link tmp71
     save tmp72
@@ -613,7 +613,7 @@ save from-number
         bind a, link n
         bind b, link base
     save tmp80
-      call negative
+      call subtract
         bind a, size 0
         bind b, link n
     save tmp81
@@ -622,8 +622,8 @@ save from-number
         bind b, link base
     save tmp82
       call and
-        bind a, tmp79
-        bind b, tmp81
+        bind a, link tmp79
+        bind b, link tmp81
     call check
       bind test, link tmp82
       hook match
@@ -635,7 +635,7 @@ save from-number
             bind a, link n
             bind b, size 0
         save tmp84
-          call negative
+          call subtract
             bind a, size 0
             bind b, link n
         save tmp85
@@ -734,8 +734,8 @@ save from-string
         bind b, size 2
     save tmp100
       call and
-        bind a, tmp98
-        bind b, tmp99
+        bind a, link tmp98
+        bind b, link tmp99
     save tmp101
       call s/char-code-at
         bind size 0
@@ -748,8 +748,8 @@ save from-string
         bind b, link tmp102
     save tmp104
       call and
-        bind a, tmp100
-        bind b, tmp103
+        bind a, link tmp100
+        bind b, link tmp103
     call check
       bind test, link tmp104
       hook match
@@ -832,7 +832,7 @@ save from-string
       hook fault
         turn seed, link false
     save tmp117
-      call negative
+      call subtract
         bind a, link length
         bind b, size 1
     save tmp118
@@ -854,11 +854,11 @@ save from-string
         bind a, link from
         bind b, size 1
     save tmp121
-      call negative
+      call subtract
         bind a, link length
         bind b, size 1
     save tmp122
-      call negative
+      call subtract
         bind a, link size
         bind b, size 1
     save tmp123
@@ -866,7 +866,7 @@ save from-string
         bind a, link tmp122
         bind b, link group-length
     save tmp124
-      call negative
+      call subtract
         bind a, link tmp121
         bind b, link tmp123
     save tmp125
@@ -874,7 +874,7 @@ save from-string
         bind a, link tmp120
         bind b, link tmp124
     save start
-      call negative
+      call subtract
         bind a, link tmp125
         bind b, link group-length
     save j
@@ -955,7 +955,7 @@ save from-string
             bind a, link size
             bind b, size 0
         save tmp133
-          call negative
+          call subtract
             bind a, link size
             bind b, size 1
         save tmp134
@@ -964,8 +964,8 @@ save from-string
             bind b, size 0
         save tmp135
           call and
-            bind a, tmp132
-            bind b, tmp134
+            bind a, link tmp132
+            bind b, link tmp134
         call check
           bind test, link tmp135
       hook match
@@ -1163,15 +1163,15 @@ save big-integer-internal/as-uint-n
         bind size 2
         bind link tmp162
     save tmp163
-      call negative
+      call subtract
         bind a, link n
         bind b, size 1
     save tmp164
-      call negative
+      call subtract
         bind a, link n
         bind b, size 1
     save tmp165
-      call negative
+      call subtract
         bind a, link n
         bind b, size 1
     save tmp166
@@ -1186,7 +1186,7 @@ save big-integer-internal/as-uint-n
         bind a, link tmp167
         bind b, link m
     save array[tmp163]
-      call negative
+      call subtract
         bind a, link array[tmp164]
         bind b, link tmp168
     call loop
@@ -1196,7 +1196,7 @@ save big-integer-internal/as-uint-n
             bind a, link n
             bind b, size 0
         save tmp170
-          call negative
+          call subtract
             bind a, link n
             bind b, size 1
         save tmp171
@@ -1205,8 +1205,8 @@ save big-integer-internal/as-uint-n
             bind b, size 0
         save tmp172
           call and
-            bind a, tmp169
-            bind b, tmp171
+            bind a, link tmp169
+            bind b, link tmp171
         call check
           bind test, link tmp172
       hook match
@@ -1243,7 +1243,7 @@ save big-integer-internal/to-number
             bind a, link a/sign
             bind b, size 1
         save tmp177
-          call negative
+          call subtract
             bind a, size 0
             bind b, link a/magnitude[0]
         save tmp178
@@ -1267,17 +1267,17 @@ save big-integer-internal/to-number
       hook match
         halt make range-error
     save tmp181
-      call negative
+      call subtract
         bind a, link a/length
         bind b, size 1
     save x, link a/magnitude[tmp181]
     save tmp182
-      call negative
+      call subtract
         bind a, link a/length
         bind b, size 2
     save y, link a/magnitude[tmp182]
     save i
-      call negative
+      call subtract
         bind a, link a/length
         bind b, size 3
     call loop
@@ -1292,8 +1292,8 @@ save big-integer-internal/to-number
             bind b, size 0
         save tmp185
           call and
-            bind a, tmp183
-            bind b, tmp184
+            bind a, link tmp183
+            bind b, link tmp184
         call check
           bind test, link tmp185
       hook match
@@ -1318,8 +1318,8 @@ save big-integer-internal/to-number
         bind b, size 0
     save tmp190
       call and
-        bind a, tmp187
-        bind b, tmp189
+        bind a, link tmp187
+        bind b, link tmp189
     save tmp191
       call strictly-equal
         bind a, link x
@@ -1334,16 +1334,16 @@ save big-integer-internal/to-number
         bind b, size 1
     save tmp194
       call and
-        bind a, tmp191
-        bind b, tmp193
+        bind a, link tmp191
+        bind b, link tmp193
     save tmp195
       call or
-        bind a, tmp190
-        bind b, tmp194
+        bind a, link tmp190
+        bind b, link tmp194
     save tmp196
       call and
-        bind a, tmp186
-        bind b, tmp195
+        bind a, link tmp186
+        bind b, link tmp195
     call check
       bind test, link tmp196
       hook match
@@ -1357,7 +1357,7 @@ save big-integer-internal/to-number
         bind a, link tmp197
         bind b, link y
     save tmp199
-      call negative
+      call subtract
         bind a, link a/length
         bind b, size 2
     save tmp200
@@ -1373,7 +1373,7 @@ save big-integer-internal/to-number
         bind a, link a/sign
         bind b, size 1
     save tmp202
-      call negative
+      call subtract
         bind a, size 0
         bind b, link z
     save tmp203
@@ -1398,7 +1398,7 @@ save compare-magnitude
       hook match
         turn seed, link 0
     save c1
-      call negative
+      call subtract
         bind a, link a/length
         bind b, link b/length
     save tmp205
@@ -1416,7 +1416,7 @@ save compare-magnitude
           call negative
             bind bits, size 1
         save tmp208
-          call add
+          call numeralize
             bind bits, size 1
         save tmp209
         call check
@@ -1439,7 +1439,7 @@ save compare-magnitude
           bind test, link tmp210
       hook match
         save c
-          call negative
+          call subtract
             bind a, link a/magnitude[i]
             bind b, link b/magnitude[i]
         save tmp211
@@ -1457,7 +1457,7 @@ save compare-magnitude
               call negative
                 bind bits, size 1
             save tmp214
-              call add
+              call numeralize
                 bind bits, size 1
             save tmp215
             call check
@@ -1496,7 +1496,7 @@ save compare-to
         bind a, link a/sign
         bind b, size 1
     save tmp220
-      call negative
+      call subtract
         bind a, size 0
         bind b, link c
     save tmp221
@@ -1526,7 +1526,7 @@ save add-and-subtract
         bind a, link is-subtraction
         bind b, size 0
     save tmp224
-      call negative
+      call subtract
         bind a, size 1
         bind b, link b/sign
     save tmp225
@@ -1588,7 +1588,7 @@ save add-and-subtract
         bind a, link is-subtraction
         bind b, size 0
     save tmp234
-      call negative
+      call subtract
         bind a, size 1
         bind b, link b/sign
     save tmp235
@@ -1620,11 +1620,11 @@ save add-and-subtract
                     bind a, link result-length
                     bind b, size 0
                 save tmp239
-                  call negative
+                  call subtract
                     bind a, link result-length
                     bind b, size 1
                 save tmp240
-                  call negative
+                  call subtract
                     bind a, link result-length
                     bind b, size 1
                 save tmp241
@@ -1633,8 +1633,8 @@ save add-and-subtract
                     bind b, link max/magnitude[tmp240]
                 save tmp242
                   call and
-                    bind a, tmp238
-                    bind b, tmp241
+                    bind a, link tmp238
+                    bind b, link tmp241
                 call check
                   bind test, link tmp242
               hook match
@@ -1658,7 +1658,7 @@ save add-and-subtract
                 bind size 0
             turn seed, link tmp245
     save tmp246
-      call negative
+      call subtract
         bind a, size 1
         bind b, link subtract
     save tmp247
@@ -1689,11 +1689,11 @@ save add-and-subtract
             bind a, link subtract
             bind b, size 0
         save tmp250
-          call negative
+          call subtract
             bind a, size 0
             bind b, link a-digit
         save tmp251
-          call negative
+          call subtract
             bind a, link a-digit
             bind b, link base
         save tmp252
@@ -1719,13 +1719,13 @@ save add-and-subtract
                 bind a, link base
                 bind b, link c
             save c
-              call negative
+              call subtract
                 bind a, size 0
                 bind b, link subtract
           hook fault
             save result[i], link c
             save c
-              call negative
+              call subtract
                 bind a, size 1
                 bind b, link subtract
       hook fault
@@ -1747,7 +1747,7 @@ save add-and-subtract
             bind a, link subtract
             bind b, size 0
         save tmp256
-          call negative
+          call subtract
             bind a, size 0
             bind b, link base
         save tmp257
@@ -1773,13 +1773,13 @@ save add-and-subtract
                 bind a, link base
                 bind b, link c
             save c
-              call negative
+              call subtract
                 bind a, size 0
                 bind b, link subtract
           hook fault
             save result[i], link c
             save c
-              call negative
+              call subtract
                 bind a, size 1
                 bind b, link subtract
       hook fault
@@ -1812,7 +1812,7 @@ save add-and-subtract
                 bind a, link result-length
                 bind b, size 0
             save tmp263
-              call negative
+              call subtract
                 bind a, link result-length
                 bind b, size 1
             save tmp264
@@ -1821,8 +1821,8 @@ save add-and-subtract
                 bind b, size 0
             save tmp265
               call and
-                bind a, tmp262
-                bind b, tmp264
+                bind a, link tmp262
+                bind b, link tmp264
             call check
               bind test, link tmp265
           hook match
@@ -1888,8 +1888,8 @@ save big-integer-internal/multiply
         bind b, size 0
     save tmp272
       call or
-        bind a, tmp270
-        bind b, tmp271
+        bind a, link tmp270
+        bind b, link tmp271
     call check
       bind test, link tmp272
       hook match
@@ -1912,8 +1912,8 @@ save big-integer-internal/multiply
         bind b, size 1
     save tmp277
       call and
-        bind a, tmp275
-        bind b, tmp276
+        bind a, link tmp275
+        bind b, link tmp276
     call check
       bind test, link tmp277
       hook match
@@ -1922,7 +1922,7 @@ save big-integer-internal/multiply
             bind a, link asign
             bind b, size 1
         save tmp279
-          call negative
+          call subtract
             bind a, size 1
             bind b, link bsign
         save tmp280
@@ -1948,8 +1948,8 @@ save big-integer-internal/multiply
         bind b, size 1
     save tmp284
       call and
-        bind a, tmp282
-        bind b, tmp283
+        bind a, link tmp282
+        bind b, link tmp283
     call check
       bind test, link tmp284
       hook match
@@ -1958,7 +1958,7 @@ save big-integer-internal/multiply
             bind a, link asign
             bind b, size 1
         save tmp286
-          call negative
+          call subtract
             bind a, size 1
             bind b, link bsign
         save tmp287
@@ -1992,7 +1992,7 @@ save big-integer-internal/multiply
         bind a, link asign
         bind b, size 1
     save tmp291
-      call negative
+      call subtract
         bind a, size 1
         bind b, link bsign
     save tmp292
@@ -2034,7 +2034,7 @@ save big-integer-internal/multiply
           hook match
             save c, size 0
             save j
-              call negative
+              call subtract
                 bind a, link astart
                 bind b, size 1
             call loop
@@ -2054,7 +2054,7 @@ save big-integer-internal/multiply
                     bind a, link j
                     bind b, link i
                 save c
-                  call negative
+                  call subtract
                     bind a, link result[tmp296]
                     bind b, link base
                 save tmp297
@@ -2092,7 +2092,7 @@ save big-integer-internal/multiply
       hook fault
         turn seed, link false
     save tmp300
-      call negative
+      call subtract
         bind a, link result-length
         bind b, size 1
     save tmp301
@@ -2144,7 +2144,7 @@ save divide-and-remainder
         bind a, link a/sign
         bind b, size 1
     save tmp308
-      call negative
+      call subtract
         bind a, size 1
         bind b, link b/sign
     save tmp309
@@ -2165,8 +2165,8 @@ save divide-and-remainder
         bind b, size 1
     save tmp312
       call and
-        bind a, tmp310
-        bind b, tmp311
+        bind a, link tmp310
+        bind b, link tmp311
     call check
       bind test, link tmp312
       hook match
@@ -2252,7 +2252,7 @@ save divide-and-remainder
         bind a, link divisor-offset
         bind b, link b/length
     save tmp323
-      call negative
+      call subtract
         bind a, link tmp322
         bind b, size 1
     save top, link divisor[tmp323]
@@ -2322,7 +2322,7 @@ save divide-and-remainder
                 bind a, link divisor-offset
                 bind b, link b/length
             save tmp332
-              call negative
+              call subtract
                 bind a, link tmp331
                 bind b, size 1
             save top, 
@@ -2342,7 +2342,7 @@ save divide-and-remainder
           hook match
             halt make range-error
     save tmp336
-      call negative
+      call subtract
         bind a, link a/length
         bind b, link b/length
     save shift
@@ -2393,7 +2393,7 @@ save divide-and-remainder
             bind a, link b/length
             bind b, link i
         save q
-          call negative
+          call subtract
             bind a, link base
             bind b, size 1
         save tmp341
@@ -2404,7 +2404,7 @@ save divide-and-remainder
           bind test, link tmp341
           hook match
             save tmp342
-              call negative
+              call subtract
                 bind a, link t
                 bind b, size 1
             save tmp2
@@ -2417,7 +2417,7 @@ save divide-and-remainder
         save ax, size 0
         save bx, size 0
         save tmp343
-          call negative
+          call subtract
             bind a, link i
             bind b, size 1
         save j
@@ -2440,7 +2440,7 @@ save divide-and-remainder
                 bind a, link divisor-offset
                 bind b, link j
             save tmp346
-              call negative
+              call subtract
                 bind a, link tmp345
                 bind b, link i
             save tmp3
@@ -2452,7 +2452,7 @@ save divide-and-remainder
             save hi3, link tmp3/hi
             save bx, link hi3
             save ax
-              call negative
+              call subtract
                 bind a, link remainder[j]
                 bind b, link lo3
             save tmp347
@@ -2486,7 +2486,7 @@ save divide-and-remainder
             save q, size 1
             save c, size 0
             save tmp349
-              call negative
+              call subtract
                 bind a, link i
                 bind b, size 1
             save k
@@ -2505,7 +2505,7 @@ save divide-and-remainder
                   bind test, link tmp350
               hook match
                 save tmp351
-                  call negative
+                  call subtract
                     bind a, link remainder[k]
                     bind b, link base
                 save tmp352
@@ -2513,7 +2513,7 @@ save divide-and-remainder
                     bind a, link divisor-offset
                     bind b, link k
                 save tmp353
-                  call negative
+                  call subtract
                     bind a, link tmp352
                     bind b, link i
                 save c
@@ -2535,7 +2535,7 @@ save divide-and-remainder
                   hook fault
                     save remainder[k], link c
                     save c
-                      call add
+                      call numeralize
                         bind bits, size 1
               hook fault
                 turn seed, link false
@@ -2552,8 +2552,8 @@ save divide-and-remainder
             bind b, size 0
         save tmp357
           call and
-            bind a, tmp355
-            bind b, tmp356
+            bind a, link tmp355
+            bind b, link tmp356
         call check
           bind test, link tmp357
           hook match
@@ -2653,7 +2653,7 @@ save divide-and-remainder
             bind a, link remainder-length
             bind b, size 0
         save tmp368
-          call negative
+          call subtract
             bind a, link remainder-length
             bind b, size 1
         save tmp369
@@ -2662,8 +2662,8 @@ save divide-and-remainder
             bind b, size 0
         save tmp370
           call and
-            bind a, tmp367
-            bind b, tmp369
+            bind a, link tmp367
+            bind b, link tmp369
         call check
           bind test, link tmp370
       hook match
@@ -2743,7 +2743,7 @@ save big-integer-internal/unary-minus
         bind a, link a/length
         bind b, size 0
     save tmp379
-      call negative
+      call subtract
         bind a, size 1
         bind b, link a/sign
     save tmp380
@@ -2882,10 +2882,10 @@ save big-integer-internal/exponentiate
             bind b, link tmp397
         save tmp399
           call or
-            bind a, tmp396
-            bind b, tmp398
+            bind a, link tmp396
+            bind b, link tmp398
         save tmp400
-          call add
+          call numeralize
             bind bits, size 1
         save tmp401
           call strictly-equal
@@ -2893,8 +2893,8 @@ save big-integer-internal/exponentiate
             bind b, link tmp400
         save tmp402
           call or
-            bind a, tmp399
-            bind b, tmp401
+            bind a, link tmp399
+            bind b, link tmp401
         call check
           bind test, link tmp402
           hook match
@@ -2921,8 +2921,8 @@ save big-integer-internal/exponentiate
                 bind b, size 0
             save tmp409
               call and
-                bind a, tmp404
-                bind b, tmp408
+                bind a, link tmp404
+                bind b, link tmp408
             save tmp410
               call big-integer-internal/unary-minus
                 bind link a
@@ -2960,12 +2960,12 @@ save big-integer-internal/exponentiate
         bind b, size 16
     save tmp417
       call or
-        bind a, tmp415
-        bind b, tmp416
+        bind a, link tmp415
+        bind b, link tmp416
     save tmp418
       call and
-        bind a, tmp414
-        bind b, tmp417
+        bind a, link tmp414
+        bind b, link tmp417
     call check
       bind test, link tmp418
       hook match
@@ -3019,7 +3019,7 @@ save big-integer-internal/exponentiate
             bind a, link q
             bind b, link bits
         save r
-          call negative
+          call subtract
             bind a, link nn
             bind b, link tmp428
         save tmp429
@@ -3047,8 +3047,8 @@ save big-integer-internal/exponentiate
             bind b, size 0
         save tmp433
           call or
-            bind a, tmp430
-            bind b, tmp432
+            bind a, link tmp430
+            bind b, link tmp432
         save tmp434
         call check
           bind test, link tmp433
@@ -3171,8 +3171,8 @@ save big-integer-internal/prototype/function toString() { [native code] }
         bind b, size 36
     save tmp449
       call or
-        bind a, tmp447
-        bind b, tmp448
+        bind a, link tmp447
+        bind b, link tmp448
     save tmp450
       call math/floor
         bind link radix
@@ -3182,12 +3182,12 @@ save big-integer-internal/prototype/function toString() { [native code] }
         bind b, link tmp450
     save tmp452
       call or
-        bind a, tmp449
-        bind b, tmp451
+        bind a, link tmp449
+        bind b, link tmp451
     save tmp453
       call and
-        bind a, tmp446
-        bind b, tmp452
+        bind a, link tmp446
+        bind b, link tmp452
     call check
       bind test, link tmp453
       hook match
@@ -3198,8 +3198,8 @@ save big-integer-internal/prototype/function toString() { [native code] }
         bind b, size 8
     save tmp455
       call and
-        bind a, tmp454
-        bind b, true
+        bind a, link tmp454
+        bind b, link true
     call check
       bind test, link tmp455
       hook match
@@ -3244,7 +3244,7 @@ save big-integer-internal/prototype/function toString() { [native code] }
             bind a, link tmp464
             bind b, size 0.5
         save tmp466
-          call negative
+          call subtract
             bind a, link tmp465
             bind b, size 1
         save s
@@ -3279,7 +3279,7 @@ save big-integer-internal/prototype/function toString() { [native code] }
           call q/function toString() { [native code] }
             bind link radix
         save tmp471
-          call negative
+          call subtract
             bind a, link s
             bind b, link a/length
         save tmp472
@@ -3362,7 +3362,7 @@ save big-integer-internal/prototype/function toString() { [native code] }
       hook match
         halt make range-error
     save tmp483
-      call negative
+      call subtract
         bind a, link remainder-length
         bind b, size 1
     save tmp484
@@ -3441,7 +3441,7 @@ save big-integer-internal/prototype/function toString() { [native code] }
                 bind a, link remainder-length
                 bind b, size 0
             save tmp491
-              call negative
+              call subtract
                 bind a, link remainder-length
                 bind b, size 1
             save tmp492
@@ -3450,8 +3450,8 @@ save big-integer-internal/prototype/function toString() { [native code] }
                 bind b, size 0
             save tmp493
               call and
-                bind a, tmp490
-                bind b, tmp492
+                bind a, link tmp490
+                bind b, link tmp492
             call check
               bind test, link tmp493
           hook match
@@ -3480,7 +3480,7 @@ save big-integer-internal/prototype/function toString() { [native code] }
           call remainder[k]/function toString() { [native code] }
             bind link radix
         save tmp495
-          call negative
+          call subtract
             bind a, link group-length
             bind b, link t/length
         save tmp496
@@ -3514,7 +3514,7 @@ save signed-right-shift
       call math/floor
         bind link tmp498
     save length
-      call negative
+      call subtract
         bind a, link x/length
         bind b, link shift
     save tmp499
@@ -3618,7 +3618,7 @@ save signed-right-shift
         bind link tmp512
     save pr, size 0
     save i
-      call negative
+      call subtract
         bind a, link length
         bind b, size 1
     call loop
@@ -3642,7 +3642,7 @@ save signed-right-shift
             bind a, link q
             bind b, link s
         save r
-          call negative
+          call subtract
             bind a, link digits[i]
             bind b, link tmp515
         save tmp516
@@ -3662,7 +3662,7 @@ save signed-right-shift
         bind a, link length
         bind b, size 1
     save tmp518
-      call negative
+      call subtract
         bind a, link length
         bind b, size 1
     save tmp519
@@ -3671,8 +3671,8 @@ save signed-right-shift
         bind b, size 0
     save tmp520
       call and
-        bind a, tmp517
-        bind b, tmp519
+        bind a, link tmp517
+        bind b, link tmp519
     call check
       bind test, link tmp520
       hook match
@@ -3700,8 +3700,8 @@ save signed-right-shift
                 bind bits, link has-remainder
             save tmp524
               call and
-                bind a, tmp522
-                bind b, tmp523
+                bind a, link tmp522
+                bind b, link tmp523
             call check
               bind test, link tmp524
           hook match
@@ -3733,7 +3733,7 @@ save signed-right-shift
                         bind a, link i
                         bind b, link length
                     save tmp527
-                      call negative
+                      call subtract
                         bind a, link base
                         bind b, size 1
                     save tmp528
@@ -3742,8 +3742,8 @@ save signed-right-shift
                         bind b, link tmp527
                     save tmp529
                       call and
-                        bind a, tmp526
-                        bind b, tmp528
+                        bind a, link tmp526
+                        bind b, link tmp528
                     call check
                       bind test, link tmp529
                   hook match
@@ -3790,7 +3790,7 @@ save big-integer-internal/left-shift
       call big-integer-internal/to-number
         bind link n
     save tmp535
-      call negative
+      call subtract
         bind a, size 0
         bind b, link tmp534
     save tmp536
@@ -3917,7 +3917,7 @@ save function valueOf() { [native code] }
             bind a, link x
             bind b, link tmp547
         save tmp549
-          call add
+          call numeralize
             bind bits, size 16
         save tmp550
           call lte
@@ -3925,8 +3925,8 @@ save function valueOf() { [native code] }
             bind b, link tmp549
         save tmp551
           call and
-            bind a, tmp548
-            bind b, tmp550
+            bind a, link tmp548
+            bind b, link tmp550
         call check
           bind test, link tmp551
           hook match
@@ -3984,7 +3984,7 @@ save to-result
         bind a, link value
         bind b, link tmp556
     save tmp558
-      call add
+      call numeralize
         bind bits, size 9007199254740991
     save tmp559
       call lte
@@ -3992,8 +3992,8 @@ save to-result
         bind b, link tmp558
     save tmp560
       call and
-        bind a, tmp557
-        bind b, tmp559
+        bind a, link tmp557
+        bind b, link tmp559
     call check
       bind test, link tmp560
       hook match
@@ -4019,8 +4019,8 @@ save add
             bind b, size 0
         save tmp564
           call and
-            bind a, tmp562
-            bind b, tmp563
+            bind a, link tmp562
+            bind b, link tmp563
         call check
           bind test, link tmp564
           hook match
@@ -4038,8 +4038,8 @@ save add
             bind b, size 0
         save tmp568
           call and
-            bind a, tmp566
-            bind b, tmp567
+            bind a, link tmp566
+            bind b, link tmp567
         call check
           bind test, link tmp568
           hook match
@@ -4070,8 +4070,8 @@ save add
             bind b, text <number>
         save tmp573
           call and
-            bind a, tmp570
-            bind b, tmp572
+            bind a, link tmp570
+            bind b, link tmp572
         save tmp574
           call to-result
             bind link sum
@@ -4103,8 +4103,8 @@ save subtract
             bind b, size 0
         save tmp579
           call and
-            bind a, tmp577
-            bind b, tmp578
+            bind a, link tmp577
+            bind b, link tmp578
         call check
           bind test, link tmp579
           hook match
@@ -4125,8 +4125,8 @@ save subtract
             bind b, size 0
         save tmp584
           call and
-            bind a, tmp582
-            bind b, tmp583
+            bind a, link tmp582
+            bind b, link tmp583
         call check
           bind test, link tmp584
           hook match
@@ -4157,8 +4157,8 @@ save subtract
             bind b, text <number>
         save tmp589
           call and
-            bind a, tmp586
-            bind b, tmp588
+            bind a, link tmp586
+            bind b, link tmp588
         save tmp590
           call to-result
             bind link difference
@@ -4190,8 +4190,8 @@ save multiply
             bind b, size 0
         save tmp595
           call and
-            bind a, tmp593
-            bind b, tmp594
+            bind a, link tmp593
+            bind b, link tmp594
         call check
           bind test, link tmp595
           hook match
@@ -4209,8 +4209,8 @@ save multiply
             bind b, size 1
         save tmp599
           call and
-            bind a, tmp597
-            bind b, tmp598
+            bind a, link tmp597
+            bind b, link tmp598
         call check
           bind test, link tmp599
           hook match
@@ -4231,8 +4231,8 @@ save multiply
             bind b, link tmp602
         save tmp604
           call and
-            bind a, tmp601
-            bind b, tmp603
+            bind a, link tmp601
+            bind b, link tmp603
         call check
           bind test, link tmp604
           hook match
@@ -4253,8 +4253,8 @@ save multiply
             bind b, size 0
         save tmp609
           call and
-            bind a, tmp607
-            bind b, tmp608
+            bind a, link tmp607
+            bind b, link tmp608
         call check
           bind test, link tmp609
           hook match
@@ -4272,8 +4272,8 @@ save multiply
             bind b, size 1
         save tmp613
           call and
-            bind a, tmp611
-            bind b, tmp612
+            bind a, link tmp611
+            bind b, link tmp612
         call check
           bind test, link tmp613
           hook match
@@ -4294,8 +4294,8 @@ save multiply
             bind b, link tmp616
         save tmp618
           call and
-            bind a, tmp615
-            bind b, tmp617
+            bind a, link tmp615
+            bind b, link tmp617
         call check
           bind test, link tmp618
           hook match
@@ -4345,8 +4345,8 @@ save divide
             bind b, size 1
         save tmp626
           call and
-            bind a, tmp624
-            bind b, tmp625
+            bind a, link tmp624
+            bind b, link tmp625
         call check
           bind test, link tmp626
           hook match
@@ -4367,8 +4367,8 @@ save divide
             bind b, link tmp629
         save tmp631
           call and
-            bind a, tmp628
-            bind b, tmp630
+            bind a, link tmp628
+            bind b, link tmp630
         call check
           bind test, link tmp631
           hook match
@@ -4421,8 +4421,8 @@ save remainder
             bind b, size 1
         save tmp640
           call and
-            bind a, tmp638
-            bind b, tmp639
+            bind a, link tmp638
+            bind b, link tmp639
         call check
           bind test, link tmp640
           hook match
@@ -4443,8 +4443,8 @@ save remainder
             bind b, link tmp643
         save tmp645
           call and
-            bind a, tmp642
-            bind b, tmp644
+            bind a, link tmp642
+            bind b, link tmp644
         call check
           bind test, link tmp645
           hook match
@@ -4524,16 +4524,16 @@ save exponentiate
                 bind b, size 2
             save tmp658
               call and
-                bind a, tmp655
-                bind b, tmp657
+                bind a, link tmp655
+                bind b, link tmp657
             save tmp659
               call gte
                 bind a, link y
                 bind b, size 0
             save tmp660
               call and
-                bind a, tmp658
-                bind b, tmp659
+                bind a, link tmp658
+                bind b, link tmp659
             call check
               bind test, link tmp660
               hook match
@@ -4551,8 +4551,8 @@ save exponentiate
                     bind b, size 0
                 save tmp664
                   call and
-                    bind a, tmp661
-                    bind b, tmp663
+                    bind a, link tmp661
+                    bind b, link tmp663
                 call check
                   bind test, link tmp664
                   hook match
@@ -4654,8 +4654,8 @@ save exponentiate
             bind b, size 1
         save tmp686
           call and
-            bind a, tmp683
-            bind b, tmp685
+            bind a, link tmp683
+            bind b, link tmp685
         save tmp687
           call to-result
             bind link power
@@ -4832,8 +4832,8 @@ save big-integer/big-int
         bind b, text <string>
     save tmp717
       call or
-        bind a, tmp714
-        bind b, tmp716
+        bind a, link tmp714
+        bind b, link tmp716
     save tmp718
       call get-type-of
         bind bits, link x
@@ -4843,8 +4843,8 @@ save big-integer/big-int
         bind b, text <bigint>
     save tmp720
       call or
-        bind a, tmp717
-        bind b, tmp719
+        bind a, link tmp717
+        bind b, link tmp719
     call check
       bind test, link tmp720
       hook match
@@ -4877,7 +4877,7 @@ save big-integer/big-int
             bind a, link value
             bind b, link tmp725
         save tmp727
-          call add
+          call numeralize
             bind bits, size 9007199254740991
         save tmp728
           call lte
@@ -4885,8 +4885,8 @@ save big-integer/big-int
             bind b, link tmp727
         save tmp729
           call and
-            bind a, tmp726
-            bind b, tmp728
+            bind a, link tmp726
+            bind b, link tmp728
         call check
           bind test, link tmp729
           hook match
@@ -4916,24 +4916,24 @@ save big-integer/as-uint-n
         bind b, size 0
     save tmp735
       call and
-        bind a, tmp733
-        bind b, tmp734
+        bind a, link tmp733
+        bind b, link tmp734
     save tmp736
       call gte
         bind a, link n
         bind b, size 0
     save tmp737
       call and
-        bind a, tmp735
-        bind b, tmp736
+        bind a, link tmp735
+        bind b, link tmp736
     save tmp738
       call lte
         bind a, link n
         bind b, size 53
     save tmp739
       call and
-        bind a, tmp737
-        bind b, tmp738
+        bind a, link tmp737
+        bind b, link tmp738
     call check
       bind test, link tmp739
       hook match
@@ -4953,7 +4953,7 @@ save big-integer/as-uint-n
             bind a, link tmp741
             bind b, link m
         save tmp743
-          call negative
+          call subtract
             bind a, link x
             bind b, link tmp742
         turn seed, link tmp743
@@ -5008,8 +5008,8 @@ save big-integer/add
         bind b, text <string>
     save tmp754
       call or
-        bind a, tmp751
-        bind b, tmp753
+        bind a, link tmp751
+        bind b, link tmp753
     call check
       bind test, link tmp754
       hook match
@@ -5034,8 +5034,8 @@ save big-integer/add
         bind b, text <number>
     save tmp760
       call and
-        bind a, tmp757
-        bind b, tmp759
+        bind a, link tmp757
+        bind b, link tmp759
     call check
       bind test, link tmp760
       hook match
@@ -5051,7 +5051,7 @@ save big-integer/add
             bind a, link value
             bind b, link tmp761
         save tmp763
-          call add
+          call numeralize
             bind bits, size 9007199254740991
         save tmp764
           call lte
@@ -5059,8 +5059,8 @@ save big-integer/add
             bind b, link tmp763
         save tmp765
           call and
-            bind a, tmp762
-            bind b, tmp764
+            bind a, link tmp762
+            bind b, link tmp764
         call check
           bind test, link tmp765
           hook match
@@ -5091,13 +5091,13 @@ save big-integer/subtract
         bind b, text <number>
     save tmp771
       call and
-        bind a, tmp768
-        bind b, tmp770
+        bind a, link tmp768
+        bind b, link tmp770
     call check
       bind test, link tmp771
       hook match
         save value
-          call negative
+          call subtract
             bind a, link x
             bind b, link y
         save tmp772
@@ -5108,7 +5108,7 @@ save big-integer/subtract
             bind a, link value
             bind b, link tmp772
         save tmp774
-          call add
+          call numeralize
             bind bits, size 9007199254740991
         save tmp775
           call lte
@@ -5116,8 +5116,8 @@ save big-integer/subtract
             bind b, link tmp774
         save tmp776
           call and
-            bind a, tmp773
-            bind b, tmp775
+            bind a, link tmp773
+            bind b, link tmp775
         call check
           bind test, link tmp776
           hook match
@@ -5148,8 +5148,8 @@ save big-integer/multiply
         bind b, text <number>
     save tmp782
       call and
-        bind a, tmp779
-        bind b, tmp781
+        bind a, link tmp779
+        bind b, link tmp781
     call check
       bind test, link tmp782
       hook match
@@ -5169,7 +5169,7 @@ save big-integer/multiply
             bind a, link value
             bind b, link tmp784
         save tmp786
-          call add
+          call numeralize
             bind bits, size 9007199254740991
         save tmp787
           call lte
@@ -5177,8 +5177,8 @@ save big-integer/multiply
             bind b, link tmp786
         save tmp788
           call and
-            bind a, tmp785
-            bind b, tmp787
+            bind a, link tmp785
+            bind b, link tmp787
         call check
           bind test, link tmp788
           hook match
@@ -5209,8 +5209,8 @@ save big-integer/divide
         bind b, text <number>
     save tmp794
       call and
-        bind a, tmp791
-        bind b, tmp793
+        bind a, link tmp791
+        bind b, link tmp793
     call check
       bind test, link tmp794
       hook match
@@ -5235,8 +5235,8 @@ save big-integer/divide
                 bind b, size 0
             save tmp799
               call and
-                bind a, tmp797
-                bind b, tmp798
+                bind a, link tmp797
+                bind b, link tmp798
             save tmp800
               call lt
                 bind a, link x
@@ -5247,12 +5247,12 @@ save big-integer/divide
                 bind b, size 0
             save tmp802
               call and
-                bind a, tmp800
-                bind b, tmp801
+                bind a, link tmp800
+                bind b, link tmp801
             save tmp803
               call or
-                bind a, tmp799
-                bind b, tmp802
+                bind a, link tmp799
+                bind b, link tmp802
             save tmp804
               call divide
                 bind a, link x
@@ -5265,7 +5265,7 @@ save big-integer/divide
                 bind a, size 0
                 bind b, link tmp805
             save tmp807
-              call negative
+              call subtract
                 bind a, size 0
                 bind b, link x
             save tmp808
@@ -5276,7 +5276,7 @@ save big-integer/divide
               call math/floor
                 bind link tmp808
             save tmp810
-              call negative
+              call subtract
                 bind a, size 0
                 bind b, link tmp809
             save tmp811
@@ -5320,8 +5320,8 @@ save big-integer/remainder
         bind b, text <number>
     save tmp818
       call and
-        bind a, tmp815
-        bind b, tmp817
+        bind a, link tmp815
+        bind b, link tmp817
     call check
       bind test, link tmp818
       hook match
@@ -5361,7 +5361,7 @@ save big-integer/unary-minus
       bind test, link tmp824
       hook match
         save tmp825
-          call negative
+          call subtract
             bind a, size 0
             bind b, link x
         turn seed, link tmp825
@@ -5390,8 +5390,8 @@ save big-integer/equal
         bind b, text <number>
     save tmp831
       call and
-        bind a, tmp828
-        bind b, tmp830
+        bind a, link tmp828
+        bind b, link tmp830
     call check
       bind test, link tmp831
       hook match
@@ -5426,8 +5426,8 @@ save big-integer/less-than
         bind b, text <number>
     save tmp838
       call and
-        bind a, tmp835
-        bind b, tmp837
+        bind a, link tmp835
+        bind b, link tmp837
     call check
       bind test, link tmp838
       hook match
@@ -5462,8 +5462,8 @@ save big-integer/greater-than
         bind b, text <number>
     save tmp845
       call and
-        bind a, tmp842
-        bind b, tmp844
+        bind a, link tmp842
+        bind b, link tmp844
     call check
       bind test, link tmp845
       hook match
@@ -5534,8 +5534,8 @@ save big-integer/exponentiate
         bind b, text <number>
     save tmp855
       call and
-        bind a, tmp852
-        bind b, tmp854
+        bind a, link tmp852
+        bind b, link tmp854
     call check
       bind test, link tmp855
       hook match
@@ -5560,16 +5560,16 @@ save big-integer/exponentiate
             bind b, size 1
         save tmp861
           call and
-            bind a, tmp859
-            bind b, tmp860
+            bind a, link tmp859
+            bind b, link tmp860
         save tmp862
           call or
-            bind a, tmp857
-            bind b, tmp861
+            bind a, link tmp857
+            bind b, link tmp861
         save tmp863
           call and
-            bind a, tmp856
-            bind b, tmp862
+            bind a, link tmp856
+            bind b, link tmp862
         call check
           bind test, link tmp863
           hook match
@@ -5594,8 +5594,8 @@ save big-integer/exponentiate
                 bind b, size 9007199254740991
             save tmp868
               call and
-                bind a, tmp866
-                bind b, tmp867
+                bind a, link tmp866
+                bind b, link tmp867
             call check
               bind test, link tmp868
               hook match
@@ -5645,8 +5645,8 @@ save big-integer/left-shift
     turn seed, link tmp877
 save tmp878
   call or
-    bind a, global
-    bind b, global-this
+    bind a, link global
+    bind b, link global-this
 save tmp878/big-integer, link big-integer
 save big-integer/getinternal
   

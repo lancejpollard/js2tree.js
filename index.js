@@ -42,6 +42,8 @@ const transforms = {
   ThrowStatement: transformThrowStatement,
   NewExpression: transformNewExpression,
   ThisExpression: transformThisExpression,
+  ForInStatement: transformForInStatement,
+  SwitchStatement: transformSwitchStatement,
 }
 
 const binaries = {
@@ -51,15 +53,11 @@ const binaries = {
   '/': 'divide',
   '||': 'or',
   '&&': 'and',
-  '~': 'bitflip',
-  '-': 'negative',
   '&': 'bitwise-and',
   '|': 'bitwise-or',
   '>>>': 'unsigned-shift-right',
   '>>': 'shift-right',
   '<<': 'shift-left',
-  '++': 'increment',
-  '--': 'decrement',
   '+=': 'assign-increment',
   '-=': 'assign-decrement',
   '*=': 'assign-multiple',
@@ -83,9 +81,17 @@ const binaries = {
   '<=': 'lte',
   '>=': 'gte',
   '%': 'modulo',
+  'instanceof': 'get-instance-of'
+}
+
+const unaries = {
   '!': 'not',
   'typeof': 'get-type-of',
-  'instanceof': 'get-instance-of'
+  '~': 'bitflip',
+  '-': 'negative',
+  '+': 'numeralize',
+  '++': 'increment',
+  '--': 'decrement',
 }
 
 module.exports = transform
@@ -104,6 +110,27 @@ function transform(source) {
   })
   nodes.forEach(node => walk(node, scope))
   return nodes
+}
+
+function transformForInStatement(node, scope) {
+  const name = toTerm('walk-keys')
+  const key = node.left.declarations[0].id.name
+  const object = node.right.name
+  const body = call(transforms, node.body.type, node.body, scope)
+  const bind = [
+    createBind(toTerm('object'), { form: 'link', site: toTerm(object) })
+  ]
+  const hook = {
+    link: {
+      base: [createBase(toTerm('key'))],
+      zone: body
+    }
+  }
+  return createCall(name, bind, hook)
+}
+
+function transformSwitchStatement(node, scope) {
+  return { form: 'rando'}
 }
 
 function walk(node, scope) {
@@ -141,22 +168,23 @@ function transformNewExpression(node, scope) {
   const bind = []
   const name = call(transforms, node.callee.type, node.callee, scope)
   node.arguments.forEach(arg => {
-    bind.push(call(transforms, arg.type, arg, scope))
+    const value = transformOptionallyToLink(call(transforms, arg.type, arg, scope))
+    bind.push(createBind(value))
   })
   return {
     form: 'make',
-    name: name,
+    name,
     bind
   }
 }
 
 function transformEmptyStatement(node, scope) {
-
+  console.log('HERE')
 }
 
 function transformUpdateExpression(node, scope) {
   let value = transformOptionallyToLink(call(transforms, node.argument.type, node.argument, scope))
-  const name = toTerm(transformName(node.operator))
+  const name = toTerm(transformName(node.operator, unaries))
   return createCall(name, [
     createBind(toTerm('value'), value)
   ])
@@ -164,14 +192,17 @@ function transformUpdateExpression(node, scope) {
 
 function transformUnaryExpression(node, scope) {
   const argument = transformOptionallyToLink(call(transforms, node.argument.type, node.argument, scope))
-  const name = toTerm(transformName(node.operator))
+  const name = toTerm(transformName(node.operator, unaries))
   return createCall(name, [
     createBind(toTerm('bits'), argument)
   ])
 }
 
 function normalizeName(term, scope) {
-  term.term = scope.names[term.term] = scope.names[term.term] || to.slug(term.term)
+  if (typeof scope.names[term.term] !== 'string') {
+    scope.names[term.term] = to.slug(term.term)
+  }
+  term.term = scope.names[term.term]
   return term
 }
 
@@ -180,7 +211,7 @@ function transformFunctionDeclaration(node, scope) {
   const id = node.id && call(transforms, node.id.type, node.id, scope)
   const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
-    base.push(createBase(param.name))
+    base.push(createBase(toTerm(param.name)))
   })
   const zone = []
   node.body.body.forEach(bd => {
@@ -235,7 +266,8 @@ function transformBreakStatement(node, scope) {
 function transformObjectExpression(node, scope) {
   const properties = []
   node.properties.forEach(p => {
-    properties.push(call(transforms, p.type, p, scope))
+    const value = call(transforms, p.type, p, scope)
+    properties.push(value)
   })
   return {
     form: 'make',
@@ -245,8 +277,8 @@ function transformObjectExpression(node, scope) {
 }
 
 function transformLogicalExpression(node, scope) {
-  const left = call(transforms, node.left.type, node.left, scope)
-  const right = call(transforms, node.right.type, node.right, scope)
+  const left = transformOptionallyToLink(call(transforms, node.left.type, node.left, scope))
+  const right = transformOptionallyToLink(call(transforms, node.right.type, node.right, scope))
   const operator = transformName(node.operator)
   const name = toTerm(operator)
   return createCall(name, [
@@ -255,9 +287,9 @@ function transformLogicalExpression(node, scope) {
   ])
 }
 
-function transformName(key) {
-  if (!binaries[key]) throw new Error(key)
-  return binaries[key]
+function transformName(key, x = binaries) {
+  if (!x.hasOwnProperty(key)) throw new Error(key)
+  return x[key]
 }
 
 function transformWhileStatement(node, scope) {
@@ -268,6 +300,7 @@ function transformWhileStatement(node, scope) {
   ]
   const lastCall = body[body.length - 1]
   const lastHook = lastCall.hook
+  // TODO: fix this
   lastCall.hook = {}
   const hook = {
     test: {
@@ -316,7 +349,6 @@ function transformIfStatement(node, scope) {
     base: [],
     zone: consequent
   }
-  if (!consequent[0]) console.log(node.consequent.body)
   if (alternate) {
     hook.fault = {
       form: 'hook',
@@ -364,6 +396,7 @@ function transformCallExpression(node, scope) {
   const bind = []
   node.arguments.forEach(arg => {
     let value = transformOptionallyToLink(call(transforms, arg.type, arg, scope))
+    if (!value) value = transformOptionallyToLink({ form: 'term', term: 'null' })
     bind.push(createBind(value))
   })
   return {
@@ -376,10 +409,11 @@ function transformCallExpression(node, scope) {
 }
 
 function toTerm(term) {
-  return {
+  const obj = {
     form: 'term',
     term
   }
+  return obj
 }
 
 function transformIdentifier(node, scope) {
@@ -435,7 +469,7 @@ function transformFunctionExpression(node, scope) {
   const id = node.id && call(transforms, node.id.type, node.id, scope)
   const name = id ?? { form: 'term', term: `tmp${scope.index++}` }
   node.params.forEach(param => {
-    base.push(createBase(param.name))
+    base.push(createBase(toTerm(param.name)))
   })
   const zone = []
   node.body.body.forEach(bd => {

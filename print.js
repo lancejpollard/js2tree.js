@@ -76,7 +76,15 @@ function printMake(node) {
 function printTurn(node) {
   const text = []
   if (node.site) {
-    text.push(`turn seed, link ${printName(node.site)}`)
+    const name = printName(node.site).split('\n')
+    if (name.length > 1) {
+      text.push('turn seed')
+      name.forEach(line => {
+        text.push(`  ${line}`)
+      })
+    } else {
+      text.push(`turn seed, link ${name.join('\n')}`)
+    }
   } else {
     text.push(`turn seed`)
   }
@@ -90,13 +98,15 @@ function printSite(node) {
 function printLink(node) {
   if (node.site.form === 'term') {
     return [`link ${node.site.term}`]
+  } else if (node.site.form === 'site') {
+    return [`link ${printName(node.site)}`]
   } else {
     return [node.term]
   }
 }
 
 function printTask(node) {
-  const text = [``]
+  const text = []
   text.push(`task ${printName(node.name)}`)
   node.base.forEach(b => {
     printBase(b).forEach(line => {
@@ -115,15 +125,15 @@ function printBase(node) {
   const text = []
   const sift = node.sift ? printSift(node.sift) : undefined
   if (sift == null) {
-    text.push(`base ${node.name}`)
+    text.push(`base ${printName(node.name)}`)
   } else {
     if (sift.length > 1) {
-      text.push(`base ${node.name}`)
+      text.push(`base ${printName(node.name)}`)
       sift.forEach(line => {
         text.push(`  ${line}`)
       })
     } else {
-      text.push(`base ${node.name}, ${sift}`)
+      text.push(`base ${printName(node.name)}, ${sift}`)
     }
   }
   return text
@@ -193,8 +203,7 @@ function printHook(name, hook) {
       text.push(`  ${line}`)
     })
   })
-  // console.log(name, hook)
-  hook.zone.forEach(z => {
+  hook.zone.forEach((z, i) => {
     call(printers, z.form, z).forEach(line => {
       text.push(`  ${line}`)
     })
@@ -218,6 +227,16 @@ function printName(node) {
     return node.term
   } else if (node.form === 'size') {
     return `${node.size}`
+  } else if (node.form === 'text') {
+    return `<${node.text}>`
+  } else if (node.form === 'make') {
+    return printMake(node).join('\n')
+  } else if (node.form === 'call') {
+    return printCall(node).join('\n')
+  } else if (node.form === 'task') {
+    return printTask(node).join('\n')
+  } else {
+    throw new Error(node.form)
   }
 }
 
