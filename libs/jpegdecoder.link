@@ -3599,7 +3599,7 @@ save tmp880, call task jpeg-image
                         call math/ceil
                           bind link tmp606
                       save exceeded-amount, link tmp607
-                      halt make error,  bind
+                      halt make error,  bind 
                   save components-count, link data[tmp608]
                   save component-id
                   save max-h, size 0
@@ -3861,7 +3861,7 @@ save tmp880, call task jpeg-image
                               save tmp660
                                 call tmp659/to-string
                                   bind size 16
-                              halt make error,  bind
+                              halt make error,  bind 
                           save tmp661
                             call subtract
                               bind a, link offset
@@ -5086,7 +5086,7 @@ save tmp880, call task jpeg-image
           call math/ceil
             bind link tmp878
         save exceeded-amount, link tmp879
-        halt make error,  bind
+        halt make error,  bind 
     save total-bytes-allocated, link total-memory-impact-bytes
   save constructor/reset-max-memory-usage
     task tmp1
@@ -5143,8 +5143,8 @@ task decode
   save default-opts, link tmp888
   save tmp889
     make object
-      bind
-      bind
+      bind 
+      bind 
   save opts, link tmp889
   save arr
     make uint8-array

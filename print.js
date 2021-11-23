@@ -15,6 +15,22 @@ const printers = {
   size: printSize,
   text: printText,
   halt: printHalt,
+  form: printForm,
+  lace: printLace,
+}
+
+function printLace(node) {
+  const text = []
+  text.push(`<`)
+  node.list.forEach(item => {
+    if (item.form === 'text') {
+      text.push(item.text.replace(/[\}\{\>\<]/g, _ => `\\${_}`))
+    } else {
+      text.push(`\{${printLink(item)}\}`)
+    }
+  })
+  text.push('>')
+  return [text.join('')]
 }
 
 function printHalt(node) {
@@ -105,11 +121,26 @@ function printLink(node) {
   }
 }
 
+function printForm(node) {
+  const text = []
+  text.push(`form ${printName(node.name)}`)
+  node.base.forEach(b => {
+    printBase(b).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  node.task.forEach(z => {
+    call(printers, z.form, z).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
 function printTask(node) {
   const text = []
   text.push(`task ${printName(node.name)}`)
   node.base.forEach(b => {
-    console.log(node, b)
     printBase(b).forEach(line => {
       text.push(`  ${line}`)
     })
@@ -136,6 +167,13 @@ function printBase(node) {
     } else {
       text.push(`base ${printName(node.name)}, ${sift}`)
     }
+  }
+  if (node.miss) {
+    const miss = printSift(node.miss)
+    text.push(`  hook miss`)
+    miss.forEach(line => {
+      text.push(`    ${line}`)
+    })
   }
   return text
 }
@@ -199,7 +237,6 @@ function printHook(name, hook) {
   const text = []
   text.push(`hook ${name}`)
   hook.base.forEach(b => {
-    console.log(name, hook, b)
     printBase(b).forEach(line => {
       text.push(`  ${line}`)
     })

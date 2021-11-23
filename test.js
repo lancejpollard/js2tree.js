@@ -3,7 +3,7 @@ const t = require('.')
 const print = require('./print')
 const fs = require('fs')
 
-// log`
+log`
 // const a = 10
 // const x = a + 20
 // const y = a * b
@@ -34,20 +34,21 @@ const fs = require('fs')
 // const y11 = [1, 2, 3]
 // const y12 = [{a}, {b}, {c}]
 // const y13 = [...a]
-// const y14 = { ...a }
-// const y15 = { a: {b} }
-// switch (x) {
-//   case y:
-//     console.log(z)
-//     break
-// }
-// `
+const y14 = { ...a }
+const y15 = { a: {b} }
+switch (x) {
+  case y:
+    console.log(z)
+    break
+}
+function x10(a = 1) { console.log(a) }
+`
 
 function log(x) {
   const ast = t(x[0])
   const text = print(ast)
   // console.log(text)
-  fs.writeFileSync('libs/md5.link', text)
+  // fs.writeFileSync('libs/md5.link', text)
 }
 
-fs.writeFileSync('libs/jpegdecoder.link', print(t(fs.readFileSync('libs/jpegdecoder.js', 'utf-8'))))
+fs.writeFileSync('libs/test.link', print(t(fs.readFileSync('libs/test.js', 'utf-8'))))

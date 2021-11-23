@@ -46,10 +46,11 @@ function createHostZone(name, sift, form) {
   }
 }
 
-function createBase(name, form) {
+function createBase(name, { miss, form } = {}) {
   return {
     form: 'base',
     name,
+    miss,
     base_form: form
   }
 }

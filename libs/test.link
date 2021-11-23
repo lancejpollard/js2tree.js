@@ -1,0 +1,69 @@
+save tmp0
+  call require
+    bind text <fs>
+save fs, link tmp0
+save tmp1
+  call require
+    bind text <path>
+save path-resolver, link tmp1
+save tmp2
+  call fs/read-file-sync
+    bind text <./make/head/index.js>
+    bind text <utf-8>
+save head, link tmp2
+form scope
+  task constructor
+    save host/variable-index, size 1
+    save tmp3, make object
+    save host/names, link tmp3
+    save tmp4, make object
+    save host/links, link tmp4
+  task create-name
+    save tmp5
+      call increment
+        bind value, link host/variable-index
+    save name, <x{link tmp5}>
+    save host/names[name], link false
+    turn seed, link name
+save module/exports, link make
+task make-dock-call-test
+  base call
+  base load-state
+  save tmp6, make list
+  save ast, link tmp6
+  save test, link call/bind[0]
+  save make, link call/bind[1]
+  save tmp7
+    make object
+      bind type, text <if-statement>
+  save if-statement, link tmp7
+  save tmp8
+    call make-nest
+      bind link test/sift/nest
+      bind link load-state
+  call ast/push
+    bind <if ({link tmp8}()) \{>
+  save tmp9
+    call make-nest
+      bind link make/sift/nest
+      bind link load-state
+  call ast/push
+    bind <  return {link tmp9}()>
+  call ast/push
+    bind <\}>
+  save tmp10
+    call ast/join
+      bind text <\n>
+  turn seed, link tmp10
+task make-function-call
+task make-if-statement
+  base test
+  base match
+  base fault
+  save tmp11
+    make object
+      bind type, text <if-statement>
+      bind test, link test
+      bind match, link match
+      bind fault, link fault
+  turn seed, link tmp11

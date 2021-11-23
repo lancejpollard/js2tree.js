@@ -51,6 +51,9 @@ const transforms = {
   CatchClause: transformCatchClause,
   AssignmentPattern: transformAssignmentPattern,
   SwitchCase: transformSwitchCase,
+  ClassDeclaration: transformClassDeclaration,
+  ClassBody: transformClassBody,
+  MethodDefinition: transformMethodDefinition,
 }
 
 const binaries = {
@@ -118,6 +121,40 @@ function transform(source) {
   })
   nodes.forEach(node => walk(node, scope))
   return nodes
+}
+
+function transformClassDeclaration(node, scope) {
+  const id = call(transforms, node.id.type, node.id, scope)
+  const superClass = node.superClass && call(transforms, node.superClass.type, node.superClass, scope)
+  const body = call(transforms, node.body.type, node.body, scope)
+  const form = {
+    form: 'form',
+    name: id,
+    base: [],
+    task: []
+  }
+  body.forEach(bd => {
+    if (bd.form === 'task') {
+      form.task.push(bd)
+    }
+  })
+  return form
+}
+
+function transformMethodDefinition(node, scope) {
+  const key = call(transforms, node.key.type, node.key, scope)
+  const value = call(transforms, node.value.type, node.value, scope)
+  value.name = key
+  return value
+}
+
+function transformClassBody(node, scope) {
+  const body = []
+  node.body.forEach(bd => {
+    const out = call(transforms, bd.type, bd, scope)
+    body.push(out)
+  })
+  return body
 }
 
 function transformSwitchCase(node, scope) {
@@ -188,6 +225,18 @@ function transformTemplateLiteral(node, scope) {
     const quasi = call(transforms, qua.type, qua, scope)
     quasis.push(quasi)
   })
+  const lace = []
+  quasis.forEach((q, i) => {
+    lace.push({ form: 'text', text: q })
+    if (i < quasis.length - 1) {
+      const expression = transformOptionallyToLink(expressions[i])
+      lace.push(expression)
+    }
+  })
+  return {
+    form: 'lace',
+    list: lace
+  }
 }
 
 function transformTemplateElement(node, scope) {
@@ -228,7 +277,7 @@ function transformSwitchStatement(node, scope) {
         zone: [
           createCall(toTerm('check-equal'), [
             createBind(transformOptionallyToLink(discriminant)),
-            createBind(test)
+            createBind(transformOptionallyToLink(test))
           ])
         ]
       })
@@ -268,7 +317,7 @@ function walk(node, scope) {
 }
 
 function transformThisExpression(node, scope) {
-  return toTerm('this')
+  return toTerm('host')
 }
 
 function transformThrowStatement(node, scope) {
@@ -328,7 +377,7 @@ function transformFunctionDeclaration(node, scope) {
   node.params.forEach(param => {
     const p = call(transforms, param.type, param, scope)
     if (Array.isArray(p)) {
-      base.push(createBase(toTerm(p[0].term)))
+      base.push(createBase(toTerm(p[0].term), { miss: p[1] }))
     } else {
       base.push(createBase(p))
     }
@@ -580,7 +629,7 @@ function transformBinaryExpression(node, scope) {
 function transformLiteral(node, scope) {
   switch (typeof node.value) {
     case 'number': return createSize(node.value)
-    case 'string': return createText(node.value)
+    case 'string': return createText(node.raw.substr(1, node.raw.length - 2))
     case 'boolean': return createTerm(node.value)
   }
 }
@@ -605,7 +654,7 @@ function transformFunctionExpression(node, scope) {
   node.params.forEach(param => {
     const p = call(transforms, param.type, param, scope)
     if (Array.isArray(p)) {
-      base.push(createBase(toTerm(p[0].term)))
+      base.push(createBase(toTerm(p[0].term), { miss: p[1] }))
     } else {
       base.push(createBase(p))
     }
