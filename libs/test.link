@@ -1,69 +1,378 @@
-save tmp0
-  call require
-    bind text <fs>
-save fs, link tmp0
-save tmp1
-  call require
-    bind text <path>
-save path-resolver, link tmp1
-save tmp2
-  call fs/read-file-sync
-    bind text <./make/head/index.js>
-    bind text <utf-8>
-save head, link tmp2
-form scope
-  task constructor
-    save host/variable-index, size 1
-    save tmp3, make object
-    save host/names, link tmp3
-    save tmp4, make object
-    save host/links, link tmp4
-  task create-name
-    save tmp5
-      call increment
-        bind value, link host/variable-index
-    save name, <x{link tmp5}>
-    save host/names[name], link false
-    turn seed, link name
-save module/exports, link make
-task make-dock-call-test
-  base call
-  base load-state
-  save tmp6, make list
-  save ast, link tmp6
-  save test, link call/bind[0]
-  save make, link call/bind[1]
-  save tmp7
-    make object
-      bind type, text <if-statement>
-  save if-statement, link tmp7
-  save tmp8
-    call make-nest
-      bind link test/sift/nest
-      bind link load-state
-  call ast/push
-    bind <if ({link tmp8}()) \{>
-  save tmp9
-    call make-nest
-      bind link make/sift/nest
-      bind link load-state
-  call ast/push
-    bind <  return {link tmp9}()>
-  call ast/push
-    bind <\}>
-  save tmp10
-    call ast/join
-      bind text <\n>
-  turn seed, link tmp10
-task make-function-call
-task make-if-statement
-  base test
-  base match
-  base fault
-  save tmp11
-    make object
-      bind type, text <if-statement>
-      bind test, link test
-      bind match, link match
-      bind fault, link fault
-  turn seed, link tmp11
+save rhooffsets, call compute-rho-offset-constants
+save piindexes, call compute-pi-index-constants
+save roundconstants, call compute-round-constants
+task compute-rho-offset-constants
+  save table, make list
+  save x, mark 1
+  save y, mark 0
+  save t, mark 0
+  walk test
+    hook test
+      call t/is-below, mark 24
+    hook step
+      save tmp0, call x/add, call 5/multiply, read y
+      save table[tmp0]
+        call t/add, mark 1
+          link multiply, call t/add, mark 2
+          link divide, mark 2
+          link remainder, mark 64
+      save new-x, call y/remainder, mark 5
+      save new-y
+        call 2/multiply, read x
+          link add, call 3/multiply, read y
+          link remainder, mark 5
+      save x, read new-x
+      save y, read new-y
+      save t, call increment, read t
+  back seed, read table
+
+task compute-pi-index-constants
+  save table, make list
+  save x, mark 0
+  walk test
+    hook test
+      call x/is-below, mark 5
+    hook step
+      save y, mark 0
+      walk test
+        hook test
+          call y/is-below, mark 5
+        hook step
+          save tmp2, call x/add, call 5/multiply, read y
+          save table[tmp2]
+            call y/add
+              call 2/multiply, read x
+                link add, call 3/multiply, read y
+                link remainder, mark 5
+                link multiply, mark 5
+          save y, call increment, read y
+      save x, call increment, read x
+  back seed, read table
+
+task compute-round-constants
+  save table, make list
+  save lfsr, mark 1
+  save i, mark 0
+  walk test
+    hook test
+      call i/is-below, mark 24
+    hook step
+      save round-constant-msw, mark 0
+      save round-constant-lsw, mark 0
+      save j, mark 0
+      walk test
+        hook test
+          call j/is-below, mark 7
+        hook step
+          stem test, call lfsr/intersect-bitwise, mark 1
+            hook true
+              save bit-position
+                call 1/shift-base, read j
+                  link subtract, mark 1
+              stem roll
+                stem test, call bit-position/is-below, mark 32
+                  hook true
+                    save round-constant-lsw
+                      call oppose-bitwise
+                        read round-constant-lsw
+                        call 1/shift-base, read bit-position
+                save round-constant-msw
+                  call oppose-bitwise
+                    read round-constant-msw
+                    call 1/shift-base, call bit-position/subtract, mark 32
+          stem roll
+            stem test, call lfsr/intersect-bitwise, mark 128
+              hook true
+                save lfsr
+                  call lfsr/shift-base, mark 1
+                    link oppose-bitwise, mark 113
+            save lfsr
+              call base-shift
+                read lfsr
+                mark 1
+          save j, call increment, read j
+      save table[i]
+        call x64-word/create
+          read round-constant-msw
+          read round-constant-lsw
+      save i, call increment, read i
+  back seed, read table
+
+save t, call create-variable-table
+task create-variable-table
+  save table, make list
+  save i, mark 0
+  walk test
+    hook test
+      call i/is-below, mark 25
+    hook step
+      save table[i], call x64-word/create
+      save i, call increment, read i
+  back seed, read table
+
+save output-length, mark 512
+task do-reset
+  save state, save self/state, make list
+  save i, mark 0
+  walk test
+    hook test
+      call i/is-below, mark 25
+    hook step
+      save state[i], make x64-word/init
+      save i, call increment, read i
+  save self/block-size
+    call 1600/subtract, call 2/multiply, read output-length
+      link divide, mark 32
+
+task do-process-block
+  take m
+  take offset
+  save state, self/state
+  save n-block-size-lanes, call self/block-size/divide, mark 2
+  save i, mark 0
+  walk test
+    hook test
+      call i/is-below, read n-block-size-lanes
+    hook step
+      save tmp9, call offset/add, call 2/multiply, read i
+      save m2i, m[tmp9]
+      save tmp10
+        call offset/add, call 2/multiply, read i
+          link add, mark 1
+      save m2i1, m[tmp10]
+      save m2i
+        call m2i/shift-base, mark 8
+          link unite-bitwise, call m2i/shift-head-unsigned, mark 24
+          link intersect-bitwise, mark 16711935
+          link unite-bitwise
+            call m2i/shift-base, mark 24
+              link unite-bitwise, call m2i/shift-head-unsigned, mark 8
+              link intersect-bitwise, mark 4278255360
+      save m2i1
+        call m2i1/shift-base, mark 8
+          link unite-bitwise, call m2i1/shift-head-unsigned, mark 24
+          link intersect-bitwise, mark 16711935
+          link unite-bitwise
+            call m2i1/shift-base, mark 24
+              link unite-bitwise, call m2i1/shift-head-unsigned, mark 8
+              link intersect-bitwise, mark 4278255360
+      save lane, state[i]
+      save lane/high
+        call oppose-bitwise
+          read lane/high
+          read m2i1
+      save lane/low
+        call oppose-bitwise
+          read lane/low
+          read m2i
+      save i, call increment, read i
+  save round, mark 0
+  walk test
+    hook test
+      call round/is-below, mark 24
+    hook step
+      save x, mark 0
+      walk test
+        hook test
+          call x/is-below, mark 5
+        hook step
+          save t-msw, mark 0
+          save t-lsw, mark 0
+          save y, mark 0
+          walk test
+            hook test
+              call y/is-below, mark 5
+            hook step
+              save tmp12, call x/add, call 5/multiply, read y
+              save lane, state[tmp12]
+              save t-msw
+                call oppose-bitwise
+                  read t-msw
+                  lane/high
+              save t-lsw
+                call oppose-bitwise
+                  read t-lsw
+                  lane/low
+              save y, call increment, read y
+          save tx, t[x]
+          save tx/high, read t-msw
+          save tx/low, read t-lsw
+          save x, call increment, read x
+      save x, mark 0
+      walk test
+        hook test
+          call x/is-below, mark 5
+        hook step
+          save tmp15
+            call x/add, mark 4
+              link remainder, mark 5
+          save tx4, t[tmp15]
+          save tmp16
+            call x/add, mark 1
+              link remainder, mark 5
+          save tx1, t[tmp16]
+          save tx1-msw, tx1/high
+          save tx1-lsw, tx1/low
+          save t-msw
+            call tx4/high/oppose-bitwise
+              call tx1-msw/shift-base, mark 1
+                link unite-bitwise, call tx1-lsw/shift-head-unsigned, mark 31
+          save t-lsw
+            call tx4/low/oppose-bitwise
+              call tx1-lsw/shift-base, mark 1
+                link unite-bitwise, call tx1-msw/shift-head-unsigned, mark 31
+          save y, mark 0
+          walk test
+            hook test
+              call y/is-below, mark 5
+            hook step
+              save tmp17, call x/add, call 5/multiply, read y
+              save lane, state[tmp17]
+              save lane/high
+                call oppose-bitwise
+                  read lane/high
+                  read t-msw
+              save lane/low
+                call oppose-bitwise
+                  read lane/low
+                  read t-lsw
+              save y, call increment, read y
+          save x, call increment, read x
+      save lane-index, mark 1
+      walk test
+        hook test
+          call lane-index/is-below, mark 25
+        hook step
+          save t-msw
+          save t-lsw
+          save lane, state[lane-index]
+          save lane-msw, lane/high
+          save lane-lsw, lane/low
+          save rho-offset, rhooffsets[lane-index]
+          stem roll
+            stem test, call rho-offset/is-below, mark 32
+              hook true
+                save t-msw
+                  call lane-msw/shift-base, read rho-offset
+                    link unite-bitwise, call lane-lsw/shift-head-unsigned, call 32/subtract, read rho-offset
+                save t-lsw
+                  call lane-lsw/shift-base, read rho-offset
+                    link unite-bitwise, call lane-msw/shift-head-unsigned, call 32/subtract, read rho-offset
+            save t-msw
+              call lane-lsw/shift-base, call rho-offset/subtract, mark 32
+                link unite-bitwise, call lane-msw/shift-head-unsigned, call 64/subtract, read rho-offset
+            save t-lsw
+              call lane-msw/shift-base, call rho-offset/subtract, mark 32
+                link unite-bitwise, call lane-lsw/shift-head-unsigned, call 64/subtract, read rho-offset
+          save t-pi-lane, t[piindexes[lane-index]]
+          save t-pi-lane/high, read t-msw
+          save t-pi-lane/low, read t-lsw
+          save lane-index, call increment, read lane-index
+      save t0, t[0]
+      save state0, state[0]
+      save t0/high, read state0/high
+      save t0/low, read state0/low
+      save x, mark 0
+      walk test
+        hook test
+          call x/is-below, mark 5
+        hook step
+          save y, mark 0
+          walk test
+            hook test
+              call y/is-below, mark 5
+            hook step
+              save lane-index, call x/add, call 5/multiply, read y
+              save lane, state[lane-index]
+              save t-lane, t[lane-index]
+              save tmp21
+                call x/add, mark 1
+                  link remainder, mark 5
+                  link add, call 5/multiply, read y
+              save tx1-lane, t[tmp21]
+              save tmp22
+                call x/add, mark 2
+                  link remainder, mark 5
+                  link add, call 5/multiply, read y
+              save tx2-lane, t[tmp22]
+              save lane/high
+                call t-lane/high/oppose-bitwise
+                  call bitflip, tx1-lane/high
+                    link intersect-bitwise, read tx2-lane/high
+              save lane/low
+                call t-lane/low/oppose-bitwise
+                  call bitflip, tx1-lane/low
+                    link intersect-bitwise, read tx2-lane/low
+              save y, call increment, read y
+          save x, call increment, read x
+      save lane, state[0]
+      save round-constant, roundconstants[round]
+      save lane/high
+        call oppose-bitwise
+          read lane/high
+          round-constant/high
+      save lane/low
+        call oppose-bitwise
+          read lane/low
+          round-constant/low
+      save round, call increment, read round
+
+task do-finalize
+  save data, self/data
+  save data-words, data/words
+  save n-bits-total, call self/n-data-bytes/multiply, mark 8
+  save n-bits-left, call data/sig-bytes/multiply, mark 8
+  save block-size-bits, call self/block-size/multiply, mark 32
+  save tmp26, call n-bits-left/shift-head-unsigned, mark 5
+  save data-words[tmp26]
+    call unite-bitwise
+      read data-words[tmp26]
+      call 1/shift-base, call 24/subtract, call n-bits-left/remainder, mark 32
+  save tmp27
+    call math/ceil
+      call n-bits-left/add, mark 1
+        link divide, read block-size-bits
+      link multiply, read block-size-bits
+      link shift-head-unsigned, mark 5
+      link subtract, mark 1
+  save data-words[tmp27]
+    call unite-bitwise
+      read data-words[tmp27]
+      mark 128
+  save data/sig-bytes, call data-words/length/multiply, mark 4
+  call self/process
+  save state, self/state
+  save output-length-bytes, call output-length/divide, mark 8
+  save output-length-lanes, call output-length-bytes/divide, mark 8
+  save hash-words, make list
+  save i, mark 0
+  walk test
+    hook test
+      call i/is-below, read output-length-lanes
+    hook step
+      save lane, state[i]
+      save lane-msw, lane/high
+      save lane-lsw, lane/low
+      save lane-msw
+        call lane-msw/shift-base, mark 8
+          link unite-bitwise, call lane-msw/shift-head-unsigned, mark 24
+          link intersect-bitwise, mark 16711935
+          link unite-bitwise
+            call lane-msw/shift-base, mark 24
+              link unite-bitwise, call lane-msw/shift-head-unsigned, mark 8
+              link intersect-bitwise, mark 4278255360
+      save lane-lsw
+        call lane-lsw/shift-base, mark 8
+          link unite-bitwise, call lane-lsw/shift-head-unsigned, mark 24
+          link intersect-bitwise, mark 16711935
+          link unite-bitwise
+            call lane-lsw/shift-base, mark 24
+              link unite-bitwise, call lane-lsw/shift-head-unsigned, mark 8
+              link intersect-bitwise, mark 4278255360
+      call hash-words/push, read lane-lsw
+      call hash-words/push, read lane-msw
+      save i, call increment, read i
+  back seed
+    make word-array/init
+      read hash-words
+      read output-length-bytes

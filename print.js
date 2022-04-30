@@ -2,43 +2,251 @@
 module.exports = print
 
 const printers = {
-  host: printHost,
-  call: printCall,
-  task: printTask,
-  link: printLink,
-  site: printSite,
-  turn: printTurn,
-  term: printTerm,
-  make: printMake,
-  rest: printRest,
   save: printSave,
-  size: printSize,
+  nest: printNest,
+  call: printCall,
+  mark: printMark,
   text: printText,
-  halt: printHalt,
-  form: printForm,
-  lace: printLace,
+  term: printTerm,
+  'binary-call': printBinaryCall,
+  link: printLink,
+  task: printTask,
+  back: printBack,
+  stem: printStem,
+  hook: printHook,
+  walk: printWalk,
+  bust: printBust,
+  line: printLine,
+  read: printRead,
+  make: printMake,
+  bind: printBind,
+  rest: printRest,
 }
 
-function printLace(node) {
+function printRest(node) {
   const text = []
-  text.push(`<`)
-  node.list.forEach(item => {
-    if (item.form === 'text') {
-      text.push(item.text.replace(/[\}\{\>\<]/g, _ => `\\${_}`))
-    } else {
-      text.push(`\{${printLink(item)}\}`)
-    }
+  const nest = printNest(node.site)
+  text.push(`read ${nest}, rest true`)
+  return text
+}
+
+function printBind(node) {
+  const text = []
+  const lines = printBond(node.sift)
+
+  if (lines.length === 1) {
+    text.push(`bind ${node.name.term}, ${lines[0]}`)
+  } else {
+    text.push(`bind ${node.name.term}`)
+    lines.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+  return text
+}
+
+function printBond(node) {
+  switch (node.form) {
+    case 'term': return [`read ${node.term}`]
+    case 'text': return [`text <${node.text}>`]
+    case 'mark': return [`mark ${node.mark}`]
+    default: return call(printers, node.form, node)
+  }
+}
+
+function printMake(node) {
+  const text = []
+  text.push(`make ${printNest(node.name).join('')}`)
+  node.bind.forEach(bind => {
+    call(printers, bind.form, bind).forEach(line => {
+      text.push(`  ${line}`)
+    })
   })
-  text.push('>')
-  return [text.join('')]
+  return text
 }
 
-function printHalt(node) {
-  return [`halt ${printSift(node.site)}`]
+function printRead(node) {
+  return [`read ${printLine(node.line)}`]
 }
 
-function printSize(node) {
-  return [`size ${node.size}`]
+function printLine(node) {
+  return printNest(node)
+}
+
+function printBust(node) {
+  return [`bust ${node.site.term ?? 'walk'}`]
+}
+
+function printWalk(node) {
+  switch (node.name) {
+    case 'test': return printWalkTest(node)
+    case 'roll': return printWalkRoll(node)
+  }
+}
+
+function printWalkTest(node) {
+  const text = []
+  text.push(`walk test`)
+  node.hook.forEach(hook => {
+    call(printers, hook.form, hook).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printWalkRoll(node) {
+  const text = []
+  text.push(`walk roll`)
+  node.hook.forEach(hook => {
+    call(printers, hook.form, hook).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printHook(node) {
+  const text = []
+  text.push(`hook ${node.name.term}`)
+  node.take.forEach(take => {
+    text.push(`  take ${take.term}`)
+  })
+  node.zone.forEach(zone => {
+    call(printers, zone.form, zone).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printStem(node) {
+  switch (node.name) {
+    case 'test': return printStemTest(node)
+    case 'roll': return printStemRoll(node)
+    case 'fall': return printStemFall(node)
+  }
+}
+
+function printStemFall(node) {
+  const text = []
+  text.push(`stem fall`)
+  call(printers, node.call.form, node.call).forEach(line => {
+    text.push(`  ${line}`)
+  })
+  return text
+}
+
+function printStemRoll(node) {
+  const text = []
+  text.push(`stem roll`)
+  node.test.forEach(test => {
+    call(printers, test.form, test).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printStemTest(node) {
+  const text = []
+  const test = call(printers, node.test.form, node.test)
+  if (test.length === 1) {
+    text.push(`stem test, ${test[0]}`)
+  } else {
+    text.push(`stem test`)
+    test.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+  node.hook.forEach(hook => {
+    call(printers, hook.form, hook).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printBack(node) {
+  const text = []
+  const lines = node.site ? call(printers, node.site.form, node.site) : []
+  if (lines.length === 1) {
+    text.push(`back seed, ${lines[0]}`)
+  } else {
+    text.push(`back seed`)
+    lines.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+  return text
+}
+
+function printTask(node) {
+  const text = []
+  text.push(`task ${node.name.term}`)
+  node.take.forEach(take => {
+    // if (take.default) {
+
+    // }
+    text.push(`  take ${take.term}`)
+  })
+  node.zone.forEach(zone => {
+    call(printers, zone.form, zone).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  text.push('')
+  return text
+}
+
+function printLink(node) {
+  const text = []
+  const nest = printNest(node.nest).join('')
+  const lines = []
+  node.bind.forEach(bind => {
+    call(printers, bind.form, bind).forEach(line => {
+      lines.push(`${line}`)
+    })
+  })
+
+  if (lines.length === 1) {
+    text.push(`link ${nest}, ${lines[0]}`)
+  } else {
+    text.push(`link ${nest}`)
+    lines.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+  return text
+}
+
+function printBinaryCall(node) {
+  const text = []
+  const nest = printNest(node.nest).join('')
+  const lines1 = []
+  node.bind.forEach(bind => {
+    call(printers, bind.form, bind).forEach(line => {
+      lines1.push(`${line}`)
+    })
+  })
+  if (lines1.length === 1) {
+    text.push(`call ${nest}, ${lines1[0]}`)
+  } else {
+    text.push(`call ${nest}`)
+    lines1.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+  node.link.forEach(link => {
+    call(printers, link.form, link).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printMark(node) {
+  return [`mark ${node.mark}`]
 }
 
 function printText(node) {
@@ -46,258 +254,93 @@ function printText(node) {
 }
 
 function printTerm(node) {
-  return [node.term]
+  return [`read ${node.term}`]
+}
+
+function printCall(node) {
+  const text = []
+  const nest = printNest(node.nest).join('')
+  const lines = []
+  node.bind.forEach(bind => {
+    call(printers, bind.form, bind).forEach(line => {
+      lines.push(`${line}`)
+    })
+  })
+  if (lines.length === 1) {
+    text.push(`call ${nest}, ${lines[0]}`)
+  } else {
+    text.push(`call ${nest}`)
+    lines.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+
+  node.link.forEach(link => {
+    call(printers, link.form, link).forEach(line => {
+      text.push(`  ${line}`)
+    })
+  })
+  return text
+}
+
+function printSave(node) {
+  const text = []
+  const nest = printNest(node.nest).join('')
+  const lines = []
+  if (node.bond) {
+    call(printers, node.bond.form, node.bond).forEach(line => {
+      lines.push(line)
+    })
+  }
+  if (lines.length === 1) {
+    text.push(`save ${nest}, ${lines[0]}`)
+  } else {
+    text.push(`save ${nest}`)
+    lines.forEach(line => {
+      text.push(`  ${line}`)
+    })
+  }
+  return text
 }
 
 function print(nodes) {
   const text = []
+  // console.log(JSON.stringify(nodes, null, 2))
   nodes.forEach(node => {
     text.push(...call(printers, node.form, node))
   })
   return text.join('\n')
 }
 
-function printSave(node) {
-  const left = call(printers, node.left.form, node.left)
-  const right = call(printers, node.right.form, node.right)
-  const text = []
-  if (right.length > 1) {
-    text.push(`save ${left.join('')}`)
-    right.forEach(line => {
-      text.push(`  ${line}`)
-    })
-  } else {
-    text.push(`save ${left.join('')}, ${right.join('')}`)
-  }
-  return text
-}
-
-function printRest(node) {
-  const text = []
-  text.push(`rest ${printName(node.site)}`)
-  return text
-}
-
-function printMake(node) {
-  const text = []
-  text.push(`make ${printName(node.name)}`)
-  node.bind.forEach(b => {
-    printBind(b).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  return text
-}
-
-function printTurn(node) {
-  const text = []
-  if (node.site) {
-    const name = printName(node.site).split('\n')
-    if (name.length > 1) {
-      text.push('turn seed')
-      name.forEach(line => {
-        text.push(`  ${line}`)
+function printNest(node) {
+  switch (node.form) {
+    case 'term': return [node.term]
+    default:
+      const text = []
+      node.link.forEach((x, i) => {
+        const link = printNestLink(x)
+        if (i > 0) {
+          if (x.form === 'nest') {
+            text.push(`${link}`)
+          } else {
+            text.push(`/${link}`)
+          }
+        } else {
+          text.push(`${link}`)
+        }
       })
-    } else {
-      text.push(`turn seed, link ${name.join('\n')}`)
-    }
-  } else {
-    text.push(`turn seed`)
-  }
-  return text
-}
-
-function printSite(node) {
-  return [printName(node)]
-}
-
-function printLink(node) {
-  if (node.site.form === 'term') {
-    return [`link ${node.site.term}`]
-  } else if (node.site.form === 'site') {
-    return [`link ${printName(node.site)}`]
-  } else {
-    return [node.term]
+      return [text.join('')]
   }
 }
 
-function printForm(node) {
-  const text = []
-  text.push(`form ${printName(node.name)}`)
-  node.base.forEach(b => {
-    printBase(b).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  node.task.forEach(z => {
-    call(printers, z.form, z).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  return text
-}
-
-function printTask(node) {
-  const text = []
-  text.push(`task ${printName(node.name)}`)
-  node.base.forEach(b => {
-    printBase(b).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  node.zone.forEach(z => {
-    call(printers, z.form, z).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  return text
-}
-
-function printBase(node) {
-  const text = []
-  const sift = node.sift ? printSift(node.sift) : undefined
-  if (sift == null) {
-    text.push(`base ${printName(node.name)}`)
-  } else {
-    if (sift.length > 1) {
-      text.push(`base ${printName(node.name)}`)
-      sift.forEach(line => {
-        text.push(`  ${line}`)
-      })
-    } else {
-      text.push(`base ${printName(node.name)}, ${sift}`)
-    }
+function printNestLink(x) {
+  switch (x.form) {
+    case 'term': return x.term
+    case 'text': return `<${x.text}>`
+    case 'mark': return `${x.mark}`
+    case 'nest': return `[${call(printers, x.form, x).join('')}]`
+    default: return call(printers, x.form, x)
   }
-  if (node.miss) {
-    const miss = printSift(node.miss)
-    text.push(`  hook miss`)
-    miss.forEach(line => {
-      text.push(`    ${line}`)
-    })
-  }
-  return text
-}
-
-function printHost(node) {
-  const text = []
-  const sift = node.sift ? printSift(node.sift) : undefined
-  if (sift == null) {
-    text.push(`save ${printName(node.name)}`)
-  } else {
-    if (sift.length > 1) {
-      text.push(`save ${printName(node.name)}`)
-      sift.forEach(line => {
-        text.push(`  ${line}`)
-      })
-    } else {
-      text.push(`save ${printName(node.name)}, ${sift}`)
-    }
-  }
-  return text
-}
-
-function printSift(node) {
-  if (node.form === 'size') {
-    return [`size ${node.size}`]
-  } else if (node.form === 'text') {
-    return [`text <${node.text}>`]
-  } else if (node.form === 'link') {
-    return [`link ${printName(node.site)}`]
-  } else if (node.form === 'rest') {
-    return [`rest ${printName(node.site)}`]
-  } else {
-    return call(printers, node.form, node)
-  }
-}
-
-function printCall(node) {
-  const text = []
-  text.push(`call ${printName(node.name)}`)
-  node.bind.forEach(b => {
-    printBind(b).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  node.zone.forEach(z => {
-    if (z.form === 'call-save') {
-      text.push(`  save ${printName(z.name)}`)
-    } else if (z.form === 'call-turn') {
-      text.push(`  turn ${z.term}`)
-    }
-  })
-  node.hook.forEach(hook => {
-    printHook(hook.name, hook).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  return text
-}
-
-function printHook(name, hook) {
-  const text = []
-  text.push(`hook ${name}`)
-  hook.base.forEach(b => {
-    printBase(b).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  hook.zone.forEach((z, i) => {
-    call(printers, z.form, z).forEach(line => {
-      text.push(`  ${line}`)
-    })
-  })
-  return text
-}
-
-function printName(node) {
-  if (node.form === 'site') {
-    const host = printName(node.host)
-    const link = printName(node.link)
-    const bond = node.bond
-    if (bond) {
-      return `${host}[${link}]`
-    } else {
-      return `${host}/${link}`
-    }
-  } else if (node.form === 'link') {
-    return printLink(node)
-  } else if (node.form === 'term') {
-    return node.term
-  } else if (node.form === 'size') {
-    return `${node.size}`
-  } else if (node.form === 'text') {
-    return `<${node.text}>`
-  } else if (node.form === 'make') {
-    return printMake(node).join('\n')
-  } else if (node.form === 'call') {
-    return printCall(node).join('\n')
-  } else if (node.form === 'task') {
-    return printTask(node).join('\n')
-  } else {
-    throw new Error(node.form)
-  }
-}
-
-function printBind(node) {
-  const text = []
-  const sift = node.sift ? printSift(node.sift) : []
-  if (sift.length > 1) {
-    if (node.name) {
-      text.push(`bind ${printName(node.name)}`)
-    } else {
-      text.push(`bind`)
-    }
-    sift.forEach(line => {
-      text.push(`  ${line}`)
-    })
-  } else {
-    if (node.name) {
-      text.push(`bind ${printName(node.name)}, ${sift.join('')}`)
-    } else {
-      text.push(`bind ${sift.join('')}`)
-    }
-  }
-  return text
 }
 
 function call(obj, method, ...args) {

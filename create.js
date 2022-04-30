@@ -1,23 +1,16 @@
 
 module.exports = {
   createTask,
-  createHostZone,
+  createSave,
   createBase,
+  createTerm,
   createCall,
   createForm,
-  createSave,
-  createSize,
+  createMark,
   createText,
   createBind,
+  createWalk,
   createCallSave,
-}
-
-function createSave(left, right) {
-  return {
-    form: 'save',
-    left,
-    right
-  }
 }
 
 function createForm(name, base) {
@@ -28,20 +21,27 @@ function createForm(name, base) {
   }
 }
 
-function createTask(name, base = [], zone = []) {
+function createTask(name, take = [], zone = []) {
   return {
     form: 'task',
     name,
-    base,
+    take,
     zone
   }
 }
 
-function createHostZone(name, sift, form) {
+function createTerm(value) {
   return {
-    form: 'host',
-    name,
-    sift,
+    form: 'term',
+    term: String(value)
+  }
+}
+
+function createSave(nest, bond, form) {
+  return {
+    form: 'save',
+    nest,
+    bond,
     base_form: form
   }
 }
@@ -55,20 +55,38 @@ function createBase(name, { miss, form } = {}) {
   }
 }
 
-function createCall(name, bind = [], hook = [], zone = []) {
+function createWalk(name, bind = [], hook = [], fork = null) {
   return {
-    form: 'call',
+    form: 'walk',
     name,
     bind,
     hook,
+    fork
+  }
+}
+
+function createCall(nest, bind = [], hook = [], link = [], zone = []) {
+  return {
+    form: 'call',
+    nest,
+    bind,
+    hook,
+    link,
     zone
   }
 }
 
-function createSize(size) {
+function createMark(mark) {
   return {
-    form: 'size',
-    size
+    form: 'mark',
+    mark
+  }
+}
+
+function createNest(text) {
+  return {
+    form: 'nest',
+    text
   }
 }
 

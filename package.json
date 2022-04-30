@@ -2,6 +2,10 @@
   "name": "@lancejpollard/js2link.js",
   "dependencies": {
     "@lancejpollard/normalize-ast.js": "*",
-    "to-case": "^2.0.0"
+    "to-case": "^2.0.0",
+    "typescript": "^4.6.4"
+  },
+  "devDependencies": {
+    "sucrase": "^3.21.0"
   }
 }
